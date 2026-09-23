@@ -143,6 +143,7 @@ describe('continuous gestures', () => {
 describe('load and save state', () => {
   it('clears the history on load and tracks unsaved changes', () => {
     const store = createProjectStore(createDemoProject())
+    expect(selectIsDirty(store.getState())).toBe(false)
     store.getState().update(actions.setBpm(100))
     const loaded = createDemoProject()
     store.getState().load(loaded, { saved: true })
@@ -154,6 +155,19 @@ describe('load and save state', () => {
     expect(selectIsDirty(store.getState())).toBe(false)
     store.getState().load(createDemoProject())
     expect(selectIsDirty(store.getState())).toBe(true)
+  })
+})
+
+describe('amend', () => {
+  it('changes the project without an undo step and keeps it clean', () => {
+    const store = createProjectStore(createDemoProject())
+    store.getState().markSaved()
+    store.getState().amend((p) => {
+      p.meta.updatedAt = 'later'
+    })
+    expect(store.getState().project.meta.updatedAt).toBe('later')
+    expect(store.getState().past).toHaveLength(0)
+    expect(selectIsDirty(store.getState())).toBe(false)
   })
 })
 

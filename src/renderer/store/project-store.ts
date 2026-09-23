@@ -23,6 +23,8 @@ export interface ProjectState {
   load: (project: Project, options?: { saved?: boolean }) => void
   /** Applies an edit. Outside a gesture, it becomes one undo step. */
   update: (recipe: Recipe) => void
+  /** Applies a bookkeeping edit (save date) without an undo step and without making the project dirty. */
+  amend: (recipe: Recipe) => void
   /** Starts a continuous gesture (dragging a knob, painting steps): it will form one undo step. */
   beginGesture: () => void
   endGesture: () => void
@@ -53,7 +55,8 @@ export function createProjectStore(initial: Project = createDemoProject()): Stor
       past: [],
       future: [],
       gestureBase: null,
-      saved: null,
+      // A project that was just created or loaded has nothing to save.
+      saved: initial,
 
       load(project, options = {}) {
         set({ project, past: [], future: [], gestureBase: null, saved: options.saved ? project : null })
@@ -64,6 +67,12 @@ export function createProjectStore(initial: Project = createDemoProject()): Stor
         const next = produce(project, recipe)
         if (next === project) return
         set(gestureBase !== null ? { project: next } : { project: next, past: pushBounded(past, project), future: [] })
+      },
+
+      amend(recipe) {
+        const { project, saved } = get()
+        const next = produce(project, recipe)
+        set({ project: next, saved: saved === project ? next : saved })
       },
 
       beginGesture() {

@@ -10,15 +10,23 @@ export interface UiState {
   screen: Screen
   selectedTrackId: ID | null
   codeMode: 'synced' | 'direct'
+  /** Name of the project folder, null until the project is saved. */
+  fileName: string | null
+  /** A short message for the user (open failed, project recovered...). */
+  notice: string | null
   setScreen: (screen: Screen) => void
   selectTrack: (trackId: ID | null) => void
   setCodeMode: (mode: 'synced' | 'direct') => void
+  setFileName: (fileName: string | null) => void
+  setNotice: (notice: string | null) => void
 }
 
 export const uiStore = createStore<UiState>()((set) => ({
   screen: 'studio',
   selectedTrackId: null,
   codeMode: 'synced',
+  fileName: null,
+  notice: null,
   setScreen: (screen) => {
     set({ screen })
   },
@@ -27,6 +35,12 @@ export const uiStore = createStore<UiState>()((set) => ({
   },
   setCodeMode: (codeMode) => {
     set({ codeMode })
+  },
+  setFileName: (fileName) => {
+    set({ fileName })
+  },
+  setNotice: (notice) => {
+    set({ notice })
   },
 }))
 
