@@ -44,6 +44,18 @@ declare module '@strudel/webaudio' {
     audioContext?: AudioContext
   }
 
+  /** superdough/superdoughoutput.mjs: one Orbit per orbit number, created on first use. */
+  export interface Orbit {
+    output: GainNode
+  }
+
+  export interface SuperdoughAudioController {
+    output: { destinationGain: GainNode | null }
+    nodes: Record<number, Orbit>
+    getOrbit(orbit: number, channels?: number[]): Orbit
+  }
+
+  export function getSuperdoughAudioController(): SuperdoughAudioController
   export function webaudioRepl(options?: ReplOptions): Repl
   export function initAudio(options?: { disableWorklets?: boolean; maxPolyphony?: number }): Promise<void>
   export function getAudioContext(): AudioContext

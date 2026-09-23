@@ -2,6 +2,7 @@ import { evalScope } from '@strudel/core'
 import { miniAllStrings } from '@strudel/mini'
 import { transpiler } from '@strudel/transpiler'
 import { getAudioContext, initAudio, registerSynthSounds, samples, webaudioRepl, type Repl } from '@strudel/webaudio'
+import { ensureMasterBus } from './master-bus'
 
 export const BUNDLED_SAMPLES_URL = 'motif-sample://bundled/'
 
@@ -33,6 +34,7 @@ export function initEngine(): Promise<Repl> {
 export async function play(code: string): Promise<void> {
   const instance = await initEngine()
   await getAudioContext().resume()
+  ensureMasterBus()
   await instance.evaluate(code, true)
 }
 
