@@ -15,6 +15,7 @@ declare module '@strudel/core' {
     p(id: string): Pattern
   }
   export function stack(...patterns: Pattern[]): Pattern
+  export function isPattern(value: unknown): value is Pattern
   export function evalScope(...modules: unknown[]): Promise<unknown[]>
   export function evaluate(
     code: string,

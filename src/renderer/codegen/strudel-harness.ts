@@ -12,7 +12,8 @@ export interface PlayedEvent {
 let ready: Promise<void> | null = null
 let registered: Pattern[] = []
 
-function init(): Promise<void> {
+/** Sets up Strudel's global scope once (what the engine does at boot, minus audio). */
+export function initStrudelScope(): Promise<void> {
   ready ??= (async () => {
     await evalScope(
       import('@strudel/core'),
@@ -31,7 +32,7 @@ function init(): Promise<void> {
 
 /** Evaluates `code` and returns the events with an onset in [begin, end), sorted. */
 export async function playedEvents(code: string, begin = 0, end = 1): Promise<PlayedEvent[]> {
-  await init()
+  await initStrudelScope()
   registered = []
   await evaluate(code, transpiler)
   const haps = stack(...registered).queryArc(begin, end) as unknown as {
