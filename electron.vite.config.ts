@@ -3,6 +3,7 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'electron-vite'
 import type { Plugin } from 'vite'
+import { workletFiles } from './scripts/vite-worklets'
 import { PRODUCTION_CSP } from './src/shared/csp'
 
 const shared = { '@shared': resolve(__dirname, 'src/shared') }
@@ -37,6 +38,6 @@ export default defineConfig({
         '@renderer': resolve(__dirname, 'src/renderer'),
       },
     },
-    plugins: [react(), tailwindcss(), productionCsp()],
+    plugins: [react(), tailwindcss(), workletFiles(), productionCsp()],
   },
 })

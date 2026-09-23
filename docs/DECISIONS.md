@@ -17,3 +17,14 @@ Format: date - problem - decision.
 
 - **Problem**: `@strudel/core` evaluates transpiled code with `Function(body)()` (`evaluate.mjs`), which a CSP without `'unsafe-eval'` blocks. superdough's build also inlines its AudioWorklet modules as `data:text/javascript` URLs.
 - **Decision** (approved by the owner): `script-src 'self' 'unsafe-eval'`, no `data:` in `script-src`; superdough's worklets will be served as local files (see the engine entry). Everything else is `'none'` or `'self'`, plus `motif-sample:` for media and fetch. No remote host appears in the policy (unit test). The packaged renderer loads from `file://`, so the production CSP is injected as a meta tag at build time; in development the main process sends a looser header for Vite (inline scripts, HMR socket). Electron prints an "Insecure Content-Security-Policy" warning because of `'unsafe-eval'`; it only appears in unpackaged builds. A session-level `onBeforeRequest` filter also cancels every non-local request, as a second line of defense for rule 7.
+
+## 2026-09-23 - AudioWorklet modules
+
+- **Problem**: the published builds of superdough 1.3.0 and supradough 1.2.4 (pulled in by `@strudel/webaudio`) embed their AudioWorklet modules as `data:text/javascript;base64` strings passed to `audioWorklet.addModule`. The CSP has no `data:` in `script-src`.
+- **Decision**: a Vite plugin (`scripts/vite-worklets.ts`) decodes each string and replaces it with a real file: emitted as an asset in production builds, served from `/@worklets/` by the dev server. The three packages are excluded from dependency pre-bundling, because pre-bundled code skips transform hooks. The plugin fails the build if the string disappears, so a Strudel upgrade cannot silently break it. Verified in dev and in the built app loaded from `file://`: worklets load, the test pattern plays.
+- **Known gap**: superdough's `.dsp()` feature compiles user code into a worklet at runtime through another `data:` URL. It stays blocked by the CSP. Revisit if a phase needs it.
+
+## 2026-09-23 - Sample protocol privileges
+
+- **Problem**: the spec lists the privileges `standard`, `secure`, `supportFetchAPI` and `stream` for `motif-sample://`. The renderer (on `file://` or the dev server) fetches from it cross-origin.
+- **Decision**: add `corsEnabled` and answer with `Access-Control-Allow-Origin: *`. The protocol only serves audio files and manifests from allowed roots, so this exposes nothing new. URLs have the form `motif-sample://<root>/<path>`; the only root in phase 0 is `bundled` (`resources/samples/`).
