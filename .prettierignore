@@ -1,0 +1,6 @@
+out/
+dist/
+coverage/
+bun.lock
+docs/
+AGENTS.md
