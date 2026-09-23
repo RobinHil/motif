@@ -4,6 +4,8 @@
   "version": "0.0.0",
   "description": "Desktop music production app built on Strudel",
   "license": "AGPL-3.0-or-later",
+  "author": "Motif contributors",
+  "desktopName": "motif.desktop",
   "private": true,
   "main": "./out/main/index.js",
   "scripts": {
@@ -15,7 +17,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "samples:test": "bun scripts/generate-test-samples.ts"
+    "samples:test": "bun scripts/generate-test-samples.ts",
+    "licenses": "bun scripts/third-party-licenses.ts",
+    "package": "electron-vite build && bun run licenses && electron-builder"
   },
   "dependencies": {
     "@strudel/core": "1.2.6",
@@ -34,6 +38,7 @@
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "5.2.0",
     "electron": "44.4.5",
+    "electron-builder": "26.15.3",
     "electron-vite": "5.0.0",
     "eslint": "10.11.0",
     "eslint-plugin-react-hooks": "7.1.1",

@@ -1,0 +1,38 @@
+appId: io.github.robinhil.motif
+productName: Motif
+copyright: Copyright (C) 2026 Motif contributors
+directories:
+  output: dist
+  buildResources: resources/brand
+# Main and preload only require electron and Node built-ins, and the renderer is fully bundled by Vite,
+# so the packaged app ships no node_modules.
+files:
+  - out/**/*
+  - package.json
+  - '!node_modules/**/*'
+extraResources:
+  - from: resources/samples
+    to: samples
+  - from: LICENSE
+    to: LICENSE
+  - from: THIRD_PARTY_LICENSES
+    to: THIRD_PARTY_LICENSES
+asar: true
+electronLanguages:
+  - en-US
+linux:
+  target:
+    - AppImage
+  category: AudioVideo
+  syncDesktopName: true
+win:
+  target:
+    - nsis
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+mac:
+  target:
+    - dmg
+  category: public.app-category.music
+publish: null

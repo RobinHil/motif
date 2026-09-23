@@ -4,3 +4,4 @@ dist/
 coverage/
 *.log
 .DS_Store
+THIRD_PARTY_LICENSES
