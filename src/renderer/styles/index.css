@@ -1,0 +1,124 @@
+@import 'tailwindcss';
+
+@font-face {
+  font-family: 'Geist';
+  src: url('../../../resources/fonts/Geist-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('../../../resources/fonts/GeistMono-Variable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: block;
+}
+
+/* Tokens from docs/DESIGN.md. Tailwind's default palette, radii and fonts are removed so only these exist. */
+@theme {
+  --color-*: initial;
+  --radius-*: initial;
+  --font-*: initial;
+  --text-*: initial;
+  --shadow-*: initial;
+
+  /* Surfaces */
+  --color-bg-deep: #08080a;
+  --color-bg-app: #0c0c0e;
+  --color-bg-code: #0a0a0c;
+  --color-panel: #111113;
+  --color-raised: #141416;
+  --color-raised-2: #161618;
+  --color-active: #1d1d21;
+  --color-selected-row: #131315;
+  --color-line: rgba(255, 255, 255, 0.06);
+  --color-line-strong: rgba(255, 255, 255, 0.1);
+
+  /* Text */
+  --color-text: #ededef;
+  --color-text-2: #8a8a93;
+  --color-label: #7e7e87;
+  --color-text-3: #55555d;
+
+  /* Accent and states */
+  --color-accent: #d8b77a;
+  --color-accent-hover: #e9cd96;
+  --color-mod: #86c5b8;
+  --color-mod-bg: #121c1a;
+  --color-danger: #d9695f;
+  --color-success: #7dbf8e;
+
+  /* Track colors */
+  --color-track-1: #d8b77a;
+  --color-track-2: #86c5b8;
+  --color-track-3: #afa8e0;
+  --color-track-4: #d89a88;
+
+  /* Code highlighting */
+  --color-code-function: #bdb6e8;
+  --color-code-string: #d9be8e;
+  --color-code-number: #8fcbc1;
+  --color-code-comment: #5f5f68;
+
+  /* Component surfaces */
+  --color-knob-core: #1b1b1e;
+  --color-step-off: #19191c;
+  --color-step-downbeat: #202023;
+  --color-step-playing: rgba(237, 237, 239, 0.45);
+  --color-pill-active: rgba(255, 255, 255, 0.07);
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  /* Typography */
+  --font-sans: 'Geist', 'Helvetica Neue', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', 'SF Mono', ui-monospace, monospace;
+
+  --text-screen-title: 20px;
+  --text-track-name: 15px;
+  --text-body: 13px;
+  --text-body-lg: 14px;
+  --text-small: 12px;
+  --text-section: 10.5px;
+  --text-section--letter-spacing: 0.14em;
+  --text-knob-value: 11px;
+  --text-code: 12.5px;
+  --text-code--line-height: 20px;
+  --text-code-lg: 14px;
+  --text-code-lg--line-height: 24px;
+
+  /* Shape */
+  --radius-xs: 5px;
+  --radius-control: 7px;
+  --radius-input: 8px;
+  --radius-panel: 14px;
+  --radius-pill: 999px;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: var(--ease-out);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-bg-deep font-sans text-body text-text antialiased;
+    user-select: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
+}
