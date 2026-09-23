@@ -11,5 +11,7 @@ export default defineConfig({
   test: {
     include: ['src/**/*.test.ts', 'scripts/**/*.test.ts'],
     environment: 'node',
+    // @kabelsalat/web (imported by @strudel/core) points `main` at a UMD bundle; Vite's resolver picks `module`.
+    server: { deps: { inline: [/@strudel\//, /@kabelsalat\//] } },
   },
 })

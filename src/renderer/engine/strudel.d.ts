@@ -2,7 +2,24 @@
 // checked against the installed sources (@strudel/core 1.2.6, @strudel/webaudio 1.3.0, superdough 1.3.0).
 
 declare module '@strudel/core' {
+  export interface Location {
+    start: number
+    end: number
+  }
+  export interface Hap {
+    context: { locations?: Location[] }
+    hasOnset(): boolean
+  }
+  export class Pattern {
+    queryArc(begin: number, end: number): Hap[]
+    p(id: string): Pattern
+  }
+  export function stack(...patterns: Pattern[]): Pattern
   export function evalScope(...modules: unknown[]): Promise<unknown[]>
+  export function evaluate(
+    code: string,
+    transpiler?: (input: string) => unknown,
+  ): Promise<{ pattern: Pattern; meta?: { miniLocations?: [number, number][] } }>
 }
 
 declare module '@strudel/mini' {
