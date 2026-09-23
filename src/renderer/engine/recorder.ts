@@ -5,15 +5,19 @@ import { ensureMasterBus } from './master-bus'
 export interface Recording {
   channels: Float32Array[]
   sampleRate: number
+  /** AudioContext frame of the first recorded sample, to align simultaneous recordings. */
+  startFrame: number
   /** Frames missing between chunks. Anything above zero means the recording has a gap. */
   droppedFrames: number
 }
 
 let loaded: Promise<void> | null = null
 
-export async function startRecording(): Promise<() => Promise<Recording>> {
+/** Records `source` (the master output by default) until the returned function is called. */
+export async function startRecording(source?: AudioNode): Promise<() => Promise<Recording>> {
   const bus = ensureMasterBus()
   const { context } = bus
+  const input = source ?? bus.output
   loaded ??= context.audioWorklet.addModule(recorderUrl)
   await loaded
 
@@ -29,7 +33,7 @@ export async function startRecording(): Promise<() => Promise<Recording>> {
     if (event.data === 'stopped') stopped?.()
     else chunks.push(event.data)
   }
-  bus.output.connect(node)
+  input.connect(node)
   node.port.postMessage('start')
 
   return async () => {
@@ -37,7 +41,7 @@ export async function startRecording(): Promise<() => Promise<Recording>> {
       stopped = resolve
       node.port.postMessage('stop')
     })
-    bus.output.disconnect(node)
+    input.disconnect(node)
     node.port.close()
 
     const frames = chunks.reduce((sum, c) => sum + (c.channels[0]?.length ?? 0), 0)
@@ -54,6 +58,6 @@ export async function startRecording(): Promise<() => Promise<Recording>> {
       offset += length
       expectedStart = chunk.startFrame + length
     }
-    return { channels, sampleRate: context.sampleRate, droppedFrames }
+    return { channels, sampleRate: context.sampleRate, startFrame: chunks[0]?.startFrame ?? 0, droppedFrames }
   }
 }

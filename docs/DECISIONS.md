@@ -37,3 +37,15 @@ Format: date - problem - decision.
 - **Measurements** (dev app, test pattern, 48 kHz, driven through the DevTools protocol): analyser max RMS 0.46 while playing, 0 after stop. A 4-cycle recording at 0.5 cps gave exactly 384000 frames (8.000 s, equal to the AudioContext clock), 0 dropped frames, no silent gap, and a valid 24-bit stereo WAV. After `resetGlobalEffects()` the analyser read 0 until `ensureMasterBus()` ran again, then 0.48. The recorder worklet also loads from `file://` in a production build.
 - **Rejected**: `MediaRecorder` on a `MediaStreamAudioDestinationNode` only produces compressed webm/opus in Chromium, so it cannot deliver the 24-bit WAV the spec requires without a lossy round trip.
 - **Decision**: series master bus after `destinationGain`, re-checked with `ensureMasterBus()` before each evaluation and each analysis or recording session. Real-time WAV export uses the recorder worklet. Master processing (gain, compressor, limiter) goes between `input` and `output`, so the analyser and the recording see the final signal.
+
+## 2026-09-23 - [SPIKE] Per-orbit analysis
+
+- **Question**: can each track (one track = one orbit) get its own analyser for meters, and its own recording for stems, without estimating levels from events?
+- **Findings** (superdough 1.3.0): `SuperdoughAudioController.getOrbit(n)` lazily creates an `Orbit` whose `output` GainNode carries the orbit's voices plus its own reverb, delay and ducking, before the master. Calling `getOrbit(n)` ahead of time is harmless (an idle gain node connected to the output). Orbit nodes are recreated only by `controller.reset()`, like `destinationGain`.
+- **Prototype**: `engine/orbit-taps.ts` attaches an `AnalyserNode` (fftSize 512) in parallel to each orbit output, idempotently; `startRecording(source)` now records any node and reports its start frame.
+- **Measurements** (dev app, 8 orbits with drums, synths, a delay and a reverb, orbit 3 muted with `_$:`):
+  - Levels: every playing orbit read a positive max RMS (0.02 to 0.49), the muted orbit read exactly 0.
+  - Main-thread cost of reading 8 analysers and computing RMS: median below 0.1 ms, p99 0.4 ms per animation frame.
+  - Master plus 8 stems recorded simultaneously for 4 s: all 9 recorders started on the same frame, 0 dropped frames, and `AudioContext.playbackStats` reported 0 underruns.
+  - Summing the 8 stems reproduces the master with a residual of -146.7 dB, i.e. identical within float rounding.
+- **Decision**: per-orbit analysis is feasible and cheap, so track meters read real per-orbit analysers, not event-based estimates. Stems are validated for phase 10: one recorder worklet per orbit, aligned by start frame. Stems are pre-master (before the master bus processing), which is the usual definition. `playbackStats` is available in Electron 44 and will serve as the audio-glitch check in performance passes.
