@@ -1,4 +1,4 @@
-# Design system
+# Motif - design system
 
 Direction: dark studio, premium and minimal. Few borders, near-invisible hairlines, a single warm accent, desaturated track colors. Visual reference: screenshots in `docs/mockups/`.
 
@@ -106,6 +106,39 @@ Weights stay light: 600 at most, reserved for exceptional cases.
 **Transform toggle**: 34 px row, label on the left, code in mono on the right (`text-3` when off, track color when on).
 
 **Visualizations**: monochrome (white at 30 to 70% opacity), accent only on peaks and low frequencies.
+
+## Logo and brand identity
+
+Motif needs a **custom, original logo**, designed specifically for the project. No stock icon, no generic music symbol (note, waveform, headphones), no resemblance to the logos of Strudel, TidalCycles, FL Studio or any other music software.
+
+### Current wordmark (placeholder)
+
+"motif." in Geist 500, tight letter-spacing (-0.03em), the period in `accent`. The tagline "powered by Strudel" sits to its right in 11 px `label` color. This is only a starting point: the final wordmark may be redrawn.
+
+### What to design
+
+1. **Symbol**: a standalone mark that works without text, readable down to 16 px. Ideas to explore: a motif repeated around a circle (the cycle), the accent period as a seed that repeats, stacked layers. Geometric and minimal, consistent with the rest of the design system.
+2. **Wordmark**: final "motif" lettering.
+3. **Lockups**: symbol + wordmark (horizontal), and symbol + wordmark + "powered by Strudel" for the home screen and About window.
+4. **App icon**: the symbol on a `bg-deep` background, following each OS's icon guidelines (macOS rounded square with its own margins, Windows and Linux full-bleed).
+
+### Constraints
+
+- Hand-written, clean **SVG** sources (no embedded bitmaps, text converted to paths).
+- Colors from the tokens only: `accent`, `text`, `bg-deep`.
+- Variants: on dark background (default), on light background, single-color (white and black).
+- Recognizable at 16, 32, 128 and 1024 px.
+
+### Deliverables (in `resources/brand/`)
+
+- `symbol.svg`, `wordmark.svg`, `lockup-horizontal.svg`, `lockup-tagline.svg`, plus light and mono variants
+- `icon.svg` (master for the app icon)
+- Generated icon sets: `icon.icns` (macOS), `icon.ico` (Windows, 16 to 256 px), PNG set for Linux (16 to 512 px), 1024 px PNG
+- `resources/brand/README.md`: minimum size, clear space, allowed and forbidden uses
+
+### Process
+
+Propose **3 distinct symbol directions** as SVG, each shown at 16, 32 and 128 px on the dark background, with one sentence explaining the idea. The owner picks one, then refine it and produce the deliverables. The logo is never final without the owner's explicit approval.
 
 ## Motion
 

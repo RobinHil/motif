@@ -1,12 +1,12 @@
 # AGENTS.md - Motif
 
-This file is read by Claude Code at the start of every session. It holds the permanent rules of the project. Functional details live in `docs/`.
+This file is read by coding agents at the start of every session (`CLAUDE.md` is a symlink to it). It holds the permanent rules of the project. Functional details live in `docs/`.
 
-**App name: TBD.** Until it is chosen, the codebase refers to "the app". The name is defined in a single place (`src/shared/app-info.ts`) so it can be changed in one edit.
+**App name: Motif.** Tagline: "Powered by Strudel", shown next to the logo, on the home screen and in the About window. Name, tagline and version are defined in a single place (`src/shared/app-info.ts`) and imported everywhere else. Project files use the `.motif` extension.
 
 ## The project in short
 
-A desktop music production app in the spirit of FL Studio, built entirely on **Strudel** (the JavaScript port of TidalCycles). Users compose through a graphical interface (step sequencer, piano roll, mixer, modulation, arrangement) and every action generates Strudel code that is always visible and editable. A beginner can do everything with the mouse; an advanced user can do everything in code. Nothing is locked away.
+Motif is a desktop music production app in the spirit of FL Studio, built entirely on **Strudel** (the JavaScript port of TidalCycles). Users compose through a graphical interface (step sequencer, piano roll, mixer, modulation, arrangement) and every action generates Strudel code that is always visible and editable. A beginner can do everything with the mouse; an advanced user can do everything in code. Nothing is locked away.
 
 The app is **100% self-contained**: no network access, nothing else to install, samples and fonts bundled.
 
@@ -16,13 +16,14 @@ Reference documents, to read before any task related to their topic:
 
 - `docs/SPEC.md`: full functional specification, data model, code generation
 - `docs/PHASES.md`: phased roadmap with acceptance criteria
-- `docs/DESIGN.md`: design system (colors, typography, components)
-- `docs/mockups/`: screenshots of the 6 approved screens. They will be added before phase 2; do not look for them before then
+- `docs/DESIGN.md`: design system (colors, typography, components, logo brief)
+- `docs/mockups/`: screenshots of the 6 approved screens. **Not added yet**: they will be committed before phase 2. Do not look for them before then.
 - `docs/DECISIONS.md`: log of technical decisions made during development
+- `.github/workflows/`: CI/CD, see the CI/CD section below
 
 ## Stack
 
-- **Bun**: package manager and script runner (development tool only)
+- **Bun**: package manager and script runner (development tool only). Bun is a deliberate choice for this project and overrides any global pnpm preference.
 - **Electron** + **electron-vite**: the main process runs on the Node runtime bundled with Electron, not on Bun
 - **React 19** + **TypeScript (strict)**
 - **Vite** for the renderer
@@ -31,8 +32,6 @@ Reference documents, to read before any task related to their topic:
 - **CodeMirror 6** for the code editor (reuse `@strudel/codemirror` where relevant)
 - **Strudel**: `@strudel/*` packages and `superdough` (audio engine)
 - **Vitest** for unit tests, **Playwright** (Electron mode) for end-to-end tests from phase 2 onward
-
-Bun is a deliberate choice for this project and overrides any global pnpm preference.
 
 If Bun causes packaging issues (because of its `node_modules` layout), switch installs to hoisted mode rather than changing tools.
 
@@ -46,8 +45,8 @@ Keep up to date from phase 0:
 bun install          # dependencies
 bun run dev          # Electron app in development mode
 bun run test         # unit tests (Vitest)
-bun run test <file>  # a single test file
-bun run test -t "<name>"  # a single test by name
+bun run test src/renderer/codegen/foo.test.ts   # a single test file
+bun run test -t "test name"                     # a single test by name
 bun run test:e2e     # end-to-end tests (Playwright)
 bun run lint         # ESLint
 bun run typecheck    # tsc --noEmit
@@ -55,11 +54,11 @@ bun run build        # production build
 bun run package      # installers (Windows, macOS, Linux)
 ```
 
-Never run `bun test` (Bun's built-in runner). Always use `bun run test`, which runs Vitest.
+**Never run `bun test`** (Bun's built-in test runner). Always use `bun run test`, which runs Vitest.
 
 ## Architecture
 
-This is the target structure, created in phase 0. Until then, these folders do not exist.
+This tree is the **target structure to create in phase 0**. Until then, the repository contains only `AGENTS.md`, `docs/` and the license: do not look for these folders before they exist.
 
 ```
 src/
@@ -80,6 +79,7 @@ src/
 resources/
   samples/           bundled sample packs + manifests
   fonts/             Geist and Geist Mono, local files
+  brand/             Motif logo, symbol, app icon sources and generated icon sets
   docs/              in-app function reference (functions.en.json)
 docs/
 ```
@@ -96,12 +96,41 @@ docs/
 8. **Strict TypeScript**, no `any` without a comment justifying it.
 9. **Design follows `docs/DESIGN.md`.** No hard-coded color, radius or font outside the tokens.
 
+## CI/CD
+
+Hosted on **GitHub Actions** (if the repository lives on Codeberg or another Forgejo instance, port the same workflows to Forgejo Actions, the syntax is nearly identical). Workflows live in `.github/workflows/`.
+
+### Workflows
+
+| File | Trigger | Content |
+|---|---|---|
+| `ci.yml` | every push and pull request | `lint`, `typecheck`, `test` with coverage on Ubuntu, then `build` on a matrix Ubuntu / Windows / macOS |
+| `e2e.yml` | pull requests and pushes to `main` (from phase 2) | Playwright in Electron mode on Ubuntu under `xvfb-run`, traces and screenshots uploaded on failure |
+| `package.yml` | pushes to `main` | `bun run package` on the 3 OSes, installers uploaded as workflow artifacts (7-day retention) for manual testing |
+| `release.yml` | tag `v*.*.*` | packages the 3 OSes, generates `SHA256SUMS`, creates a **draft** GitHub Release with installers and changelog |
+| `codeql.yml` | pull requests + weekly | CodeQL analysis for JavaScript/TypeScript |
+| `audit.yml` | weekly + changes to the lockfile | dependency vulnerability audit and license check (flag any license incompatible with AGPL-3.0) |
+
+Dependency updates: Renovate or Dependabot (check that the chosen tool supports Bun's lockfile), grouped weekly, GitHub Actions included.
+
+### Rules
+
+- `main` is protected: merge only through pull requests with `ci.yml` (and `e2e.yml` once it exists) green.
+- Workflows declare **minimal permissions** (`permissions: contents: read` by default, `contents: write` only in `release.yml`).
+- Third-party actions are **pinned by commit SHA**, not by tag.
+- `concurrency` cancels outdated runs on the same branch.
+- Bun and its install cache are set up with `oven-sh/setup-bun` and `actions/cache`.
+- CI never needs network access *from the app*: an e2e test asserts that the running app makes **zero outbound requests** (intercept all requests in test mode and fail on any non-local URL).
+- CI runners have no audio device: unit tests of `engine/` use a mocked or offline AudioContext; e2e tests launch Electron with the flags needed for audio without user gesture and do not assert on audible output. If this turns out to be impossible, document it in `docs/DECISIONS.md`.
+- Code signing and notarization (macOS, Windows) are **optional**: `release.yml` signs only when the corresponding secrets exist, and still produces unsigned installers otherwise.
+- Secrets never appear in logs; no secret is available to workflows triggered by pull requests from forks.
+
 ## Electron security
 
 - `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true` for every window
 - The preload exposes a **minimal** API through `contextBridge`; every IPC channel validates its arguments in the main process
 - Strict Content Security Policy, no remote content
-- The sample protocol (`app-sample://`) resolves paths only inside allowed folders (path traversal protection)
+- The sample protocol (`motif-sample://`) resolves paths only inside allowed folders (path traversal protection)
 - Strudel code is executed JavaScript: a project received from someone else is untrusted code. Show a warning when opening an external project that contains free code, and expose nothing in the preload that malicious code should not be able to call
 - Explicitly allow the `midi` permission with `session.setPermissionRequestHandler`, deny everything else by default
 

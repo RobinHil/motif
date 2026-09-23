@@ -1,4 +1,4 @@
-# Functional specification
+# Motif - functional specification
 
 Version 1.0 - functional reference. Architecture rules are in `CLAUDE.md`, delivery order in `PHASES.md`, visuals in `DESIGN.md`.
 
@@ -6,7 +6,7 @@ Version 1.0 - functional reference. Architecture rules are in `CLAUDE.md`, deliv
 
 ## 1. Vision
 
-A complete composition instrument, approachable for a beginner, with no ceiling for an advanced user, that exploits Strudel's capabilities to the fullest.
+Motif is a complete composition instrument, approachable for a beginner, with no ceiling for an advanced user, that exploits Strudel's capabilities to the fullest.
 
 ### Guiding principles
 
@@ -153,7 +153,7 @@ interface MidiMapping { deviceName: string; channel: number; cc: number;
 
 ### File format
 
-- A project is a **folder**: `MySong.<ext>/` containing `project.json` and `samples/` (copies of the imported samples it uses). The extension is derived from the app name once chosen.
+- A project is a **folder**: `MySong.motif/` containing `project.json` and `samples/` (copies of the imported samples it uses). The `.motif` folder is registered as a document type so it opens in Motif from the file manager where the OS allows it.
 - The `version` field drives migrations (`model/migrations.ts`), which are tested.
 - Autosave every 30 seconds to a recovery file, restored after a crash.
 
@@ -253,7 +253,7 @@ Six screens, reachable from the tabs in the top bar and shortcuts `1` to `6`. Se
 
 ### 6.0 Transport bar (every screen)
 
-Logo, play, stop, record, loop, tempo (click to edit, drag vertically to adjust), position in cycles with 4 progress segments, tabs, "Offline · bundled samples" indicator, Export button.
+Motif logo with the tagline "powered by Strudel", play, stop, record, loop, tempo (click to edit, drag vertically to adjust), position in cycles with 4 progress segments, tabs, "Offline · bundled samples" indicator, Export button.
 
 ### 6.1 Studio (main screen)
 
@@ -324,7 +324,7 @@ The in-app documentation is a local JSON file (`resources/docs/functions.en.json
 
 - Drum packs (drum machine banks), basic sounds and a few instruments, copied into `resources/samples/` with their manifests.
 - **Check the license of every pack** before bundling it and record it in `resources/samples/LICENSES.md`. Drop any pack with an unclear license.
-- Served through the custom `app-sample://` protocol registered in the main process (`protocol.handle`, privileges `standard`, `secure`, `supportFetchAPI`, `stream`).
+- Served through the custom `motif-sample://` protocol registered in the main process (`protocol.handle`, privileges `standard`, `secure`, `supportFetchAPI`, `stream`).
 
 ### User imports
 
@@ -389,7 +389,7 @@ Audio output device, latency, MIDI devices, sample library folder, UI scale (zoo
 
 - Demo project loaded on first launch (the one from the mockups: Drums, Bass, Lead, Texture).
 - Tooltips on every control showing the matching Strudel code.
-- Home screen: New project, Open, Recent projects, Demo.
+- Home screen: Motif logo lockup with the "Powered by Strudel" tagline, New project, Open, Recent projects, Demo.
 
 ### Performance
 
@@ -404,4 +404,4 @@ Real `button`, `input`, `label` elements. Keyboard navigation in every panel. `a
 
 ### License
 
-Strudel is licensed under **AGPL-3.0**, so this project is too. `LICENSE` file at the root, mention in the About window, list of dependency and sample licenses.
+Strudel is licensed under **AGPL-3.0**, so this project is too. `LICENSE` file at the root, mention in the About window, list of dependency and sample licenses. The About window credits Strudel and TidalCycles and links to their projects.
