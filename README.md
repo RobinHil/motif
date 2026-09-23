@@ -29,8 +29,8 @@ Motif is free software, licensed under the GNU Affero General Public License, ve
 
 Motif would not exist without:
 
-- [Strudel](https://strudel.cc) ([source](https://codeberg.org/uzu/strudel)), by Felix Roos, Alex McLean and the Strudel contributors, which provides the pattern language, the scheduler and the audio engine (superdough).
-- [TidalCycles](https://tidalcycles.org), by Alex McLean and contributors, whose ideas and mini-notation Strudel brings to JavaScript.
+- [Strudel](https://strudel.cc) ([source](https://codeberg.org/uzu/strudel)), by the Strudel contributors, which provides the pattern language, the scheduler and the audio engine (superdough).
+- [TidalCycles](https://tidalcycles.org), by the TidalCycles contributors, whose ideas and mini-notation Strudel brings to JavaScript.
 
 Motif bundles the Geist and Geist Mono fonts, licensed under the SIL Open Font License 1.1. The licenses of all bundled dependencies are listed in `THIRD_PARTY_LICENSES`, generated with `bun run licenses` and shipped with every installer. Bundled samples and their licenses are listed in [resources/samples/LICENSES.md](resources/samples/LICENSES.md).
 
