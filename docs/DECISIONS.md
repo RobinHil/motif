@@ -82,3 +82,21 @@ Format: date - problem - decision.
 - **Signing**: `package.yml` sets `CSC_IDENTITY_AUTO_DISCOVERY=false` and produces unsigned installers; signing arrives with `release.yml` in phase 10.
 - **Branch protection** of `main` is a repository setting, applied by the owner in GitHub (required checks: the `CI` jobs).
 - Actions are pinned by commit SHA with the version in a comment; `actionlint` reports no issue.
+
+## 2026-09-23 - Model schema and validation
+
+- **Problem**: projects are read from disk and may come from someone else, and codegen writes model strings into code that is executed.
+- **Decision**: the model is a set of zod schemas (`model/project.ts`); TypeScript types are inferred from them, so types and load-time validation cannot drift apart. Every string that reaches generated code is constrained by a regular expression (sound and bank names, note names, scales, vowels), and codegen checks them again (`safeToken`), so a crafted project cannot break out of a mini-notation string. Free code tracks and custom transforms remain arbitrary code by design (see the untrusted-project warning). Cross-field rules are checked too: unique track ids, one orbit per track, content present for the track kind, a scale in degree mode, notes inside the cycle.
+
+## 2026-09-23 - Code generation: gaps and contradictions in SPEC 4
+
+- **Default gain**: SPEC 3 gives a default gain of 0.8, and SPEC 4 rule 5 says default values are not written. Together, a new track would show 0.8 but play at Strudel's default of 1. **Decision**: a parameter is omitted only when it equals Strudel's own default (`gain` 1, `pan` 0.5, `PARAM_DEFAULTS`), and new tracks start at gain 1. Headroom comes from the master gain, whose default stays 0.8. The demo lead line then matches the SPEC example exactly (no `.gain()`).
+- **Order of `.scale()`**: rule 4 lists `.bank()`/`.s()` before `.scale()`, but the SPEC example and the phase 5 criterion write `n("...").scale("C:minor").s("triangle")`. **Decision**: follow the example: pattern, `.scale()`, sound, parameters, transforms, `.orbit()`.
+- **Probability**: in mini-notation `bd?0.3` removes the event with probability 0.3; the model stores the chance to play. **Decision**: write `?` followed by `1 - probability` (probability 0.7 gives `bd?0.3`). Verified by evaluating the code: probability 0.25 plays about a quarter of the notes.
+- **Velocities**: a layered `.velocity("1 0.5, 0.2 0.3")` gives every event the values of every layer (8 events instead of 4, verified). **Decision**: without velocity changes, step tracks use the SPEC multi-line string. When a velocity differs from 1, each row becomes its own `s(...)` with its own aligned `.velocity(...)` inside `stack(...)`. Note tracks do the same per voice, and chord members only share a chord when their velocity and probability are equal.
+- **Note grid**: notes are written on the coarsest grid that keeps every onset (lengths divided by their greatest common divisor), which is how the SPEC example `n("0 2 4 <5 7> ~ 4 2 ~")` comes out of a 16-step grid. Notes that overlap without starting together go to separate comma-separated layers.
+- **Solo and mute**: a track is muted if it is muted, or if another track is soloed and it is not. Mute wins over solo.
+- **Sources**: step tracks name their sounds per row, so only a `bank` source is written for them. Free code tracks write no source.
+- **Free code**: trimmed, then parameters, transforms and `.orbit()` are appended. If the last line holds a `//` comment, the suffix starts on a new line.
+- **`lineMap`**: 1-based, inclusive line ranges per track. `generateProjectCode` also returns the `header` and each track's `blocks`, which the engine uses to isolate errors.
+- **`sceneId`**: tracks outside the scene are muted rather than removed, so their orbits and effects stay allocated.
