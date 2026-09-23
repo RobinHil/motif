@@ -1,6 +1,7 @@
 import { join } from 'node:path'
 import { app, BrowserWindow, session } from 'electron'
 import { APP_NAME } from '@shared/app-info'
+import { bundledSamplesRoot, handleSampleProtocol, registerSampleScheme } from './sample-protocol'
 import { hardenSession, hardenWebContents } from './security'
 
 const devServerUrl = !app.isPackaged ? (process.env['ELECTRON_RENDERER_URL'] ?? null) : null
@@ -42,10 +43,12 @@ function createWindow(): void {
 }
 
 app.setName(APP_NAME)
+registerSampleScheme()
 hardenWebContents(devServerOrigin)
 
 void app.whenReady().then(() => {
   hardenSession(session.defaultSession, devServerOrigin)
+  handleSampleProtocol({ bundled: bundledSamplesRoot() })
   createWindow()
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
