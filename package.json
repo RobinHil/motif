@@ -8,6 +8,7 @@
   "desktopName": "motif.desktop",
   "private": true,
   "main": "./out/main/index.js",
+  "packageManager": "bun@1.4.2",
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
@@ -19,7 +20,8 @@
     "test": "vitest run",
     "samples:test": "bun scripts/generate-test-samples.ts",
     "licenses": "bun scripts/third-party-licenses.ts",
-    "package": "electron-vite build && bun run licenses && electron-builder"
+    "package": "electron-vite build && bun run licenses && electron-builder",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@strudel/core": "1.2.6",
@@ -37,6 +39,7 @@
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
     "@vitejs/plugin-react": "5.2.0",
+    "@vitest/coverage-v8": "5.0.1",
     "electron": "44.4.5",
     "electron-builder": "26.15.3",
     "electron-vite": "5.0.0",
