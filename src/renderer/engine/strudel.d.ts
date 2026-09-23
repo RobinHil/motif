@@ -78,6 +78,8 @@ declare module '@strudel/webaudio' {
   }
 
   export function getSuperdoughAudioController(): SuperdoughAudioController
+  /** Plays one event now-ish: `value` holds controls such as s, note, bank, gain. */
+  export function superdough(value: Record<string, unknown>, time: number, duration: number): Promise<void>
   export function webaudioRepl(options?: ReplOptions): Repl
   export function initAudio(options?: { disableWorklets?: boolean; maxPolyphony?: number }): Promise<void>
   export function getAudioContext(): AudioContext

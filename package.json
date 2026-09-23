@@ -24,6 +24,11 @@
     "samples:kit": "bun scripts/generate-kit.ts"
   },
   "dependencies": {
+    "@codemirror/lang-javascript": "6.2.5",
+    "@codemirror/language": "6.12.4",
+    "@codemirror/state": "6.7.6",
+    "@codemirror/view": "6.43.13",
+    "@lezer/highlight": "1.2.3",
     "@strudel/core": "1.2.6",
     "@strudel/mini": "1.2.6",
     "@strudel/tonal": "1.2.6",

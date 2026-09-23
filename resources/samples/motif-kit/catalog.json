@@ -1,7 +1,5 @@
 {
-  "banks": [
-    "MotifKit"
-  ],
+  "banks": ["MotifKit"],
   "sounds": [
     {
       "name": "bd",

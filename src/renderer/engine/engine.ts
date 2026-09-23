@@ -4,11 +4,20 @@
 import { evalScope } from '@strudel/core'
 import { miniAllStrings } from '@strudel/mini'
 import { transpiler } from '@strudel/transpiler'
-import { getAudioContext, initAudio, registerSynthSounds, samples, webaudioRepl, type Repl } from '@strudel/webaudio'
+import {
+  getAudioContext,
+  initAudio,
+  registerSynthSounds,
+  samples,
+  superdough,
+  webaudioRepl,
+  type Repl,
+} from '@strudel/webaudio'
 import type { GeneratedCode } from '../codegen/generate'
 import { checkBlock } from './check-block'
 import { Evaluator, type EvaluationResult } from './evaluator'
 import { ensureMasterBus, setMasterGain as setBusGain } from './master-bus'
+import { orbitPeak } from './orbit-taps'
 
 export type { EvaluationResult } from './evaluator'
 
@@ -115,4 +124,26 @@ export function getCycle(): number {
 
 export function setMasterGain(gain: number): void {
   setBusGain(gain)
+}
+
+/** Orbit used for previews, far from any track orbit. */
+const PREVIEW_ORBIT = 64
+
+/** One-shot preview from the sound browser: `{ s: 'bd' }`, `{ s: 'sawtooth', note: 'c3' }`. */
+export async function previewSound(value: Record<string, unknown>): Promise<void> {
+  await initEngine()
+  const context = getAudioContext()
+  await context.resume()
+  ensureMasterBus()
+  await superdough({ ...value, orbit: PREVIEW_ORBIT }, context.currentTime + 0.02, 0.4)
+}
+
+/** Whether Strudel and the audio context are running (meters read nothing before). */
+export function isReady(): boolean {
+  return repl !== null
+}
+
+/** Peak level of a track's orbit, for meters drawn in a requestAnimationFrame loop. */
+export function trackLevel(orbit: number): number {
+  return repl === null ? 0 : orbitPeak(orbit)
 }
