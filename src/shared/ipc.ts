@@ -3,6 +3,8 @@ export const IPC = {
   projectSave: 'project:save',
   projectSaveAs: 'project:save-as',
   projectNew: 'project:new',
+  projectRecent: 'project:recent',
+  projectOpenRecent: 'project:open-recent',
   recoveryWrite: 'recovery:write',
   recoveryTake: 'recovery:take',
   recoveryClear: 'recovery:clear',
@@ -13,6 +15,12 @@ export type OpenResult =
 
 export type SaveResult =
   { status: 'saved'; name: string } | { status: 'canceled' } | { status: 'error'; message: string }
+
+export interface RecentProject {
+  /** Opaque: the folder path never leaves the main process. */
+  id: string
+  name: string
+}
 
 export interface RecoveredProject {
   text: string
@@ -35,6 +43,8 @@ export interface MotifApi {
     saveAs(text: string, suggestedName: string): Promise<SaveResult>
     /** Forgets the current project folder (new project). */
     reset(): Promise<void>
+    recent(): Promise<RecentProject[]>
+    openRecent(id: string): Promise<OpenResult>
   }
   readonly recovery: {
     write(text: string): Promise<void>

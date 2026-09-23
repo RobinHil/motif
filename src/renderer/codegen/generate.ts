@@ -52,6 +52,14 @@ function patternCode(track: Track, prefixLength: number): string {
   }
 }
 
+/**
+ * The code a structured track would contribute as free code: pattern, scale, sound and transforms.
+ * Mixer parameters and the orbit stay on the track, so converting does not change the sound.
+ */
+export function trackToFreeCode(track: Track): string {
+  return patternCode(track, 0) + soundCode(track) + transformsCode(track.transforms)
+}
+
 /** One track as a `$:` block (SPEC 4, rules 2 to 5 and 9). */
 export function generateTrackCode(track: Track, muted: boolean): string {
   const prefix = muted ? '_$: ' : '$: '

@@ -1,7 +1,7 @@
 import { join } from 'node:path'
 import { app, BrowserWindow, dialog, ipcMain, type IpcMainInvokeEvent } from 'electron'
 import { APP_NAME } from '@shared/app-info'
-import { IPC, type OpenResult, type RecoveredProject, type SaveResult } from '@shared/ipc'
+import { IPC, type OpenResult, type RecentProject, type RecoveredProject, type SaveResult } from '@shared/ipc'
 import {
   assertProjectText,
   containsFreeCode,
@@ -11,6 +11,7 @@ import {
   withProjectExtension,
   writeProjectFolder,
 } from './project-files'
+import { RecentProjects } from './recent-projects'
 import { Recovery } from './recovery'
 import { TrustedProjects } from './trusted-projects'
 
@@ -54,12 +55,26 @@ export async function registerProjectIpc(): Promise<Recovery> {
   const userData = app.getPath('userData')
   const recovery = new Recovery(join(userData, 'recovery'))
   const trusted = new TrustedProjects(join(userData, 'trusted-projects.json'))
+  const recent = new RecentProjects(join(userData, 'recent-projects.json'))
   await recovery.start()
+
+  /** Reads a project folder, warning before running someone else's free code. */
+  async function openDir(window: BrowserWindow | undefined, dir: string): Promise<OpenResult> {
+    const text = await readProjectFolder(dir)
+    const name = projectNameFromDir(dir)
+    if (containsFreeCode(text) && !(await trusted.isTrusted(dir)) && !(await confirmFreeCode(window, name))) {
+      return { status: 'canceled' }
+    }
+    currentDir = dir
+    await recent.add(dir)
+    return { status: 'opened', text, name }
+  }
 
   async function saveTo(dir: string, text: string): Promise<SaveResult> {
     await writeProjectFolder(dir, text)
     currentDir = dir
     await trusted.trust(dir)
+    await recent.add(dir)
     await recovery.clear()
     return { status: 'saved', name: projectNameFromDir(dir) }
   }
@@ -88,13 +103,7 @@ export async function registerProjectIpc(): Promise<Recovery> {
       const result = window ? await dialog.showOpenDialog(window, options) : await dialog.showOpenDialog(options)
       const dir = result.filePaths[0]
       if (result.canceled || dir === undefined) return { status: 'canceled' }
-      const text = await readProjectFolder(dir)
-      const name = projectNameFromDir(dir)
-      if (containsFreeCode(text) && !(await trusted.isTrusted(dir)) && !(await confirmFreeCode(window, name))) {
-        return { status: 'canceled' }
-      }
-      currentDir = dir
-      return { status: 'opened', text, name }
+      return await openDir(window, dir)
     } catch (error) {
       return { status: 'error', message: message(error) }
     }
@@ -120,6 +129,19 @@ export async function registerProjectIpc(): Promise<Recovery> {
 
   ipcMain.handle(IPC.projectNew, () => {
     currentDir = null
+  })
+
+  ipcMain.handle(IPC.projectRecent, (): Promise<RecentProject[]> => recent.list())
+
+  ipcMain.handle(IPC.projectOpenRecent, async (event, id: unknown): Promise<OpenResult> => {
+    const dir = await recent.resolve(id)
+    if (dir === null) return { status: 'error', message: 'This project is no longer in the recent list.' }
+    try {
+      return await openDir(windowOf(event), dir)
+    } catch (error) {
+      await recent.remove(dir)
+      return { status: 'error', message: message(error) }
+    }
   })
 
   ipcMain.handle(IPC.recoveryWrite, async (_event, text: unknown) => {

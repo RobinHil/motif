@@ -1,4 +1,5 @@
 // New, open, save and crash recovery, on top of the preload API and the project store.
+import { createDemoProject } from '../model/demo'
 import { createProject } from '../model/defaults'
 import { migrateProject, ProjectLoadError, serializeProject } from '../model/migrations'
 import { projectStore, selectIsDirty } from '../store/project-store'
@@ -27,8 +28,23 @@ export async function newProject(): Promise<void> {
   notify(null)
 }
 
-export async function openProject(): Promise<void> {
-  const result = await window.motif.project.open()
+export async function openDemo(): Promise<void> {
+  await window.motif.project.reset()
+  projectStore.getState().load(createDemoProject(), { saved: true })
+  uiStore.getState().setFileName(null)
+  notify(null)
+}
+
+export function openProject(): Promise<void> {
+  return applyOpen(window.motif.project.open())
+}
+
+export function openRecentProject(id: string): Promise<void> {
+  return applyOpen(window.motif.project.openRecent(id))
+}
+
+async function applyOpen(pending: ReturnType<typeof window.motif.project.open>): Promise<void> {
+  const result = await pending
   if (result.status === 'canceled') return
   if (result.status === 'error') {
     notify(result.message)
@@ -37,6 +53,7 @@ export async function openProject(): Promise<void> {
   try {
     projectStore.getState().load(parseProject(result.text), { saved: true })
     uiStore.getState().setFileName(result.name)
+    uiStore.getState().setScreen('studio')
     notify(null)
   } catch (error) {
     notify(error instanceof Error ? error.message : String(error))

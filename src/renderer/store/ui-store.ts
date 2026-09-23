@@ -7,6 +7,8 @@ export type Screen = (typeof SCREENS)[number]
 
 /** Interface state. Not part of the project and not undoable (SPEC 10). */
 export interface UiState {
+  /** The home screen (new, open, recent, demo) is shown instead of the six screens. */
+  home: boolean
   screen: Screen
   selectedTrackId: ID | null
   codeMode: 'synced' | 'direct'
@@ -14,21 +16,29 @@ export interface UiState {
   fileName: string | null
   /** A short message for the user (open failed, project recovered...). */
   notice: string | null
+  helpOpen: boolean
+  setHome: (home: boolean) => void
   setScreen: (screen: Screen) => void
   selectTrack: (trackId: ID | null) => void
   setCodeMode: (mode: 'synced' | 'direct') => void
   setFileName: (fileName: string | null) => void
   setNotice: (notice: string | null) => void
+  setHelpOpen: (open: boolean) => void
 }
 
 export const uiStore = createStore<UiState>()((set) => ({
+  home: false,
   screen: 'studio',
   selectedTrackId: null,
   codeMode: 'synced',
   fileName: null,
   notice: null,
+  helpOpen: false,
+  setHome: (home) => {
+    set({ home })
+  },
   setScreen: (screen) => {
-    set({ screen })
+    set({ screen, home: false })
   },
   selectTrack: (selectedTrackId) => {
     set({ selectedTrackId })
@@ -41,6 +51,9 @@ export const uiStore = createStore<UiState>()((set) => ({
   },
   setNotice: (notice) => {
     set({ notice })
+  },
+  setHelpOpen: (helpOpen) => {
+    set({ helpOpen })
   },
 }))
 

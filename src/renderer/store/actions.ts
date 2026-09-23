@@ -1,6 +1,7 @@
 // Named edits on the project. Each one is a recipe for `ProjectState.update`, so every action is
 // undoable and components never mutate the model directly.
 import { current, type Draft } from 'immer'
+import { trackToFreeCode } from '../codegen/generate'
 import {
   createStepRow,
   createTrack,
@@ -193,4 +194,52 @@ export const setTransformArg = (trackId: ID, transformId: ID, key: string, value
   withTrack(trackId, (track) => {
     const transform = track.transforms.find((t) => t.id === transformId)
     if (transform) transform.args[key] = value
+  })
+
+/** Replaces the sound of one row of a step track (dropping a sound on a row). */
+export const setRowSound = (trackId: ID, rowId: ID, sound: string): Recipe =>
+  withTrack(trackId, (track) => {
+    const row = track.steps?.rows.find((r) => r.id === rowId)
+    if (row) {
+      row.sound = sound
+      delete row.variant
+    }
+  })
+
+/** Turns a step or note track into free code that plays the same thing (track context menu). */
+export const convertToFreeCode = (trackId: ID): Recipe =>
+  withTrack(trackId, (track) => {
+    if (track.kind === 'code') return
+    const code = trackToFreeCode(current(track))
+    track.kind = 'code'
+    track.code = code
+    track.transforms = []
+    delete track.steps
+    delete track.notes
+  })
+
+export type DroppedSound = { kind: 'sound'; name: string; category: string } | { kind: 'bank'; bank: string }
+
+/**
+ * Dropping from the sound browser onto a track (SPEC 6.1): a bank sets a step track's bank, a sound
+ * adds a row to a step track or becomes a note track's instrument. Free code sets its own sounds.
+ */
+export function dropOnTrack(trackId: ID, dropped: DroppedSound, newIdFn: IdFactory = newId): Recipe {
+  return withTrack(trackId, (track) => {
+    if (track.kind === 'steps') {
+      if (dropped.kind === 'bank') track.source = { type: 'bank', bank: dropped.bank }
+      else track.steps?.rows.push(createStepRow(dropped.name, newIdFn))
+    } else if (track.kind === 'notes' && dropped.kind === 'sound') {
+      track.source = { type: dropped.category === 'Synths' ? 'synth' : 'sample', name: dropped.name }
+    }
+  })
+}
+
+/** Sample variant of a whole row: `bd:2`. `undefined` goes back to the first sample. */
+export const setVariant = (trackId: ID, rowId: ID, variant: number | undefined): Recipe =>
+  withTrack(trackId, (track) => {
+    const row = track.steps?.rows.find((r) => r.id === rowId)
+    if (!row) return
+    if (variant === undefined) delete row.variant
+    else row.variant = Math.max(0, Math.round(variant))
   })
