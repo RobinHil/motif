@@ -1,11 +1,12 @@
-// Synthesizes the phase 0 test kit (bd, sd, hh) so no third-party sample is needed.
-// Output is deterministic: running it twice produces identical files.
-// Usage: bun run samples:test
+// Synthesizes MotifKit, the bundled starter kit (drums and a wind texture), so no third-party
+// sample is needed. Output is deterministic: running it twice produces identical files.
+// Usage: bun run samples:kit
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const SAMPLE_RATE = 48000
-const OUT_DIR = join(import.meta.dirname, '..', 'resources', 'samples', 'test')
+const OUT_DIR = join(import.meta.dirname, '..', 'resources', 'samples', 'motif-kit')
+const BANK = 'MotifKit'
 
 function mulberry32(seed: number): () => number {
   let a = seed
@@ -58,6 +59,43 @@ function hihat(): Float32Array {
   })
 }
 
+function clap(): Float32Array {
+  const random = mulberry32(3)
+  let low = 0
+  return render(0.35, (t) => {
+    const white = random() * 2 - 1
+    low += 0.35 * (white - low)
+    const band = white - low
+    // Three quick bursts, then a short diffuse tail.
+    const burst = [0, 0.011, 0.023].reduce((sum, at) => sum + (t >= at ? Math.exp(-(t - at) * 180) : 0), 0)
+    const tail = t >= 0.023 ? Math.exp(-(t - 0.023) * 22) * 0.5 : 0
+    return band * (burst + tail) * 0.7
+  })
+}
+
+function rim(): Float32Array {
+  return render(0.12, (t) => {
+    const body = Math.sin(2 * Math.PI * 1680 * t) * 0.6 + Math.sin(2 * Math.PI * 520 * t) * 0.4
+    return body * Math.exp(-t * 60) * 0.8
+  })
+}
+
+function wind(): Float32Array {
+  const random = mulberry32(4)
+  let low = 0
+  let lower = 0
+  const seconds = 2
+  return render(seconds, (t) => {
+    const white = random() * 2 - 1
+    // Cutoff sways slowly so the noise breathes like wind.
+    const sway = 0.02 + 0.03 * (0.5 + 0.5 * Math.sin(2 * Math.PI * 0.7 * t))
+    low += sway * (white - low)
+    lower += 0.2 * (low - lower)
+    const envelope = Math.sin((Math.PI * t) / seconds) ** 1.5
+    return lower * envelope * 2.2
+  })
+}
+
 function encodeWav16(samples: Float32Array): Buffer {
   const dataSize = samples.length * 2
   const buffer = Buffer.alloc(44 + dataSize)
@@ -81,14 +119,29 @@ function encodeWav16(samples: Float32Array): Buffer {
   return buffer
 }
 
-const kit = { bd: kick(), sd: snare(), hh: hihat() }
+const kit = { bd: kick(), sd: snare(), hh: hihat(), cp: clap(), rim: rim(), wind: wind() }
+const categories: Record<keyof typeof kit, string> = {
+  bd: 'Drums',
+  sd: 'Drums',
+  hh: 'Drums',
+  cp: 'Drums',
+  rim: 'Drums',
+  wind: 'Textures',
+}
 const manifest: Record<string, string[]> = {}
 
 for (const [name, samples] of Object.entries(kit)) {
   mkdirSync(join(OUT_DIR, name), { recursive: true })
   writeFileSync(join(OUT_DIR, name, '0.wav'), encodeWav16(samples))
-  manifest[name] = [`${name}/0.wav`]
+  const files = [`${name}/0.wav`]
+  manifest[name] = files
+  // Strudel's .bank("MotifKit") looks sounds up as MotifKit_bd, MotifKit_sd...
+  if (categories[name as keyof typeof kit] === 'Drums') manifest[`${BANK}_${name}`] = files
 }
 
 writeFileSync(join(OUT_DIR, 'strudel.json'), `${JSON.stringify(manifest, null, 2)}\n`)
+writeFileSync(
+  join(OUT_DIR, 'catalog.json'),
+  `${JSON.stringify({ banks: [BANK], sounds: Object.entries(categories).map(([name, category]) => ({ name, category })) }, null, 2)}\n`,
+)
 console.log(`Wrote ${Object.keys(kit).join(', ')} to ${OUT_DIR}`)

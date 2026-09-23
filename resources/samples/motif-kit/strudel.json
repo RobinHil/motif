@@ -1,0 +1,35 @@
+{
+  "bd": [
+    "bd/0.wav"
+  ],
+  "MotifKit_bd": [
+    "bd/0.wav"
+  ],
+  "sd": [
+    "sd/0.wav"
+  ],
+  "MotifKit_sd": [
+    "sd/0.wav"
+  ],
+  "hh": [
+    "hh/0.wav"
+  ],
+  "MotifKit_hh": [
+    "hh/0.wav"
+  ],
+  "cp": [
+    "cp/0.wav"
+  ],
+  "MotifKit_cp": [
+    "cp/0.wav"
+  ],
+  "rim": [
+    "rim/0.wav"
+  ],
+  "MotifKit_rim": [
+    "rim/0.wav"
+  ],
+  "wind": [
+    "wind/0.wav"
+  ]
+}

@@ -4,4 +4,4 @@ Every pack bundled in `resources/samples/` is listed here with its source and li
 
 | Pack                        | Folder  | Source                                                               | License |
 | --------------------------- | ------- | -------------------------------------------------------------------- | ------- |
-| Motif test kit (bd, sd, hh) | `test/` | Synthesized by `scripts/generate-test-samples.ts` in this repository | CC0-1.0 |
+| MotifKit (bd, sd, hh, cp, rim, wind) | `motif-kit/` | Synthesized by `scripts/generate-kit.ts` in this repository | CC0-1.0 |

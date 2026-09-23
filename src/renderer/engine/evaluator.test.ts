@@ -104,8 +104,8 @@ describe('Evaluator', () => {
     const result = await evaluator.flush()
 
     expect(result?.code).toContain('setcpm(90/4)')
-    expect(result?.code).toContain('_$: note("c2@2')
-    expect(result?.code).toContain('$: note("<c4 eb4 g4 bb4>/2")')
+    expect(result?.code).toContain('_$: note("c2 c2 eb2 g1")')
+    expect(result?.code).toContain('$: s("wind*2")')
     expect(result?.errors['demo-texture']?.line).toBe(generated.lineMap['demo-texture']?.from)
   })
 
@@ -145,7 +145,7 @@ describe('Evaluator', () => {
     // Re-adding a broken texture must not bring back the old block.
     evaluator.schedule(generateProjectCode(withTextureCode(createDemoProject(new Date(0)), 'oops(')))
     const result = await evaluator.flush()
-    expect(result?.code).not.toContain('bb4')
+    expect(result?.code).not.toContain('wind')
   })
 
   it('debounces scheduled evaluations and keeps only the latest', async () => {

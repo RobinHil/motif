@@ -30,8 +30,8 @@ async function boot(): Promise<Repl> {
     import('@strudel/webaudio'),
   )
   registerSynthSounds()
-  const manifest: unknown = await fetch(`${BUNDLED_SAMPLES_URL}test/strudel.json`).then((r) => r.json())
-  await samples(manifest as Record<string, unknown>, `${BUNDLED_SAMPLES_URL}test/`)
+  const manifest: unknown = await fetch(`${BUNDLED_SAMPLES_URL}motif-kit/strudel.json`).then((r) => r.json())
+  await samples(manifest as Record<string, unknown>, `${BUNDLED_SAMPLES_URL}motif-kit/`)
   await initAudio()
   repl = webaudioRepl({
     transpiler,

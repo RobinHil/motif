@@ -84,7 +84,7 @@ export function createTrack(kind: TrackKind, existing: readonly Track[], newIdFn
       return {
         ...base,
         kind,
-        source: { type: 'bank', bank: 'RolandTR909' },
+        source: { type: 'bank', bank: 'MotifKit' },
         steps: { stepsPerCycle: STEPS_PER_CYCLE, rows: DEFAULT_DRUM_ROWS.map((s) => createStepRow(s, newIdFn)) },
       }
     case 'notes':

@@ -241,9 +241,8 @@ describe('actions', () => {
     apply(actions.setParam('demo-bass', 'gain', undefined))
     apply(actions.setParam('demo-bass', 'vowel', 'a'))
     expect(track('demo-bass')?.params).toEqual({
-      gain: 0.9,
+      gain: 1,
       pan: 0.5,
-      lpq: 4,
       room: { kind: 'sequence', values: [0.1, 0.5] },
       vowel: 'a',
     })
