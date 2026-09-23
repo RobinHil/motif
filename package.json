@@ -14,7 +14,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "vitest run"
+    "test": "vitest run",
+    "samples:test": "bun scripts/generate-test-samples.ts"
   },
   "dependencies": {
     "react": "19.3.0",
