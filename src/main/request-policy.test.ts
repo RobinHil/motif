@@ -9,9 +9,9 @@ describe('isAllowedRequest', () => {
   })
 
   it('blocks every remote URL in production', () => {
-    expect(isAllowedRequest('https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/strudel.json', null)).toBe(
-      false,
-    )
+    expect(
+      isAllowedRequest('https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/strudel.json', null),
+    ).toBe(false)
     expect(isAllowedRequest('http://localhost:5173/', null)).toBe(false)
     expect(isAllowedRequest('https://fonts.googleapis.com/css', null)).toBe(false)
   })
