@@ -22,6 +22,10 @@ declare module '@strudel/core' {
   ): Promise<{ pattern: Pattern; meta?: { miniLocations?: [number, number][] } }>
 }
 
+declare module '@strudel/tonal' {
+  export {}
+}
+
 declare module '@strudel/mini' {
   export function miniAllStrings(): void
 }
