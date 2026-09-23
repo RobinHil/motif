@@ -82,3 +82,40 @@ Format: date - problem - decision.
 - **Signing**: `package.yml` sets `CSC_IDENTITY_AUTO_DISCOVERY=false` and produces unsigned installers; signing arrives with `release.yml` in phase 10.
 - **Branch protection** of `main` is a repository setting, applied by the owner in GitHub (required checks: the `CI` jobs).
 - Actions are pinned by commit SHA with the version in a comment; `actionlint` reports no issue.
+
+## 2026-09-23 - Model schema and validation
+
+- **Problem**: projects are read from disk and may come from someone else, and codegen writes model strings into code that is executed.
+- **Decision**: the model is a set of zod schemas (`model/project.ts`); TypeScript types are inferred from them, so types and load-time validation cannot drift apart. Every string that reaches generated code is constrained by a regular expression (sound and bank names, note names, scales, vowels), and codegen checks them again (`safeToken`), so a crafted project cannot break out of a mini-notation string. Free code tracks and custom transforms remain arbitrary code by design (see the untrusted-project warning). Cross-field rules are checked too: unique track ids, one orbit per track, content present for the track kind, a scale in degree mode, notes inside the cycle.
+
+## 2026-09-23 - Code generation: gaps and contradictions in SPEC 4
+
+- **Default gain**: SPEC 3 gives a default gain of 0.8, and SPEC 4 rule 5 says default values are not written. Together, a new track would show 0.8 but play at Strudel's default of 1. **Decision**: a parameter is omitted only when it equals Strudel's own default (`gain` 1, `pan` 0.5, `PARAM_DEFAULTS`), and new tracks start at gain 1. Headroom comes from the master gain, whose default stays 0.8. The demo lead line then matches the SPEC example exactly (no `.gain()`).
+- **Order of `.scale()`**: rule 4 lists `.bank()`/`.s()` before `.scale()`, but the SPEC example and the phase 5 criterion write `n("...").scale("C:minor").s("triangle")`. **Decision**: follow the example: pattern, `.scale()`, sound, parameters, transforms, `.orbit()`.
+- **Probability**: in mini-notation `bd?0.3` removes the event with probability 0.3; the model stores the chance to play. **Decision**: write `?` followed by `1 - probability` (probability 0.7 gives `bd?0.3`). Verified by evaluating the code: probability 0.25 plays about a quarter of the notes.
+- **Velocities**: a layered `.velocity("1 0.5, 0.2 0.3")` gives every event the values of every layer (8 events instead of 4, verified). **Decision**: without velocity changes, step tracks use the SPEC multi-line string. When a velocity differs from 1, each row becomes its own `s(...)` with its own aligned `.velocity(...)` inside `stack(...)`. Note tracks do the same per voice, and chord members only share a chord when their velocity and probability are equal.
+- **Note grid**: notes are written on the coarsest grid that keeps every onset (lengths divided by their greatest common divisor), which is how the SPEC example `n("0 2 4 <5 7> ~ 4 2 ~")` comes out of a 16-step grid. Notes that overlap without starting together go to separate comma-separated layers.
+- **Solo and mute**: a track is muted if it is muted, or if another track is soloed and it is not. Mute wins over solo.
+- **Sources**: step tracks name their sounds per row, so only a `bank` source is written for them. Free code tracks write no source.
+- **Free code**: trimmed, then parameters, transforms and `.orbit()` are appended. If the last line holds a `//` comment, the suffix starts on a new line.
+- **`lineMap`**: 1-based, inclusive line ranges per track. `generateProjectCode` also returns the `header` and each track's `blocks`, which the engine uses to isolate errors.
+- **`sceneId`**: tracks outside the scene are muted rather than removed, so their orbits and effects stay allocated.
+
+## 2026-09-23 - Undo history
+
+- **Problem**: AGENTS.md suggests zundo "or equivalent". SPEC 10 wants continuous gestures (dragging a knob) to form a single undo entry. zundo can pause tracking, but cannot then record one entry from the state before the gesture to the state after it.
+- **Decision**: a small history inside the project store (`store/project-store.ts`): immutable snapshots made with immer (structural sharing), `past` and `future` stacks capped at 500 entries, and `beginGesture()`/`endGesture()` that turn everything in between into one entry. Undo during a gesture ends it first. Named edits live in `store/actions.ts` as recipes, so every change to the model goes through the history. UI state (`ui-store`) and playback state (`transport-store`) are separate and not undoable. `amend()` applies bookkeeping changes (the save date) without an undo entry. Tested: 200 random edits then 200 undos give back the initial project object.
+
+## 2026-09-23 - Engine: evaluation and errors
+
+- **Problem**: golden rule 6 and SPEC 5 ask that a failing evaluation keeps the last valid pattern and attaches the error to the right track. `repl.evaluate` catches errors and reports them through `onEvalError`; runtime errors (`x.lfp is not a function`) carry no line number.
+- **Decision**: `engine/evaluator.ts` checks each track block alone before evaluating the program (`check-block.ts`: transpile, evaluate without the `$:` label, query the first cycle). A failing block is replaced by that track's last valid block, so the other tracks still take their changes and the failing track keeps playing its previous version; the error is attached to the track, with a line when Strudel gives one (syntax errors). If Strudel still rejects the whole program, the previous pattern keeps playing (Strudel does not replace it) and the error is reported as global. Evaluations are debounced by 150 ms and never overlap. The evaluator has no Strudel dependency and is tested with a fake player plus the real block check; the acceptance scenario (breaking the demo's free code track) was also verified in the running app, where the output level stayed unchanged.
+- `@strudel/tonal` is now installed and in the scope: `.scale()` comes from it.
+- The main process enables `autoplayPolicy: 'no-user-gesture-required'`, so the engine can boot and evaluate before the first click; the AudioContext is resumed on play.
+- The engine is still reached through the app layer only (`app/engine-bridge.ts`), which regenerates code on project changes, skips evaluation when the code is unchanged, and pushes results to the transport store.
+- **Known gap**: the demo's drums use the `RolandTR909` bank from the SPEC, which is not bundled yet (packs arrive in phase 7). They are silent and superdough logs "sound not found" until then.
+
+## 2026-09-23 - Project files and recovery
+
+- **Problem**: project code runs in the renderer, so anything the preload exposes can be called by a malicious project.
+- **Decision**: the main process only writes `project.json` (and creates `samples/`) inside a `.motif` folder chosen in a save dialog, or the folder the current project was opened from; the renderer never sends a path. Writes go through a temporary file and a rename. Payloads are limited to 50 MB. Opening a project that contains free code or custom transforms shows a native warning unless this installation saved that folder itself (list of trusted folders in userData). Crash recovery: the renderer autosaves unsaved changes every 30 seconds to a fixed file in userData; a lock file marks a running session, and finding it at startup means the previous session crashed, so the autosave is offered once and restored with a notice. A clean quit removes both files. Closing with unsaved changes asks for confirmation (`beforeunload` in the renderer, native dialog in the main process). Verified in the app: a hard kill after an edit restores the project on the next start, and a clean quit leaves nothing behind.

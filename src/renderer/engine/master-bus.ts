@@ -15,9 +15,10 @@ export interface MasterBus {
 
 let bus: MasterBus | null = null
 let tapped: GainNode | null = null
+let masterGain = 0.8
 
 function createBus(context: AudioContext): MasterBus {
-  const input = new GainNode(context)
+  const input = new GainNode(context, { gain: masterGain })
   const output = new GainNode(context)
   const analyser = new AnalyserNode(context, { fftSize: 2048, smoothingTimeConstant: 0.6 })
   input.connect(output)
@@ -44,4 +45,10 @@ export function ensureMasterBus(): MasterBus {
     tapped = source
   }
   return bus
+}
+
+/** Master volume (MasterSettings.gain). Applied now if the bus exists, otherwise when it is created. */
+export function setMasterGain(gain: number): void {
+  masterGain = gain
+  if (bus) bus.input.gain.setTargetAtTime(gain, bus.context.currentTime, 0.01)
 }
