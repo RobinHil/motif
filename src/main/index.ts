@@ -1,6 +1,10 @@
 import { join } from 'node:path'
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, session } from 'electron'
 import { APP_NAME } from '@shared/app-info'
+import { hardenSession, hardenWebContents } from './security'
+
+const devServerUrl = !app.isPackaged ? (process.env['ELECTRON_RENDERER_URL'] ?? null) : null
+const devServerOrigin = devServerUrl !== null ? new URL(devServerUrl).origin : null
 
 function createWindow(): void {
   const window = new BrowserWindow({
@@ -16,6 +20,7 @@ function createWindow(): void {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
+      webSecurity: true,
     },
   })
 
@@ -23,8 +28,13 @@ function createWindow(): void {
     window.show()
   })
 
-  const devServerUrl = process.env['ELECTRON_RENDERER_URL']
-  if (!app.isPackaged && devServerUrl) {
+  if (!app.isPackaged) {
+    window.webContents.on('console-message', ({ level, message }) => {
+      console.log(`[renderer:${level}] ${message}`)
+    })
+  }
+
+  if (devServerUrl !== null) {
     void window.loadURL(devServerUrl)
   } else {
     void window.loadFile(join(__dirname, '../renderer/index.html'))
@@ -32,8 +42,10 @@ function createWindow(): void {
 }
 
 app.setName(APP_NAME)
+hardenWebContents(devServerOrigin)
 
 void app.whenReady().then(() => {
+  hardenSession(session.defaultSession, devServerOrigin)
   createWindow()
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
