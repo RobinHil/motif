@@ -99,18 +99,25 @@ function segments(voice: readonly Group[]): Segment[] {
  * Writes the segments on the coarsest grid that keeps every onset: all lengths are divided by
  * their greatest common divisor, so eight eighth notes read `0 2 4 5 ...`, not `0@2 2@2 ...`.
  */
-function sequence(parts: readonly Segment[], token: (group: Group) => string): string {
+function sequence(
+  parts: readonly Segment[],
+  token: (group: Group) => string,
+  onToken?: (group: Group, from: number, to: number) => void,
+): string {
   const unit = parts.reduce((acc, part) => gcd(acc, part.length), 0)
-  const tokens: string[] = []
+  let text = ''
   for (const part of parts) {
     const length = part.length / unit
     if (part.rest) {
-      for (let i = 0; i < length; i++) tokens.push('~')
+      for (let i = 0; i < length; i++) text += (text ? ' ' : '') + '~'
     } else {
-      tokens.push(length > 1 ? `${token(part.group)}@${String(length)}` : token(part.group))
+      if (text) text += ' '
+      const written = length > 1 ? `${token(part.group)}@${String(length)}` : token(part.group)
+      onToken?.(part.group, text.length, text.length + written.length)
+      text += written
     }
   }
-  return tokens.join(' ')
+  return text
 }
 
 function groupToken(group: Group): string {
@@ -122,24 +129,56 @@ function groupToken(group: Group): string {
 
 /** Pattern of a note track: `note("...")` or `n("...")` (the caller adds `.scale()`). */
 export function notesPattern(content: NoteContent): string {
+  return buildNotesPattern(content).code
+}
+
+/**
+ * Where each note is written in the pattern: `[from, to]` offsets into `notesPattern(content)`,
+ * so the piano roll can highlight the code of the selected note.
+ */
+export function noteTokenRanges(content: NoteContent): Map<string, [number, number]> {
+  return buildNotesPattern(content).ranges
+}
+
+function buildNotesPattern(content: NoteContent): { code: string; ranges: Map<string, [number, number]> } {
   const fn = content.mode === 'degree' ? 'n' : 'note'
+  const ranges = new Map<string, [number, number]>()
   const voices = assignVoices(groupNotes(content.notes)).map((groups) => {
     const parts = segments(groups)
+    const tokens: { group: Group; from: number; to: number }[] = []
     return {
       parts,
-      pitches: sequence(parts, groupToken),
+      tokens,
+      pitches: sequence(parts, groupToken, (group, from, to) => tokens.push({ group, from, to })),
       hasVelocity: groups.some((group) => group.velocity !== 1),
     }
   })
-  if (voices.length === 0) return `${fn}("~")`
-  if (!voices.some((voice) => voice.hasVelocity)) return `${fn}("${voices.map((v) => v.pitches).join(', ')}")`
+  if (voices.length === 0) return { code: `${fn}("~")`, ranges }
+
+  // Each voice text starts at `offset` in the final code.
+  const place = (voice: (typeof voices)[number], offset: number) => {
+    for (const { group, from, to } of voice.tokens)
+      for (const note of group.notes) ranges.set(note.id, [offset + from, offset + to])
+  }
+
+  if (!voices.some((voice) => voice.hasVelocity)) {
+    let offset = `${fn}("`.length
+    for (const voice of voices) {
+      place(voice, offset)
+      offset += voice.pitches.length + 2
+    }
+    return { code: `${fn}("${voices.map((v) => v.pitches).join(', ')}")`, ranges }
+  }
 
   // A layered velocity pattern would apply every layer's value to every event (docs/DECISIONS.md),
   // so each voice gets its own pattern.
-  const voiceCode = voices.map((voice) => {
-    const pattern = `${fn}("${voice.pitches}")`
-    if (!voice.hasVelocity) return pattern
-    return `${pattern}.velocity("${sequence(voice.parts, (group) => formatNumber(group.velocity))}")`
+  const single = voices.length === 1
+  let code = single ? '' : 'stack('
+  voices.forEach((voice, i) => {
+    if (i > 0) code += ', '
+    place(voice, code.length + `${fn}("`.length)
+    code += `${fn}("${voice.pitches}")`
+    if (voice.hasVelocity) code += `.velocity("${sequence(voice.parts, (group) => formatNumber(group.velocity))}")`
   })
-  return voiceCode.length === 1 ? voiceCode.join('') : `stack(${voiceCode.join(', ')})`
+  return { code: single ? code : `${code})`, ranges }
 }
