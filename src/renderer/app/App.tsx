@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { CodeScreen } from '../screens/code/CodeScreen'
 import { MixerScreen } from '../screens/mixer/MixerScreen'
+import { ArrangementScreen } from '../screens/arrangement/ArrangementScreen'
 import { ModulationScreen } from '../screens/modulation/ModulationScreen'
 import { PianoRollScreen } from '../screens/pianoroll/PianoRollScreen'
 import { StudioScreen } from '../screens/studio/StudioScreen'
@@ -8,7 +9,6 @@ import { projectStore } from '../store/project-store'
 import { uiStore, useUi } from '../store/ui-store'
 import { ConversionDialog } from './ConversionDialog'
 import { HomeScreen } from './HomeScreen'
-import { PlaceholderScreen } from './PlaceholderScreen'
 import { ShortcutHelp } from './ShortcutHelp'
 import { TransportBar } from './TransportBar'
 
@@ -58,7 +58,7 @@ export function App() {
       ) : screen === 'modulation' ? (
         <ModulationScreen />
       ) : (
-        <PlaceholderScreen screen={screen} />
+        <ArrangementScreen />
       )}
       <ShortcutHelp />
       <ConversionDialog />

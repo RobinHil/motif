@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { App } from './app/App'
 import { startEngineBridge } from './app/engine-bridge'
+import { startLiveScenes } from './app/live-scenes'
 import { startLiveHighlight } from './app/live-highlight'
 import { restoreRecovery, startAutosave, startSampleLibrary } from './app/project-session'
 import { startShortcuts } from './app/shortcuts'
@@ -27,6 +28,7 @@ uiStore.getState().setHome(launchedBefore && !restored)
 uiStore.getState().selectTrack(projectStore.getState().project.tracks[0]?.id ?? null)
 
 startEngineBridge()
+startLiveScenes()
 startLiveHighlight()
 startAutosave()
 startSampleLibrary()

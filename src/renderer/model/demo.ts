@@ -1,5 +1,5 @@
 import { createProject, emptySteps } from './defaults'
-import type { Note, Project, Step, StepRow, Track } from './project'
+import type { ArrangementBlock, Automation, Note, Project, Scene, Step, StepRow, Track } from './project'
 
 const HIT: Step = { velocity: 1, probability: 1 }
 
@@ -97,7 +97,52 @@ const texture: Track = {
   code: 's("wind*2").speed(perlin.range(0.5, 1.5)).chop(8).degradeBy(0.3)',
 }
 
-/** The project loaded on first launch (SPEC 10, onboarding): Drums, Bass, Lead, Texture. */
+const scene = (id: string, name: string, lengthCycles: number, tracks: Track[]): Scene => ({
+  id: `demo-scene-${id}`,
+  name,
+  lengthCycles,
+  activeTrackIds: tracks.map((t) => t.id),
+})
+
+const scenes: Scene[] = [
+  scene('intro', 'Intro', 8, [lead, texture]),
+  scene('verse', 'Verse', 16, [drums, bass, texture]),
+  scene('chorus', 'Chorus', 8, [drums, bass, lead, texture]),
+  scene('drop', 'Drop', 16, [drums, bass, lead]),
+  scene('outro', 'Outro', 8, [texture]),
+]
+
+/** The song of the mockup (5-arrangement.png): every scene once, back to back. */
+const arrangement: ArrangementBlock[] = scenes.map((s, i) => ({
+  id: `demo-section-${String(i + 1)}`,
+  sceneId: s.id,
+  startCycle: scenes.slice(0, i).reduce((sum, previous) => sum + previous.lengthCycles, 0),
+}))
+
+/** The master filter opens through the verse, opens fully for the drop and closes in the outro. */
+const automations: Automation[] = [
+  {
+    id: 'demo-automation-lpf',
+    target: { trackId: 'master', param: 'lpf' },
+    points: [
+      { cycle: 0, value: 600 },
+      { cycle: 8, value: 600 },
+      { cycle: 24, value: 2500 },
+      { cycle: 31, value: 2800 },
+      { cycle: 32, value: 6000 },
+      { cycle: 48, value: 6000 },
+      { cycle: 56, value: 500 },
+    ],
+  },
+]
+
+/** The project loaded on first launch (SPEC 10, onboarding): Drums, Bass, Lead, Texture, and a song. */
 export function createDemoProject(now: Date = new Date()): Project {
-  return { ...createProject('Demo', now), tracks: structuredClone([drums, bass, lead, texture]) }
+  return {
+    ...createProject('Demo', now),
+    tracks: structuredClone([drums, bass, lead, texture]),
+    scenes: structuredClone(scenes),
+    arrangement: structuredClone(arrangement),
+    automations: structuredClone(automations),
+  }
 }

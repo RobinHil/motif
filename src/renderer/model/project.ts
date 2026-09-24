@@ -188,7 +188,13 @@ export const SceneSchema = z.object({
   activeTrackIds: z.array(id),
 })
 
-export const ArrangementBlockSchema = z.object({ id, sceneId: id, startCycle: z.number().int().min(0) })
+export const ArrangementBlockSchema = z.object({
+  id,
+  sceneId: id,
+  startCycle: z.number().int().min(0),
+  /** Length of this section when resized; absent means the scene's length. */
+  lengthCycles: z.number().int().min(1).max(4096).optional(),
+})
 
 export const AutomationSchema = z.object({
   id,

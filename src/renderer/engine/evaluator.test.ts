@@ -1,5 +1,6 @@
 import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
 import { generateProjectCode, type GeneratedCode } from '../codegen/generate'
+import { generateSongCode } from '../codegen/song'
 import { initStrudelScope, playedEvents } from '../codegen/strudel-harness'
 import { createDemoProject } from '../model/demo'
 import type { Project } from '../model/project'
@@ -107,6 +108,34 @@ describe('Evaluator', () => {
     expect(result?.code).toContain('_$: note("c2 c2 eb2 g1")')
     expect(result?.code).toContain('$: s("wind*2")')
     expect(result?.errors['demo-texture']?.line).toBe(generated.lineMap['demo-texture']?.from)
+  })
+
+  it('plays a song and keeps it playing when one track breaks', async () => {
+    const player = fakePlayer()
+    const evaluator = new Evaluator(player.backend, () => undefined)
+    evaluator.schedule(demo())
+    await evaluator.flush()
+    evaluator.schedule(generateSongCode(createDemoProject(new Date(0))))
+    const song = await evaluator.flush()
+    expect(song?.errors).toEqual({})
+    expect(song?.code).toContain('$: arrange([8, intro]')
+    expect(new Set((await playedEvents(song?.code ?? '', 8, 9)).map((e) => e.value['orbit']))).toEqual(
+      new Set([1, 2, 4]),
+    )
+
+    // A broken track keeps its last valid song version; the song goes on.
+    const brokenSong = generateSongCode(withTextureCode(createDemoProject(new Date(0)), 'oops('))
+    evaluator.schedule(brokenSong)
+    const broken = await evaluator.flush()
+    expect(Object.keys(broken?.errors ?? {})).toEqual(['demo-texture'])
+    expect(broken?.applied).toBe(true)
+    expect(broken?.code).toContain('const texture = s("wind*2")')
+
+    // Without a valid version, the track is silence rather than a missing name.
+    const fresh = new Evaluator(fakePlayer().backend, () => undefined)
+    fresh.schedule(brokenSong)
+    expect((await fresh.flush())?.code).toContain('const texture = silence')
+    expect(stripLabel('const drums = s("bd")')).toBe('s("bd")')
   })
 
   it('drops a broken track that never had a valid version', async () => {
