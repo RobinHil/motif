@@ -16,8 +16,9 @@ import {
 import type { GeneratedCode } from '../codegen/generate'
 import { checkBlock } from './check-block'
 import { Evaluator, type EvaluationResult } from './evaluator'
-import { ensureMasterBus, setMasterGain as setBusGain } from './master-bus'
-import { orbitPeak } from './orbit-taps'
+import { ensureMasterBus, setMasterSettings } from './master-bus'
+import type { MasterValues } from './master-settings'
+import { orbitPeaks, peak } from './orbit-taps'
 
 export type { EvaluationResult } from './evaluator'
 
@@ -130,8 +131,23 @@ export function getCycle(): number {
   return playing && repl ? repl.scheduler.now() : 0
 }
 
-export function setMasterGain(gain: number): void {
-  setBusGain(gain)
+/** Master bus settings: gain, EQ, width, compressor, limiter (MasterSettings). */
+export function setMaster(values: MasterValues): void {
+  setMasterSettings(values)
+}
+
+/** Left and right peaks of the master output, for its meter. */
+export function masterLevels(): [number, number] {
+  if (repl === null) return [0, 0]
+  const bus = ensureMasterBus()
+  return [peak(bus.left), peak(bus.right)]
+}
+
+/** Fills `out` with the master waveform (oscilloscope). */
+export function masterWaveform(out: Float32Array<ArrayBuffer>): boolean {
+  if (repl === null) return false
+  ensureMasterBus().analyser.getFloatTimeDomainData(out)
+  return true
 }
 
 /** Orbit used for previews, far from any track orbit. */
@@ -153,7 +169,12 @@ export function isReady(): boolean {
 
 /** Peak level of a track's orbit, for meters drawn in a requestAnimationFrame loop. */
 export function trackLevel(orbit: number): number {
-  return repl === null ? 0 : orbitPeak(orbit)
+  return Math.max(...trackLevels(orbit))
+}
+
+/** Left and right peaks of a track's orbit, for stereo meters. */
+export function trackLevels(orbit: number): [number, number] {
+  return repl === null ? [0, 0] : orbitPeaks(orbit)
 }
 
 /** The program being played and its mini-notation positions (character offsets into `code`). */
