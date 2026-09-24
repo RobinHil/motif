@@ -384,6 +384,11 @@ export async function renderCycles(
   )
   const { scheduler } = instance
   const before = scheduler.seconds_at_cps_change
+  // Pre-roll: the scheduler starts half a second before cycle 0, silenced, because its first ticks
+  // may be skipped as "too late" while the main thread is busy starting playback.
+  const preroll = 0.5 * scheduler.cps
+  if (scheduler.pattern) scheduler.pattern = scheduler.pattern.filterWhen((t) => t >= 0)
+  scheduler.lastEnd = -preroll
   playing = true
   instance.start()
   try {
@@ -392,7 +397,8 @@ export async function renderCycles(
       if (i > 200) throw new Error('The scheduler did not start.')
       await wait(10)
     }
-    const start = (scheduler.seconds_at_cps_change ?? 0) + scheduler.latency
+    const start =
+      (scheduler.seconds_at_cps_change ?? 0) + scheduler.latency - scheduler.num_cycles_at_cps_change / scheduler.cps
     const seconds = cycles / scheduler.cps
     while (context.currentTime < start + seconds + 0.05) {
       onProgress?.(Math.max(0, Math.min(1, (context.currentTime - start) / seconds)))

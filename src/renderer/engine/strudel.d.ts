@@ -15,6 +15,7 @@ declare module '@strudel/core' {
     queryArc(begin: number, end: number): Hap[]
     p(id: string): Pattern
     range(min: number, max: number): Pattern
+    filterWhen(test: (time: number) => boolean): Pattern
     slow(factor: number): Pattern
   }
   export const sine: Pattern
@@ -63,6 +64,8 @@ declare module '@strudel/webaudio' {
     /** Audio time of the tick that started the current cps (Cyclist internals, used to align exports). */
     seconds_at_cps_change?: number
     num_cycles_at_cps_change: number
+    /** End of the last queried span, where the next tick starts; stop() resets it to 0. */
+    lastEnd: number
     latency: number
     pattern?: import('@strudel/core').Pattern
   }
