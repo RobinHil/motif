@@ -13,6 +13,7 @@ import {
   toggleBypass,
 } from '../../store/actions'
 import { projectStore } from '../../store/project-store'
+import { uiStore } from '../../store/ui-store'
 import { addableEffects, EFFECT_PARAMS, effectRows, type EffectRow } from './mixer-effects'
 
 const rowKey = (row: EffectRow) => (row.kind === 'param' ? row.key : row.id)
@@ -94,6 +95,7 @@ export function EffectList({ track, color }: { track: Track; color: string }) {
                     onReset={() => update(setParam(trackId, spec.key, spec.initial))}
                     onGestureStart={beginGesture}
                     onGestureEnd={endGesture}
+                    onAnimate={() => uiStore.getState().openModulation(trackId, spec.key)}
                   />
                 )}
                 {transform && argKey && typeof argValue === 'number' && (

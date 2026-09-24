@@ -7,6 +7,7 @@ import { trackLevels } from '../../engine/engine'
 import type { ID, ParamKey } from '../../model/project'
 import { setMute, setParam, setSolo } from '../../store/actions'
 import { projectStore, useProject } from '../../store/project-store'
+import { uiStore } from '../../store/ui-store'
 import { StereoMeter } from '../../viz/StereoMeter'
 import { INSPECTOR_KNOBS } from '../studio/knob-specs'
 import { SWATCH } from '../studio/StudioTrackRow'
@@ -88,6 +89,8 @@ export function ChannelStrip({ trackId }: { trackId: ID }) {
                 onReset={() => update(setParam(trackId, key, required ? spec.defaultValue : undefined))}
                 onGestureStart={beginGesture}
                 onGestureEnd={endGesture}
+                onAnimate={() => uiStore.getState().openModulation(trackId, key)}
+                onFreeze={(value) => update(setParam(trackId, key, value))}
               />
             </div>
           )
