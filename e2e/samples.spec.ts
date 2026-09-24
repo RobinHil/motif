@@ -121,9 +121,66 @@ test('a project moved to another machine still plays its imported samples', asyn
   rmSync(join(base, 'Glass Hits'), { recursive: true })
   running = await launchApp()
   await answerDialogs(running.app, moved)
-  await running.page.keyboard.press('Control+o')
   const other = running.page
+  await expect(other.getByRole('button', { name: 'Play', exact: true })).toBeVisible()
+  await other.keyboard.press('Control+o')
+  await expect(other.getByRole('gridcell', { name: 'glass_hits step 1', exact: true })).toBeVisible()
   await other.getByRole('button', { name: 'My samples', exact: true }).click()
   await expect(other.getByRole('complementary', { name: 'Sound browser' }).getByText('glass_hits')).toBeVisible()
   expect(await playAndListen(other, 'glass_hits')).toEqual({ loaded: true, problems: [] })
+})
+
+test('the sample editor writes begin, end, slices and loopAt into the code', async () => {
+  const { page } = running
+  await page.getByRole('button', { name: /Edit sample/ }).click()
+  const editor = page.getByRole('dialog', { name: 'Sample editor' })
+  const code = editor.getByLabel('Track code')
+  await expect(editor.getByText(/The sample lasts/)).toBeVisible()
+
+  const start = editor.getByRole('slider', { name: 'Start (begin)' })
+  await start.focus()
+  for (let i = 0; i < 25; i++) await page.keyboard.press('ArrowRight')
+  await expect(code).toContainText('.begin(0.25)')
+
+  // Drag the end handle to three quarters of the waveform.
+  const end = editor.getByRole('slider', { name: 'End (end)' })
+  const box = await end.boundingBox()
+  const area = await editor.locator('canvas').boundingBox()
+  if (!box || !area) throw new Error('waveform is visible')
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+  await page.mouse.down()
+  await page.mouse.move(area.x + area.width * 0.75, area.y + area.height / 2, { steps: 5 })
+  await page.mouse.up()
+  await expect(code).toContainText(/\.begin\(0\.25\)\.end\(0\.7\d+\)/)
+
+  await editor.getByRole('group', { name: 'Number of slices' }).getByRole('button', { name: '8' }).click()
+  await expect(code).toContainText('.slice(8, "0 1 2 3 4 5 6 7")')
+  await editor.getByRole('button', { name: /^Chop/ }).click()
+  await expect(code).toContainText('.chop(8)')
+  await editor.getByRole('button', { name: /^Fit to tempo/ }).click()
+  await expect(code).toContainText('.loopAt(1)')
+  await editor.getByRole('button', { name: 'Done' }).click()
+  await expect(editor).toBeHidden()
+  await expect.poll(() => generatedCode(page)).toMatch(/\.begin\(0\.25\)\.end\(0\.7\d+\).*\.chop\(8\)\.loopAt\(1\)/)
+})
+
+test('every bundled sound loads, including the MotifTape bank and tuned instruments', async () => {
+  const { page } = running
+  const messages: string[] = []
+  page.on('console', (message) => messages.push(message.text()))
+  const browser = page.getByRole('complementary', { name: 'Sound browser' })
+  const previews = browser.getByRole('button', { name: /^Preview / })
+  await expect(browser.getByRole('button', { name: 'Preview epiano' })).toBeVisible()
+  const count = await previews.count()
+  expect(count).toBeGreaterThanOrEqual(25)
+  for (let i = 0; i < count; i++) await previews.nth(i).click()
+
+  await page.getByRole('complementary', { name: 'Inspector' }).getByLabel('Sound source').selectOption('MotifTape')
+  await page.getByRole('button', { name: 'Play', exact: true }).click()
+  await page.waitForTimeout(1500)
+  await page.getByRole('button', { name: 'Stop', exact: true }).click()
+
+  expect(messages.filter((m) => /not found|could not load|error loading/i.test(m))).toEqual([])
+  for (const name of ['epiano', 'marimba', 'drone', 'MotifTape_bd', 'MotifTape_hh'])
+    expect(messages.some((m) => m.includes('[sampler] load') && m.includes(name) && m.includes('done'))).toBe(true)
 })
