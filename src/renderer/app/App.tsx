@@ -1,7 +1,9 @@
 import { useEffect } from 'react'
+import { CodeScreen } from '../screens/code/CodeScreen'
 import { StudioScreen } from '../screens/studio/StudioScreen'
 import { projectStore } from '../store/project-store'
 import { uiStore, useUi } from '../store/ui-store'
+import { ConversionDialog } from './ConversionDialog'
 import { HomeScreen } from './HomeScreen'
 import { PlaceholderScreen } from './PlaceholderScreen'
 import { ShortcutHelp } from './ShortcutHelp'
@@ -40,8 +42,17 @@ export function App() {
     <div className="flex h-full flex-col bg-bg-app">
       <TransportBar />
       <Notice />
-      {home ? <HomeScreen /> : screen === 'studio' ? <StudioScreen /> : <PlaceholderScreen screen={screen} />}
+      {home ? (
+        <HomeScreen />
+      ) : screen === 'studio' ? (
+        <StudioScreen />
+      ) : screen === 'code' ? (
+        <CodeScreen />
+      ) : (
+        <PlaceholderScreen screen={screen} />
+      )}
       <ShortcutHelp />
+      <ConversionDialog />
     </div>
   )
 }

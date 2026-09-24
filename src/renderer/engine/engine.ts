@@ -29,6 +29,10 @@ let playing = false
 let hasProgram = false
 let lastEvalError: unknown = null
 const listeners = new Set<(result: EvaluationResult) => void>()
+/** The program Strudel is playing and its mini-notation positions, for live highlighting. */
+let evaluated: { code: string; locations: [number, number][] } | null = null
+let lastGenerated: GeneratedCode | null = null
+let example: { timer: ReturnType<typeof setTimeout>; wasPlaying: boolean; done: () => void } | null = null
 
 async function boot(): Promise<Repl> {
   miniAllStrings()
@@ -69,7 +73,10 @@ const evaluator = new Evaluator(
       ensureMasterBus()
       // Stopped: set the pattern without starting, so errors still show up while editing.
       await instance.evaluate(code, playing)
-      if (lastEvalError === null) hasProgram = true
+      if (lastEvalError === null) {
+        hasProgram = true
+        evaluated = { code, locations: instance.state.miniLocations }
+      }
       return lastEvalError
     },
   },
@@ -80,6 +87,7 @@ const evaluator = new Evaluator(
 
 /** Evaluates the generated program after the debounce delay (SPEC 5: about 150 ms). */
 export function setProgram(generated: GeneratedCode): void {
+  lastGenerated = generated
   evaluator.schedule(generated)
 }
 
@@ -146,4 +154,114 @@ export function isReady(): boolean {
 /** Peak level of a track's orbit, for meters drawn in a requestAnimationFrame loop. */
 export function trackLevel(orbit: number): number {
   return repl === null ? 0 : orbitPeak(orbit)
+}
+
+/** The program being played and its mini-notation positions (character offsets into `code`). */
+export function evaluatedProgram(): { code: string; locations: [number, number][] } | null {
+  return evaluated
+}
+
+/**
+ * Positions (`start:end`) of the mini-notation elements sounding now. Read every frame by the live
+ * highlighting; queries the playing pattern around the scheduler's current cycle.
+ */
+export function activeLocations(): Set<string> {
+  const active = new Set<string>()
+  const pattern = repl?.scheduler.pattern
+  if (!playing || !repl || !pattern) return active
+  const now = repl.scheduler.now()
+  for (const hap of pattern.queryArc(now, now + 0.001) as unknown as {
+    whole?: { begin: { valueOf(): number }; end: { valueOf(): number } }
+    context: { locations?: { start: number; end: number }[] }
+  }[]) {
+    if (!hap.whole || hap.whole.begin.valueOf() > now || hap.whole.end.valueOf() <= now) continue
+    for (const { start, end } of hap.context.locations ?? []) active.add(`${String(start)}:${String(end)}`)
+  }
+  return active
+}
+
+/**
+ * Plays a documentation example for a few cycles in place of the project, then puts the project's
+ * program back. Resolves when the example is over.
+ */
+export async function playExample(code: string, cycles = 2): Promise<void> {
+  stopExample()
+  const instance = await initEngine()
+  await getAudioContext().resume()
+  ensureMasterBus()
+  const wasPlaying = playing
+  playing = true
+  await instance.evaluate(code, true)
+  const seconds = cycles / (instance.scheduler.cps || 0.5)
+  await new Promise<void>((resolve) => {
+    example = { timer: setTimeout(() => stopExample(), seconds * 1000), wasPlaying, done: resolve }
+  })
+}
+
+export function stopExample(): void {
+  const current = example
+  if (!current) return
+  example = null
+  clearTimeout(current.timer)
+  playing = current.wasPlaying
+  if (!current.wasPlaying) repl?.stop()
+  if (lastGenerated) {
+    evaluator.schedule(lastGenerated)
+    void evaluator.flush()
+  }
+  current.done()
+}
+
+export function isExamplePlaying(): boolean {
+  return example !== null
+}
+
+export interface PlayedEvent {
+  begin: number
+  end: number
+  orbit: number
+  /** MIDI note number, when the event has a pitch. */
+  midi: number | null
+}
+
+const NOTE_NUMBER: Record<string, number> = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 }
+
+function midiOf(value: unknown): number | null {
+  if (typeof value === 'number') return value
+  if (typeof value !== 'string') return null
+  const match = /^([a-gA-G])([#bs]*)(-?\d+)?$/.exec(value)
+  if (!match) return null
+  let pitch = NOTE_NUMBER[(match[1] ?? 'c').toLowerCase()] ?? 0
+  for (const accidental of match[2] ?? '') pitch += accidental === 'b' ? -1 : 1
+  return (Number(match[3] ?? '3') + 1) * 12 + pitch
+}
+
+/** Events of the playing pattern between two cycles, for the punchcard and piano roll. */
+export function eventsBetween(begin: number, end: number): PlayedEvent[] {
+  const pattern = repl?.scheduler.pattern
+  if (!pattern) return []
+  return (
+    pattern.queryArc(begin, end) as unknown as {
+      whole?: { begin: { valueOf(): number }; end: { valueOf(): number } }
+      value: Record<string, unknown>
+    }[]
+  ).flatMap((hap) =>
+    hap.whole
+      ? [
+          {
+            begin: hap.whole.begin.valueOf(),
+            end: hap.whole.end.valueOf(),
+            orbit: typeof hap.value['orbit'] === 'number' ? hap.value['orbit'] : 1,
+            midi: midiOf(hap.value['note']),
+          },
+        ]
+      : [],
+  )
+}
+
+/** Fills `out` with the master spectrum in dB (analyser of the master bus). */
+export function masterSpectrum(out: Float32Array<ArrayBuffer>): boolean {
+  if (repl === null) return false
+  ensureMasterBus().analyser.getFloatFrequencyData(out)
+  return true
 }
