@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { CodeScreen } from '../screens/code/CodeScreen'
 import { MixerScreen } from '../screens/mixer/MixerScreen'
+import { ModulationScreen } from '../screens/modulation/ModulationScreen'
 import { PianoRollScreen } from '../screens/pianoroll/PianoRollScreen'
 import { StudioScreen } from '../screens/studio/StudioScreen'
 import { projectStore } from '../store/project-store'
@@ -54,6 +55,8 @@ export function App() {
         <MixerScreen />
       ) : screen === 'pianoroll' ? (
         <PianoRollScreen />
+      ) : screen === 'modulation' ? (
+        <ModulationScreen />
       ) : (
         <PlaceholderScreen screen={screen} />
       )}

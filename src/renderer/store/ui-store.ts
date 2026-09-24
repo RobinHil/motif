@@ -1,6 +1,6 @@
 import { useStore } from 'zustand'
 import { createStore } from 'zustand/vanilla'
-import type { ID } from '../model/project'
+import type { ID, ParamKey } from '../model/project'
 
 export const SCREENS = ['studio', 'mixer', 'pianoroll', 'modulation', 'arrangement', 'code'] as const
 export type Screen = (typeof SCREENS)[number]
@@ -11,6 +11,8 @@ export interface UiState {
   home: boolean
   screen: Screen
   selectedTrackId: ID | null
+  /** Parameter shown on the modulation screen, for the selected track. */
+  modulationKey: ParamKey | null
   codeMode: 'synced' | 'direct'
   /** Name of the project folder, null until the project is saved. */
   fileName: string | null
@@ -23,6 +25,9 @@ export interface UiState {
   setHome: (home: boolean) => void
   setScreen: (screen: Screen) => void
   selectTrack: (trackId: ID | null) => void
+  /** Shows the modulation screen for one parameter of a track (knob menu "Animate"). */
+  openModulation: (trackId: ID, key: ParamKey) => void
+  setModulationKey: (key: ParamKey | null) => void
   setCodeMode: (mode: 'synced' | 'direct') => void
   setFileName: (fileName: string | null) => void
   setNotice: (notice: string | null) => void
@@ -35,6 +40,7 @@ export const uiStore = createStore<UiState>()((set) => ({
   home: false,
   screen: 'studio',
   selectedTrackId: null,
+  modulationKey: null,
   codeMode: 'synced',
   fileName: null,
   notice: null,
@@ -49,6 +55,12 @@ export const uiStore = createStore<UiState>()((set) => ({
   },
   selectTrack: (selectedTrackId) => {
     set({ selectedTrackId })
+  },
+  openModulation: (selectedTrackId, modulationKey) => {
+    set({ selectedTrackId, modulationKey, screen: 'modulation', home: false })
+  },
+  setModulationKey: (modulationKey) => {
+    set({ modulationKey })
   },
   setCodeMode: (codeMode) => {
     set({ codeMode })

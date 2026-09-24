@@ -5,7 +5,7 @@ import { TRANSFORM_DEFAULT_ARGS } from '../../model/defaults'
 import { TRANSFORM_TYPES, type ID, type SoundSource, type TransformType } from '../../model/project'
 import { addTransform, setParam, setSource, setTransformArg, setTransformEnabled } from '../../store/actions'
 import { projectStore, useProject } from '../../store/project-store'
-import { useUi } from '../../store/ui-store'
+import { uiStore, useUi } from '../../store/ui-store'
 import { INSPECTOR_KNOBS } from './knob-specs'
 import { KIND_LABEL, SWATCH } from './StudioTrackRow'
 
@@ -155,9 +155,16 @@ export function Inspector() {
           <h3 id="params-title" className="text-section font-medium uppercase tracking-[0.14em] text-label">
             Parameters
           </h3>
-          <span title="Animation arrives with the Modulation screen" className="text-body text-text-3">
+          <button
+            type="button"
+            onClick={() => {
+              const animated = INSPECTOR_KNOBS.find((k) => typeof params[k.key] === 'object')
+              uiStore.getState().openModulation(trackId, animated?.key ?? 'lpf')
+            }}
+            className="text-body text-accent hover:text-accent-hover"
+          >
             Animate a knob →
-          </span>
+          </button>
         </div>
         <div className="grid grid-cols-4 gap-y-5">
           {INSPECTOR_KNOBS.map((spec) => (
@@ -190,6 +197,8 @@ export function Inspector() {
               }
               onGestureStart={beginGesture}
               onGestureEnd={endGesture}
+              onAnimate={() => uiStore.getState().openModulation(trackId, spec.key)}
+              onFreeze={(value) => update(setParam(trackId, spec.key, value))}
             />
           ))}
         </div>

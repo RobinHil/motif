@@ -1,8 +1,20 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
 import { formatNumber } from '../codegen/format'
+import { getCycle, isPlaying } from '../engine/engine'
+import { modulationAt } from '../engine/modulation-curve'
 import type { Modulation } from '../model/project'
+import { onFrame } from '../viz/frame-loop'
 import { ContextMenu, type MenuPosition } from './ContextMenu'
-import { arcPath, clamp, fromNormalized, parseTyped, toNormalized, type KnobRange } from './knob-math'
+import {
+  ARC_START,
+  ARC_SWEEP,
+  arcPath,
+  clamp,
+  fromNormalized,
+  parseTyped,
+  toNormalized,
+  type KnobRange,
+} from './knob-math'
 
 /** Pixels of vertical drag for the whole range; Shift divides the speed by 10. */
 const DRAG_RANGE_PX = 200
@@ -27,6 +39,10 @@ export interface KnobProps {
   onReset: () => void
   onGestureStart: () => void
   onGestureEnd: () => void
+  /** Opens the modulation screen for this parameter. Absent when the knob cannot be animated. */
+  onAnimate?: () => void
+  /** Replaces the animation with a fixed value (what it plays right now). */
+  onFreeze?: (value: number) => void
 }
 
 function valueText(props: KnobProps): string {
@@ -42,6 +58,7 @@ export function Knob(props: KnobProps) {
   const [editing, setEditing] = useState(false)
   const [menu, setMenu] = useState<MenuPosition | null>(null)
   const svgRef = useRef<SVGSVGElement>(null)
+  const dotRef = useRef<SVGCircleElement>(null)
   const drag = useRef<{ startY: number; start: number } | null>(null)
   const wheelTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const latest = useRef(props)
@@ -52,6 +69,37 @@ export function Knob(props: KnobProps) {
   const modulated = typeof value === 'object'
   const current = typeof value === 'number' ? value : defaultValue
   const position = toNormalized(current, range)
+  const r = size / 2 - 3
+  const center = size / 2
+
+  // An animated knob shows the value being played, moved by the frame loop without React.
+  useEffect(() => {
+    if (!modulated) return
+    let drawn = ''
+    return onFrame(() => {
+      const dot = dotRef.current
+      if (!dot) return
+      const { value: v, range: rg } = latest.current
+      if (typeof v !== 'object' || !isPlaying()) {
+        if (drawn !== 'hidden') dot.setAttribute('visibility', 'hidden')
+        drawn = 'hidden'
+        return
+      }
+      const radians = ((ARC_START + ARC_SWEEP * toNormalized(modulationAt(v, getCycle()), rg)) * Math.PI) / 180
+      const key = radians.toFixed(3)
+      if (key === drawn) return
+      drawn = key
+      dot.setAttribute('cx', (center + r * Math.cos(radians)).toFixed(2))
+      dot.setAttribute('cy', (center + r * Math.sin(radians)).toFixed(2))
+      dot.setAttribute('visibility', 'visible')
+    })
+  }, [modulated, center, r])
+
+  const freeze = () => {
+    if (typeof value !== 'object' || !props.onFreeze) return
+    const playing = modulationAt(value, isPlaying() ? getCycle() : 0)
+    props.onFreeze(fromNormalized(toNormalized(playing, range), range))
+  }
 
   const commit = (next: number) => {
     const rounded = fromNormalized(toNormalized(next, range), range)
@@ -137,8 +185,6 @@ export function Knob(props: KnobProps) {
     return true
   }
 
-  const r = size / 2 - 3
-  const center = size / 2
   const arc = modulated
     ? arcPath(
         center,
@@ -193,6 +239,19 @@ export function Knob(props: KnobProps) {
           />
         )}
         <circle cx={center} cy={center} r={r - 6} fill="var(--color-knob-core)" />
+        {modulated && (
+          <circle
+            ref={dotRef}
+            data-modulation-dot=""
+            r={3.5}
+            cx={center}
+            cy={center}
+            visibility="hidden"
+            fill="var(--color-mod)"
+            stroke="var(--color-knob-core)"
+            strokeWidth={1.5}
+          />
+        )}
       </svg>
       <span className="text-body text-text">{label}</span>
       {editing ? (
@@ -232,8 +291,12 @@ export function Knob(props: KnobProps) {
           position={menu}
           onClose={() => setMenu(null)}
           items={[
-            { label: 'Animate', disabled: true, hint: 'Animation arrives with the Modulation screen' },
-            { label: 'Freeze', disabled: true, hint: 'Freezing arrives with the Modulation screen' },
+            props.onAnimate
+              ? { label: modulated ? 'Edit animation' : 'Animate', onSelect: props.onAnimate }
+              : { label: 'Animate', disabled: true, hint: 'This control cannot be animated' },
+            modulated && props.onFreeze
+              ? { label: 'Freeze', onSelect: freeze }
+              : { label: 'Freeze', disabled: true, hint: 'Only an animated knob can be frozen' },
             { label: 'MIDI learn', disabled: true, hint: 'MIDI arrives in a later version' },
             {
               label: 'Reset',
