@@ -8,6 +8,7 @@ import {
   type RecentProject,
   type RecoveredProject,
   type SaveResult,
+  type Settings,
 } from '@shared/ipc'
 
 const api: MotifApi = {
@@ -31,6 +32,14 @@ const api: MotifApi = {
     },
     importDialog: (kind) => ipcRenderer.invoke(IPC.samplesImportDialog, kind) as Promise<ImportResult | null>,
     removeFiles: (name, files) => ipcRenderer.invoke(IPC.samplesRemoveFiles, name, [...files]) as Promise<void>,
+    remove: (name) => ipcRenderer.invoke(IPC.samplesRemove, name) as Promise<void>,
+    folder: () => ipcRenderer.invoke(IPC.samplesFolder) as Promise<string>,
+    moveFolder: () => ipcRenderer.invoke(IPC.samplesMoveFolder) as Promise<string | null>,
+    showFolder: () => ipcRenderer.invoke(IPC.samplesShowFolder) as Promise<void>,
+  },
+  settings: {
+    get: () => ipcRenderer.invoke(IPC.settingsGet) as Promise<Settings>,
+    set: (changes) => ipcRenderer.invoke(IPC.settingsSet, changes) as Promise<Settings>,
   },
   recovery: {
     write: (text) => ipcRenderer.invoke(IPC.recoveryWrite, text) as Promise<void>,

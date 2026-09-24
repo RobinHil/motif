@@ -4,6 +4,8 @@ import { APP_NAME } from '@shared/app-info'
 import { registerProjectIpc } from './project-ipc'
 import type { Recovery } from './recovery'
 import { registerSampleIpc, sampleRoots } from './sample-ipc'
+import type { SettingsFile } from './settings'
+import { registerSettingsIpc } from './settings-ipc'
 import { handleSampleProtocol, registerSampleScheme } from './sample-protocol'
 import { hardenSession, hardenWebContents } from './security'
 
@@ -11,6 +13,7 @@ const devServerUrl = !app.isPackaged ? (process.env['ELECTRON_RENDERER_URL'] ?? 
 const devServerOrigin = devServerUrl !== null ? new URL(devServerUrl).origin : null
 
 let recovery: Recovery | null = null
+let settings: SettingsFile | null = null
 let quitting = false
 
 function createWindow(): void {
@@ -50,6 +53,9 @@ function createWindow(): void {
   window.once('ready-to-show', () => {
     window.show()
   })
+  window.webContents.on('did-finish-load', () => {
+    void settings?.get().then((s) => window.webContents.setZoomFactor(s.zoom))
+  })
 
   if (!app.isPackaged) {
     window.webContents.on('console-message', ({ level, message }) => {
@@ -73,6 +79,7 @@ hardenWebContents(devServerOrigin)
 
 void app.whenReady().then(async () => {
   hardenSession(session.defaultSession, devServerOrigin)
+  settings = await registerSettingsIpc()
   const library = await registerSampleIpc()
   handleSampleProtocol(sampleRoots)
   recovery = await registerProjectIpc(library)

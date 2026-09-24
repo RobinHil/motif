@@ -96,6 +96,20 @@ describe('SampleLibrary', () => {
     expect(missing).toEqual(['gone/0.wav'])
   })
 
+  it('removes a sound, and moves to another folder or adopts a library found there', async () => {
+    await library.import([folder('Keep', ['a.wav']), folder('Drop', ['b.wav'])])
+    await library.remove('drop')
+    expect((await library.list()).map((s) => s.name)).toEqual(['keep'])
+    const old = library.root
+    await library.moveTo(join(base, 'moved'))
+    expect(library.root).toBe(join(base, 'moved'))
+    expect(readFileSync(join(base, 'moved', 'keep', '0.wav'), 'utf8')).toBe('data of a.wav')
+    expect(existsSync(join(old, 'keep'))).toBe(false)
+    const other = new SampleLibrary(join(base, 'elsewhere'), new Set())
+    await other.moveTo(join(base, 'moved'))
+    expect((await other.list()).map((s) => s.name)).toEqual(['keep'])
+  })
+
   it('only accepts library-shaped paths from project files', () => {
     expect(isLibraryFile('vox/0.wav')).toBe(true)
     expect(isLibraryFile('../vox/0.wav')).toBe(false)

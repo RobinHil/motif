@@ -1,10 +1,11 @@
 import { readdir, readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { app, BrowserWindow, dialog, ipcMain } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, shell } from 'electron'
 import { IPC, type ImportResult, type LibrarySound } from '@shared/ipc'
 import { AUDIO_EXTENSIONS, BUILT_IN_SOUNDS } from '@shared/samples'
 import { MAX_IMPORT_FILES, SampleLibrary } from './sample-library'
 import type { SampleRoots } from './sample-path'
+import { writeFileAtomic } from './project-files'
 import { bundledSamplesRoot } from './sample-protocol'
 
 /** Folders served by `motif-sample://<root>/`. `project` exists while the project has a folder. */
@@ -43,9 +44,20 @@ function stringArray(value: unknown, max: number): string[] | null {
   return value.every((v) => typeof v === 'string' && v.length > 0 && v.length < 4096) ? (value as string[]) : null
 }
 
+/** A library folder the user chose (settings), kept outside the profile's own folder. */
+async function chosenFolder(file: string): Promise<string | null> {
+  try {
+    const folder: unknown = JSON.parse(await readFile(file, 'utf8'))
+    return typeof folder === 'string' && folder.length > 0 ? folder : null
+  } catch {
+    return null
+  }
+}
+
 export async function registerSampleIpc(): Promise<SampleLibrary> {
+  const locationFile = join(app.getPath('userData'), 'library-location.json')
   roots['bundled'] = bundledSamplesRoot()
-  roots['library'] = join(app.getPath('userData'), 'sample-library')
+  roots['library'] = (await chosenFolder(locationFile)) ?? join(app.getPath('userData'), 'sample-library')
   const library = new SampleLibrary(
     roots['library'],
     new Set([...BUILT_IN_SOUNDS, ...(await bundledNames(roots['bundled']))]),
@@ -78,6 +90,32 @@ export async function registerSampleIpc(): Promise<SampleLibrary> {
     const valid = stringArray(files, MAX_IMPORT_FILES)
     if (typeof name !== 'string' || valid === null) return
     await library.removeFiles(name, valid)
+  })
+
+  ipcMain.handle(IPC.samplesRemove, async (_event, name: unknown) => {
+    if (typeof name === 'string') await library.remove(name)
+  })
+
+  ipcMain.handle(IPC.samplesFolder, () => library.root)
+
+  ipcMain.handle(IPC.samplesMoveFolder, async (event): Promise<string | null> => {
+    const window = BrowserWindow.fromWebContents(event.sender) ?? undefined
+    const options: Electron.OpenDialogOptions = {
+      title: 'Choose the sample library folder',
+      buttonLabel: 'Use this folder',
+      properties: ['openDirectory', 'createDirectory'],
+    }
+    const result = window ? await dialog.showOpenDialog(window, options) : await dialog.showOpenDialog(options)
+    const folder = result.filePaths[0]
+    if (result.canceled || folder === undefined) return null
+    await library.moveTo(folder)
+    roots['library'] = library.root
+    await writeFileAtomic(locationFile, JSON.stringify(library.root))
+    return library.root
+  })
+
+  ipcMain.handle(IPC.samplesShowFolder, async () => {
+    await shell.openPath(library.root)
   })
 
   return library
