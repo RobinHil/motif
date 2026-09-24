@@ -1,5 +1,13 @@
 import { getAudioContext, getSuperdoughAudioController } from '@strudel/webaudio'
-import { COMPRESSOR, dynamicsFor, LIMITER, MASTER_EQ, widthGains, type DynamicsValues, type MasterValues } from './master-settings'
+import {
+  COMPRESSOR,
+  dynamicsFor,
+  LIMITER,
+  MASTER_EQ,
+  widthGains,
+  type DynamicsValues,
+  type MasterValues,
+} from './master-settings'
 
 // superdough routes every orbit into `output.destinationGain`, which it connects straight to
 // `audioContext.destination`. The master bus is inserted in series between the two (SPIKE 1):
@@ -54,7 +62,19 @@ function createBus(context: AudioContext): MasterBus {
   meterSplit.connect(left, 0)
   meterSplit.connect(right, 1)
 
-  const created = { context, input, output, analyser, left, right, low, high, width: { same, cross }, compressor, limiter }
+  const created = {
+    context,
+    input,
+    output,
+    analyser,
+    left,
+    right,
+    low,
+    high,
+    width: { same, cross },
+    compressor,
+    limiter,
+  }
   apply(created, settings, true)
   return created
 }

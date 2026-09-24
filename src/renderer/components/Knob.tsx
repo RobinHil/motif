@@ -221,7 +221,7 @@ export function Knob(props: KnobProps) {
           disabled={modulated}
           title={modulated ? 'This parameter is animated' : 'Click to type a value'}
           onClick={() => setEditing(true)}
-          className={`font-mono text-knob-value ${modulated ? 'text-mod' : 'text-text-2 hover:text-text'}`}
+          className={`font-mono text-knob-value whitespace-nowrap ${modulated ? 'text-mod' : 'text-text-2 hover:text-text'}`}
         >
           {valueText(props)}
         </button>
