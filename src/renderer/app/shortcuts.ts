@@ -7,7 +7,7 @@ import { evaluateDraft } from './direct-edit'
 import { panicAll, togglePlay } from './transport'
 
 export const IS_MAC = navigator.userAgent.includes('Mac')
-const MOD = IS_MAC ? 'Cmd' : 'Ctrl'
+export const MOD = IS_MAC ? 'Cmd' : 'Ctrl'
 
 export const SHORTCUTS: { keys: string; action: string }[] = [
   { keys: 'Space', action: 'Play / stop' },
@@ -20,6 +20,7 @@ export const SHORTCUTS: { keys: string; action: string }[] = [
   { keys: 'M / S', action: 'Mute / solo selected track' },
   { keys: `${MOD}+D`, action: 'Duplicate track' },
   { keys: '?', action: 'Shortcut help' },
+  { keys: `${MOD}+,`, action: 'Settings' },
 ]
 
 /** Typing in a field (or in the code editor, inside its shadow root) keeps single-key shortcuts off. */
@@ -49,6 +50,7 @@ export function handleShortcut(event: KeyboardEvent): void {
     else if (key === 's') run(event, event.shiftKey ? saveProjectAs : saveProject)
     else if (key === 'o') run(event, openProject)
     else if (key === 'n') run(event, newProject)
+    else if (key === ',') run(event, () => uiStore.getState().setScreen('settings'))
     else if (key === 'd' && selected) {
       run(event, () => {
         const copy = duplicateTrack(selected)

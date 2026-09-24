@@ -2,8 +2,10 @@ import { useStore } from 'zustand'
 import { createStore } from 'zustand/vanilla'
 import type { ID, ParamKey } from '../model/project'
 
+/** The six screens of the tab bar, in the order of the 1 to 6 shortcuts. */
 export const SCREENS = ['studio', 'mixer', 'pianoroll', 'modulation', 'arrangement', 'code'] as const
-export type Screen = (typeof SCREENS)[number]
+/** Settings is reached from its button in the transport bar. */
+export type Screen = (typeof SCREENS)[number] | 'settings'
 
 /** Interface state. Not part of the project and not undoable (SPEC 10). */
 export interface UiState {

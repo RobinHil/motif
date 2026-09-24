@@ -3,6 +3,7 @@ import { CodeScreen } from '../screens/code/CodeScreen'
 import { MixerScreen } from '../screens/mixer/MixerScreen'
 import { ArrangementScreen } from '../screens/arrangement/ArrangementScreen'
 import { ModulationScreen } from '../screens/modulation/ModulationScreen'
+import { SettingsScreen } from '../screens/settings/SettingsScreen'
 import { PianoRollScreen } from '../screens/pianoroll/PianoRollScreen'
 import { StudioScreen } from '../screens/studio/StudioScreen'
 import { projectStore } from '../store/project-store'
@@ -59,6 +60,8 @@ export function App() {
         <PianoRollScreen />
       ) : screen === 'modulation' ? (
         <ModulationScreen />
+      ) : screen === 'settings' ? (
+        <SettingsScreen />
       ) : (
         <ArrangementScreen />
       )}

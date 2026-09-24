@@ -5,6 +5,7 @@ import { SCREENS, uiStore, useUi, type Screen } from '../store/ui-store'
 import { useTransport } from '../store/transport-store'
 import { CyclePosition } from './CyclePosition'
 import { TempoControl } from './TempoControl'
+import { MOD } from './shortcuts'
 import { stopPlayback, togglePlay } from './transport'
 
 export const SCREEN_LABELS: Record<Screen, string> = {
@@ -14,6 +15,7 @@ export const SCREEN_LABELS: Record<Screen, string> = {
   modulation: 'Modulation',
   arrangement: 'Arrangement',
   code: 'Code',
+  settings: 'Settings',
 }
 
 function RoundButton(props: {
@@ -117,6 +119,19 @@ export function TransportBar() {
         <span className="size-2 rounded-pill bg-success" />
         Offline · bundled samples
       </span>
+      <button
+        type="button"
+        aria-label="Settings"
+        aria-pressed={screen === 'settings'}
+        title={`Settings (${MOD}+,)`}
+        onClick={() => uiStore.getState().setScreen('settings')}
+        className={`grid size-8 place-items-center rounded-pill border border-line-strong ${screen === 'settings' ? 'bg-pill-active text-text' : 'text-text-2 hover:text-text'}`}
+      >
+        <svg aria-hidden="true" viewBox="0 0 16 16" className="size-4 fill-none stroke-current" strokeWidth={1.3}>
+          <circle cx="8" cy="8" r="2.2" />
+          <path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.4 3.4l1.4 1.4M11.2 11.2l1.4 1.4M3.4 12.6l1.4-1.4M11.2 4.8l1.4-1.4" />
+        </svg>
+      </button>
       <button
         type="button"
         disabled
