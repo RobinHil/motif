@@ -1,9 +1,12 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import lockup from '../../../resources/brand/lockup-horizontal.svg'
 import { APP_TAGLINE } from '@shared/app-info'
 import { SCREENS, uiStore, useUi, type Screen } from '../store/ui-store'
 import { useTransport } from '../store/transport-store'
 import { CyclePosition } from './CyclePosition'
+import { ExportDialog } from './ExportDialog'
+import { toggleOutputRecording } from './export-session'
+import { useRecording } from '../store/recording-store'
 import { TempoControl } from './TempoControl'
 import { MOD } from './shortcuts'
 import { stopPlayback, togglePlay } from './transport'
@@ -24,6 +27,7 @@ function RoundButton(props: {
   disabled?: boolean
   hint?: string
   primary?: boolean
+  pressed?: boolean
   children: ReactNode
 }) {
   return (
@@ -33,6 +37,7 @@ function RoundButton(props: {
       title={props.hint ?? props.label}
       onClick={props.onClick}
       disabled={props.disabled}
+      {...(props.pressed === undefined ? {} : { 'aria-pressed': props.pressed })}
       className={`grid size-9 shrink-0 place-items-center rounded-pill transition-colors disabled:cursor-not-allowed ${
         props.primary
           ? 'bg-accent text-bg-app hover:bg-accent-hover'
@@ -49,6 +54,8 @@ export function TransportBar() {
   const playing = useTransport((s) => s.playing)
   const screen = useUi((s) => s.screen)
   const home = useUi((s) => s.home)
+  const recording = useRecording((s) => s.recording)
+  const [exporting, setExporting] = useState(false)
 
   return (
     <header className="flex items-center gap-3 border-b border-line bg-bg-deep px-5 py-2.5 whitespace-nowrap">
@@ -84,8 +91,13 @@ export function TransportBar() {
             <rect x="2" y="2" width="8" height="8" rx="1.5" />
           </svg>
         </RoundButton>
-        <RoundButton label="Record" disabled hint="Recording arrives with export">
-          <span className="size-3 rounded-pill bg-danger" />
+        <RoundButton
+          label={recording ? 'Stop recording' : 'Record'}
+          hint={recording ? 'Stop recording and save the WAV' : 'Record the output to a WAV file'}
+          pressed={recording}
+          onClick={() => void toggleOutputRecording()}
+        >
+          <span className={`size-3 bg-danger ${recording ? 'rounded-xs' : 'rounded-pill'}`} />
         </RoundButton>
         <RoundButton label="Loop" disabled hint="Looping arrives with the arrangement">
           <svg
@@ -134,12 +146,13 @@ export function TransportBar() {
       </button>
       <button
         type="button"
-        disabled
-        title="Export arrives in a later version"
-        className="h-8 rounded-pill border border-line-strong px-4 text-body text-text disabled:cursor-not-allowed disabled:opacity-60"
+        onClick={() => setExporting(true)}
+        title="Export audio (WAV, stems) or code"
+        className="h-8 rounded-pill border border-line-strong px-4 text-body text-text hover:bg-raised"
       >
         Export
       </button>
+      {exporting && <ExportDialog onClose={() => setExporting(false)} />}
     </header>
   )
 }
