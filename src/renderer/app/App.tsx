@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { CodeScreen } from '../screens/code/CodeScreen'
+import { MixerScreen } from '../screens/mixer/MixerScreen'
 import { StudioScreen } from '../screens/studio/StudioScreen'
 import { projectStore } from '../store/project-store'
 import { uiStore, useUi } from '../store/ui-store'
@@ -48,6 +49,8 @@ export function App() {
         <StudioScreen />
       ) : screen === 'code' ? (
         <CodeScreen />
+      ) : screen === 'mixer' ? (
+        <MixerScreen />
       ) : (
         <PlaceholderScreen screen={screen} />
       )}

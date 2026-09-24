@@ -423,6 +423,12 @@ export function parseTrackBlock(text: string, previous: Track, newIdFn: IdFactor
         params[key] = paramValueOf(call.args[0])
       }
     }
+    // Bypassed effects are not in the code: keep their values for when they are switched back on.
+    for (const key of previous.bypassed ?? []) {
+      if (params[key] === undefined && previous.params[key] !== undefined) {
+        ;(params as Record<string, unknown>)[key] = previous.params[key]
+      }
+    }
     track.params = params
 
     const previousTransforms = [...previous.transforms]

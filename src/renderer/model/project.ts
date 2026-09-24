@@ -173,6 +173,8 @@ export const TrackSchema = z.object({
   source: SoundSourceSchema,
   params: TrackParamsSchema,
   transforms: z.array(TransformInstanceSchema).max(32),
+  /** Effects switched off in the mixer: kept in the model, not written in the code. */
+  bypassed: z.array(z.enum(PARAM_ORDER)).max(PARAM_ORDER.length).optional(),
   steps: StepContentSchema.optional(),
   notes: NoteContentSchema.optional(),
   code: z.string().max(100_000).optional(),
@@ -200,6 +202,11 @@ export const MasterSettingsSchema = z.object({
   gain: z.number().min(0).max(2),
   compressor: z.boolean(),
   limiter: z.boolean(),
+  /** Stereo width: 0 mono, 1 unchanged, 2 wide. Optional: absent means 1. */
+  width: z.number().min(0).max(2).optional(),
+  /** Low and high shelf EQ, in dB. Optional: absent means 0. */
+  low: z.number().min(-12).max(12).optional(),
+  high: z.number().min(-12).max(12).optional(),
 })
 
 export const SampleEntrySchema = z.object({

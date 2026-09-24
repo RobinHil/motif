@@ -149,3 +149,12 @@ Format: date - problem - decision.
 - **Visualizations**: punchcard (events per orbit), piano roll (events per pitch) and spectrum (master analyser), drawn on canvas from the shared frame loop, two cycles around the playhead.
 - **Completion**: CodeMirror's completion ignores Enter during the first 75 ms after the list opens, against accidental accepts; the end-to-end test waits accordingly.
 - `acorn` is now a direct dependency (it was already installed through `@strudel/transpiler`).
+
+## 2026-09-24 - Phase 4: mixer
+
+- **Effect chain**: a strip's effects are the effect parameters present on the track (filter, high-pass, saturation, bitcrush, downsample) followed by its transforms in order (stereo, chop, interleave...). Sends (reverb, delay) and pan have their own knobs. Parameter order in the code stays fixed (SPEC 4, rule 4): superdough applies its effects in its own internal order, so moving `.lpf()` before `.shape()` would change nothing; only transforms, whose order matters, can be moved up and down.
+- **Bypass**: tracks get an optional `bypassed` list of parameters, kept in the model and skipped by codegen, so an effect can be switched off without losing its value; reading code back keeps these values. Transforms use their existing `enabled` flag. The field is optional, so projects saved before stay valid without a format migration.
+- **Master bus**: `MasterSettings` gets optional `width` (0 to 2), `low` and `high` (shelf EQ, -12 to 12 dB). The master strip drives the engine's master bus (SPIKE 1): gain, low shelf at 200 Hz, high shelf at 4 kHz, mid/side width, compressor, limiter. The node graph never changes while playing; a switched-off compressor or limiter gets neutral settings (ratio 1), and parameter changes glide over 10 ms. This processing happens after Strudel, so the master strip shows a plain summary ("master bus: gain 0.8, compressor") instead of Strudel code; the mockup's `all(x => x.gain(0.85))` would replace each track's gain instead of scaling it.
+- **Meters**: orbit and master taps split left and right into two analysers for stereo meters; track meters in the Studio show the louder side.
+- **Not in this phase**: MIDI learn (banner, CC badges, dashed outlines) is phase 9; recording (format, stems, offline render, Record output) is phase 10 and is shown disabled.
+- **Measurements** (Playwright, mixer open while playing the demo): 59.6 frames per second over 5 seconds, worst frame 54 ms, and 0 audio underruns in `AudioContext.playbackStats`.

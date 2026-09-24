@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { eventsBetween, getCycle, isPlaying, masterSpectrum } from '../engine/engine'
+import { drawSpectrum } from './draw'
 import { fitCanvas, onFrame, token } from './frame-loop'
 
 type Kind = 'punchcard' | 'pianoroll' | 'spectrum'
@@ -31,19 +32,7 @@ export function CodeVisual({ kind, colors }: { kind: Kind; colors: Map<number, s
       context.clearRect(0, 0, width, height)
 
       if (kind === 'spectrum') {
-        if (!masterSpectrum(spectrum)) return
-        const bars = 64
-        const barWidth = width / bars
-        for (let i = 0; i < bars; i++) {
-          // Logarithmic bins: low frequencies get more bars, as ears hear them.
-          const bin = Math.min(
-            spectrum.length - 1,
-            Math.floor(((spectrum.length - 1) * (Math.pow(2, (i / bars) * 10) - 1)) / 1023),
-          )
-          const level = Math.max(0, Math.min(1, ((spectrum[bin] ?? -120) + 100) / 70))
-          context.fillStyle = i < 8 || level > 0.85 ? accent : `rgba(237, 237, 239, ${String(0.3 + 0.4 * level)})`
-          context.fillRect(i * barWidth + 1, height - level * height, barWidth - 2, level * height)
-        }
+        if (masterSpectrum(spectrum)) drawSpectrum(context, width, height, spectrum, accent)
         return
       }
 
