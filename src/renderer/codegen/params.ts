@@ -12,13 +12,23 @@ export function paramValueCode(value: ParamValue): string {
 
 /**
  * Parameter calls in the fixed order of TrackParams, skipping values equal to Strudel's default and
- * effects bypassed in the mixer.
+ * effects bypassed in the mixer. `overrides` replaces a parameter's value with code (automation).
  */
-export function paramsCode(params: TrackParams, bypassed: readonly ParamKey[] = []): string {
+export function paramsCode(
+  params: TrackParams,
+  bypassed: readonly ParamKey[] = [],
+  overrides: Partial<Record<ParamKey, string>> = {},
+): string {
   let code = ''
   for (const key of PARAM_ORDER) {
+    if (bypassed.includes(key)) continue
+    const override = overrides[key]
+    if (override !== undefined) {
+      code += `.${key}(${override})`
+      continue
+    }
     const value = params[key]
-    if (value === undefined || bypassed.includes(key)) continue
+    if (value === undefined) continue
     if (key === 'vowel') {
       code += `.vowel(${quote(safeToken(value as string, VOWEL, 'vowel'))})`
       continue

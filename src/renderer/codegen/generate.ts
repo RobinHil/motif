@@ -1,4 +1,4 @@
-import { SCALE_NAME, SOUND_NAME, type ID, type Project, type Track } from '../model/project'
+import { SCALE_NAME, SOUND_NAME, type ID, type ParamKey, type Project, type Track } from '../model/project'
 import { formatNumber, quote, safeToken } from './format'
 import { notesPattern } from './notes'
 import { paramsCode } from './params'
@@ -14,8 +14,10 @@ export interface LineRange {
 
 export interface TrackBlock {
   trackId: ID
-  /** The block exactly as it appears in `code`, starting with `$: ` or `_$: `. */
+  /** The block exactly as it appears in `code`: `$: `, `_$: `, or `const name = ` in a song. */
   code: string
+  /** Played instead when the block fails and has no earlier valid version (song: `const x = silence`). */
+  fallback?: string
 }
 
 export interface GeneratedCode {
@@ -24,6 +26,10 @@ export interface GeneratedCode {
   /** The first line, `setcpm(...)`. */
   header: string
   blocks: TrackBlock[]
+  /** Code after the track blocks: the scenes and `arrange(...)` of a song. */
+  footer?: string
+  /** 'song' for the arrangement program, whose blocks are constants rather than `$:` patterns. */
+  kind?: 'loop' | 'song'
 }
 
 function soundCode(track: Track): string {
@@ -62,31 +68,58 @@ export function trackToFreeCode(track: Track): string {
 
 /** One track as a `$:` block (SPEC 4, rules 2 to 5 and 9). */
 export function generateTrackCode(track: Track, muted: boolean): string {
-  const prefix = muted ? '_$: ' : '$: '
+  return trackCode(track, muted ? '_$: ' : '$: ')
+}
+
+/**
+ * A track's code after `prefix` (`$: `, `_$: ` or `const drums = `), with parameters replaced by
+ * code in `overrides` (automation) and `after` appended at the end.
+ */
+export function trackCode(
+  track: Track,
+  prefix: string,
+  overrides: Partial<Record<ParamKey, string>> = {},
+  after = '',
+): string {
   const pattern = patternCode(track, prefix.length)
   const suffix =
     soundCode(track) +
-    paramsCode(track.params, track.bypassed) +
+    paramsCode(track.params, track.bypassed, overrides) +
     transformsCode(track.transforms) +
-    `.orbit(${String(track.orbit)})`
+    `.orbit(${String(track.orbit)})` +
+    after
   // Free code ending in a line comment would swallow the suffix: start it on a new line.
   const lastLine = pattern.slice(pattern.lastIndexOf('\n') + 1)
   const separator = track.kind === 'code' && lastLine.includes('//') ? '\n  ' : ''
   return `${prefix}${pattern}${separator}${suffix}`
 }
 
+export interface LoopOptions {
+  /** Live mode: only the tracks of this scene play. Null or absent: every track. */
+  sceneId?: ID | null
+  /**
+   * Live mode, a scene queued for cycle `cycle` while `fromSceneId` plays: the change is written
+   * into the pattern with `filterWhen`, so it lands exactly on that cycle whenever it is evaluated.
+   */
+  switchAt?: { cycle: number; fromSceneId: ID | null }
+}
+
+function sceneFilter(project: Project, sceneId: ID | null | undefined): (track: Track) => boolean {
+  if (sceneId === undefined || sceneId === null) return () => true
+  const scene = project.scenes.find((s) => s.id === sceneId)
+  if (!scene) throw new Error(`Unknown scene ${sceneId}`)
+  const active = new Set(scene.activeTrackIds)
+  return (track) => active.has(track.id)
+}
+
 /**
  * Generates the Strudel program of a project (SPEC 4). Pure: the same project always gives the
  * same code, byte for byte. With `sceneId`, tracks outside the scene are muted.
  */
-export function generateProjectCode(project: Project, options: { sceneId?: ID } = {}): GeneratedCode {
-  let inScene: ((track: Track) => boolean) | null = null
-  if (options.sceneId !== undefined) {
-    const scene = project.scenes.find((s) => s.id === options.sceneId)
-    if (!scene) throw new Error(`Unknown scene ${options.sceneId}`)
-    const active = new Set(scene.activeTrackIds)
-    inScene = (track) => active.has(track.id)
-  }
+export function generateProjectCode(project: Project, options: LoopOptions = {}): GeneratedCode {
+  const inScene = sceneFilter(project, options.sceneId)
+  const inPrevious = options.switchAt ? sceneFilter(project, options.switchAt.fromSceneId) : inScene
+  const at = options.switchAt ? formatNumber(options.switchAt.cycle) : ''
 
   const anySolo = project.tracks.some((t) => t.solo)
   const header = `setcpm(${formatNumber(project.transport.bpm)}/${formatNumber(project.transport.beatsPerCycle)})`
@@ -96,8 +129,12 @@ export function generateProjectCode(project: Project, options: { sceneId?: ID } 
 
   if (project.tracks.length > 0) lines.push('')
   for (const track of project.tracks) {
-    const muted = track.mute || (anySolo && !track.solo) || (inScene !== null && !inScene(track))
-    const code = generateTrackCode(track, muted)
+    const silenced = track.mute || (anySolo && !track.solo)
+    const now = inScene(track)
+    const before = inPrevious(track)
+    const muted = silenced || (!now && !before)
+    const after = muted || now === before ? '' : now ? `.filterWhen(t => t >= ${at})` : `.filterWhen(t => t < ${at})`
+    const code = trackCode(track, muted ? '_$: ' : '$: ', {}, after)
     const from = lines.length + 1
     lines.push(...code.split('\n'))
     lineMap[track.id] = { from, to: lines.length }
