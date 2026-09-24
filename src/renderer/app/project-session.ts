@@ -2,8 +2,10 @@
 import { createDemoProject } from '../model/demo'
 import { createProject } from '../model/defaults'
 import { migrateProject, ProjectLoadError, serializeProject } from '../model/migrations'
+import { projectSampleLibrary } from '../model/samples'
 import { projectStore, selectIsDirty } from '../store/project-store'
 import { uiStore } from '../store/ui-store'
+import { loadLibrary, syncProjectSamples, userSounds } from './sample-library'
 
 /** SPEC 3: autosave every 30 seconds to a recovery file. */
 export const AUTOSAVE_INTERVAL_MS = 30_000
@@ -62,8 +64,11 @@ async function applyOpen(pending: ReturnType<typeof window.motif.project.open>):
 
 async function save(saveAs: boolean): Promise<void> {
   const store = projectStore.getState()
+  // The imported sounds the project uses travel with it: the main process copies their files.
+  const sampleLibrary = projectSampleLibrary(store.project, userSounds())
   store.amend((project) => {
     project.meta.updatedAt = new Date().toISOString()
+    project.sampleLibrary = sampleLibrary
   })
   const { project } = projectStore.getState()
   const text = serializeProject(project)
@@ -73,7 +78,11 @@ async function save(saveAs: boolean): Promise<void> {
     // Only mark saved if nothing changed while the file was being written.
     if (projectStore.getState().project === project) projectStore.getState().markSaved()
     uiStore.getState().setFileName(result.name)
-    notify(null)
+    notify(
+      result.missingSamples.length > 0
+        ? `Saved, but these samples could not be found to copy into the project: ${result.missingSamples.join(', ')}.`
+        : null,
+    )
   } else if (result.status === 'error') {
     notify(`Could not save: ${result.message}`)
   }
@@ -115,4 +124,13 @@ export function startAutosave(): () => void {
     clearInterval(timer)
     window.removeEventListener('beforeunload', guard)
   }
+}
+
+/** Loads the sample library, then follows the imported sounds of each loaded project. */
+export function startSampleLibrary(): () => void {
+  void loadLibrary().then(() => syncProjectSamples(projectStore.getState().project.sampleLibrary))
+  return projectStore.subscribe((state, previous) => {
+    if (state.project.sampleLibrary !== previous.project.sampleLibrary)
+      void syncProjectSamples(state.project.sampleLibrary)
+  })
 }

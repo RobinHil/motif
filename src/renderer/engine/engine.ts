@@ -154,12 +154,27 @@ export function masterWaveform(out: Float32Array<ArrayBuffer>): boolean {
 const PREVIEW_ORBIT = 64
 
 /** One-shot preview from the sound browser: `{ s: 'bd' }`, `{ s: 'sawtooth', note: 'c3' }`. */
-export async function previewSound(value: Record<string, unknown>): Promise<void> {
+export async function previewSound(value: Record<string, unknown>, seconds = 0.4): Promise<void> {
   await initEngine()
   const context = getAudioContext()
   await context.resume()
   ensureMasterBus()
-  await superdough({ ...value, orbit: PREVIEW_ORBIT }, context.currentTime + 0.02, 0.4)
+  await superdough({ ...value, orbit: PREVIEW_ORBIT }, context.currentTime + 0.02, seconds)
+}
+
+/** Makes imported sounds playable: `{ breaks: ['breaks/0.wav', ...] }` relative to `baseUrl`. */
+export async function registerSamples(map: Record<string, string[]>, baseUrl: string): Promise<void> {
+  await initEngine()
+  await samples(map, baseUrl)
+}
+
+/** Decodes a sample file without playing it (import check, waveform). Rejects if it is not audio. */
+export async function decodeSample(url: string): Promise<AudioBuffer> {
+  const data = await fetch(url).then((response) => {
+    if (!response.ok) throw new Error(`${url}: ${String(response.status)}`)
+    return response.arrayBuffer()
+  })
+  return new OfflineAudioContext(1, 1, 48000).decodeAudioData(data)
 }
 
 /** Whether Strudel and the audio context are running (meters read nothing before). */

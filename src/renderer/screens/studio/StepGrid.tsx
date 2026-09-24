@@ -130,7 +130,10 @@ export function StepGrid({ trackId, color }: { trackId: ID; color: TrackColor })
         disabled: step?.probability === probability,
         onSelect: set({ ...base, probability }),
       })),
-      ...[0, 1, 2, 3].map((variant) => ({
+      ...Array.from(
+        { length: Math.min(12, catalog.sounds.find((c) => c.name === target.row.sound)?.variants ?? 4) },
+        (_, variant) => variant,
+      ).map((variant) => ({
         label: `Variant ${String(variant)} for the row`,
         code: `${target.row.sound}:${String(variant)}`,
         disabled: (target.row.variant ?? 0) === variant,
