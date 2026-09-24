@@ -21,6 +21,7 @@ export interface UiState {
   /** A short message for the user (open failed, project recovered...). */
   notice: string | null
   helpOpen: boolean
+  aboutOpen: boolean
   /** Visualizations of the code screen (SPEC 6.6). */
   liveHighlight: boolean
   visuals: { punchcard: boolean; pianoroll: boolean; spectrum: boolean }
@@ -34,6 +35,7 @@ export interface UiState {
   setFileName: (fileName: string | null) => void
   setNotice: (notice: string | null) => void
   setHelpOpen: (open: boolean) => void
+  setAboutOpen: (open: boolean) => void
   setLiveHighlight: (on: boolean) => void
   setVisual: (visual: 'punchcard' | 'pianoroll' | 'spectrum', on: boolean) => void
 }
@@ -47,6 +49,7 @@ export const uiStore = createStore<UiState>()((set) => ({
   fileName: null,
   notice: null,
   helpOpen: false,
+  aboutOpen: false,
   liveHighlight: true,
   visuals: { punchcard: false, pianoroll: false, spectrum: false },
   setHome: (home) => {
@@ -75,6 +78,9 @@ export const uiStore = createStore<UiState>()((set) => ({
   },
   setHelpOpen: (helpOpen) => {
     set({ helpOpen })
+  },
+  setAboutOpen: (aboutOpen) => {
+    set({ aboutOpen })
   },
   setLiveHighlight: (liveHighlight) => {
     set({ liveHighlight })

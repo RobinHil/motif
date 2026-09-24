@@ -1,3 +1,4 @@
+import { APP_NAME } from '@shared/app-info'
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from 'react'
 import { LATENCIES, ZOOMS, type Settings } from '@shared/ipc'
 import { loadLibrary, userSounds, subscribeUserSounds } from '../../app/sample-library'
@@ -252,7 +253,12 @@ export function SettingsScreen() {
       aria-label="Settings"
       className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto bg-bg-app px-8 py-6 [&>*]:shrink-0"
     >
-      <h1 className="text-screen-title font-medium">Settings</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-screen-title font-medium">Settings</h1>
+        <button type="button" onClick={() => uiStore.getState().setAboutOpen(true)} className={button}>
+          About {APP_NAME}
+        </button>
+      </div>
       <Section title="Audio">
         <AudioOutputs settings={settings} />
       </Section>

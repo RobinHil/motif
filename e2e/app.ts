@@ -11,13 +11,14 @@ export interface RunningApp {
   close: () => Promise<void>
 }
 
-export async function launchApp(): Promise<RunningApp> {
+/** `args` are passed after the app path, like a file manager passing a project. */
+export async function launchApp(options: { args?: string[] } = {}): Promise<RunningApp> {
   const userData = mkdtempSync(join(tmpdir(), 'motif-e2e-'))
   // ELECTRON_RUN_AS_NODE (set by some editors) would start Electron as plain Node.
   const { ELECTRON_RUN_AS_NODE: _runAsNode, ...inherited } = process.env
   const env: Record<string, string> = { MOTIF_E2E_USER_DATA: userData }
   for (const [key, value] of Object.entries(inherited)) if (value !== undefined) env[key] = value
-  const app = await electron.launch({ args: ['.'], env })
+  const app = await electron.launch({ args: ['.', ...(options.args ?? [])], env })
   const requests: string[] = []
   app.context().on('request', (request) => requests.push(request.url()))
   const page = await app.firstWindow()

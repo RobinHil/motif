@@ -6,7 +6,7 @@ import { startLiveScenes } from './app/live-scenes'
 import { startMidiBridge } from './app/midi-bridge'
 import { loadSettings } from './app/settings-session'
 import { startLiveHighlight } from './app/live-highlight'
-import { restoreRecovery, startAutosave, startSampleLibrary } from './app/project-session'
+import { restoreRecovery, startAutosave, startExternalOpen, startSampleLibrary } from './app/project-session'
 import { startShortcuts } from './app/shortcuts'
 import { projectStore } from './store/project-store'
 import { uiStore } from './store/ui-store'
@@ -39,6 +39,8 @@ startMidiBridge()
 startLiveHighlight()
 startAutosave()
 startSampleLibrary()
+startExternalOpen()
+window.motif.app.onShowAbout(() => uiStore.getState().setAboutOpen(true))
 startShortcuts()
 
 createRoot(root).render(
