@@ -34,8 +34,10 @@ export function initStrudelScope(): Promise<void> {
 export async function playedEvents(code: string, begin = 0, end = 1): Promise<PlayedEvent[]> {
   await initStrudelScope()
   registered = []
-  await evaluate(code, transpiler)
-  const haps = stack(...registered).queryArc(begin, end) as unknown as {
+  const { pattern } = await evaluate(code, transpiler)
+  // Code with `$:` blocks registers patterns; a bare expression returns one.
+  const played = registered.length > 0 ? stack(...registered) : pattern
+  const haps = played.queryArc(begin, end) as unknown as {
     whole?: { begin: { valueOf(): number } }
     value: Record<string, unknown>
     hasOnset(): boolean
