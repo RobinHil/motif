@@ -60,6 +60,10 @@ declare module '@strudel/webaudio' {
     now(): number
     started: boolean
     cps: number
+    /** Audio time of the tick that started the current cps (Cyclist internals, used to align exports). */
+    seconds_at_cps_change?: number
+    num_cycles_at_cps_change: number
+    latency: number
     pattern?: import('@strudel/core').Pattern
   }
 
