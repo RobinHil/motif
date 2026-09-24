@@ -1,13 +1,16 @@
 import { uiStore, type Screen } from '../store/ui-store'
 import { SCREEN_LABELS } from './TransportBar'
 
-const PHASE: Record<Exclude<Screen, 'studio' | 'code' | 'mixer' | 'pianoroll'>, string> = {
-  modulation: 'Modulation is on the way.',
+const PHASE: Record<Exclude<Screen, 'studio' | 'code' | 'mixer' | 'pianoroll' | 'modulation'>, string> = {
   arrangement: 'Scenes and the arrangement are on the way.',
 }
 
 /** Screens that later phases build. Playback and editing keep working from the Studio. */
-export function PlaceholderScreen({ screen }: { screen: Exclude<Screen, 'studio' | 'code' | 'mixer' | 'pianoroll'> }) {
+export function PlaceholderScreen({
+  screen,
+}: {
+  screen: Exclude<Screen, 'studio' | 'code' | 'mixer' | 'pianoroll' | 'modulation'>
+}) {
   return (
     <main className="grid flex-1 place-items-center bg-bg-app p-8">
       <div className="flex max-w-md flex-col items-center gap-4 text-center">
