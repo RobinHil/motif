@@ -7,11 +7,14 @@ import {
   containsFreeCode,
   PROJECT_EXTENSION,
   projectNameFromDir,
+  SAMPLES_DIR,
   readProjectFolder,
   withProjectExtension,
   writeProjectFolder,
 } from './project-files'
 import { RecentProjects } from './recent-projects'
+import { projectSampleEntries, type SampleLibrary } from './sample-library'
+import { setProjectSamplesDir } from './sample-ipc'
 import { Recovery } from './recovery'
 import { TrustedProjects } from './trusted-projects'
 
@@ -51,7 +54,13 @@ async function confirmFreeCode(window: BrowserWindow | undefined, name: string):
   return response === 1
 }
 
-export async function registerProjectIpc(): Promise<Recovery> {
+/** Changes the project folder, and the folder `motif-sample://project/` serves with it. */
+function setCurrentDir(dir: string | null) {
+  currentDir = dir
+  setProjectSamplesDir(dir === null ? null : join(dir, SAMPLES_DIR))
+}
+
+export async function registerProjectIpc(library: SampleLibrary): Promise<Recovery> {
   const userData = app.getPath('userData')
   const recovery = new Recovery(join(userData, 'recovery'))
   const trusted = new TrustedProjects(join(userData, 'trusted-projects.json'))
@@ -65,18 +74,21 @@ export async function registerProjectIpc(): Promise<Recovery> {
     if (containsFreeCode(text) && !(await trusted.isTrusted(dir)) && !(await confirmFreeCode(window, name))) {
       return { status: 'canceled' }
     }
-    currentDir = dir
+    setCurrentDir(dir)
     await recent.add(dir)
     return { status: 'opened', text, name }
   }
 
   async function saveTo(dir: string, text: string): Promise<SaveResult> {
     await writeProjectFolder(dir, text)
-    currentDir = dir
+    // Imported samples the project uses are copied next to it, so the folder is complete.
+    const previous = currentDir === null ? null : join(currentDir, SAMPLES_DIR)
+    const missingSamples = await library.copyToProject(projectSampleEntries(text), join(dir, SAMPLES_DIR), previous)
+    setCurrentDir(dir)
     await trusted.trust(dir)
     await recent.add(dir)
     await recovery.clear()
-    return { status: 'saved', name: projectNameFromDir(dir) }
+    return { status: 'saved', name: projectNameFromDir(dir), missingSamples }
   }
 
   async function saveAs(event: IpcMainInvokeEvent, text: string, suggestedName: unknown): Promise<SaveResult> {
@@ -128,7 +140,7 @@ export async function registerProjectIpc(): Promise<Recovery> {
   })
 
   ipcMain.handle(IPC.projectNew, () => {
-    currentDir = null
+    setCurrentDir(null)
   })
 
   ipcMain.handle(IPC.projectRecent, (): Promise<RecentProject[]> => recent.list())
@@ -152,7 +164,7 @@ export async function registerProjectIpc(): Promise<Recovery> {
   ipcMain.handle(IPC.recoveryTake, async (): Promise<RecoveredProject | null> => {
     const data = await recovery.read()
     if (data === null) return null
-    currentDir = data.projectDir
+    setCurrentDir(data.projectDir)
     return {
       text: data.text,
       name: data.projectDir ? projectNameFromDir(data.projectDir) : null,

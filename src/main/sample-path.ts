@@ -1,9 +1,10 @@
 import { realpath } from 'node:fs/promises'
 import { extname, isAbsolute, relative, resolve } from 'node:path'
+import { AUDIO_EXTENSIONS } from '@shared/samples'
 
 export const SAMPLE_SCHEME = 'motif-sample'
 
-const ALLOWED_EXTENSIONS = new Set(['.wav', '.mp3', '.ogg', '.flac', '.aif', '.aiff', '.m4a', '.json'])
+const ALLOWED_EXTENSIONS = new Set<string>([...AUDIO_EXTENSIONS, '.json'])
 
 /** Named folders a sample URL may point into, e.g. { bundled: '/opt/Motif/resources/samples' }. */
 export type SampleRoots = Readonly<Record<string, string>>

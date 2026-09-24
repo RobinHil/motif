@@ -17,9 +17,10 @@ export function bundledSamplesRoot(): string {
   return app.isPackaged ? join(process.resourcesPath, 'samples') : join(app.getAppPath(), 'resources', 'samples')
 }
 
-export function handleSampleProtocol(roots: SampleRoots): void {
+/** `roots` is read on every request: the project root changes when a project is opened or saved. */
+export function handleSampleProtocol(roots: () => SampleRoots): void {
   protocol.handle(SAMPLE_SCHEME, async (request) => {
-    const file = await resolveSampleFile(request.url, roots)
+    const file = await resolveSampleFile(request.url, roots())
     if (file === null) return new Response('Not found', { status: 404 })
     const response = await net.fetch(pathToFileURL(file).toString())
     const headers = new Headers(response.headers)
