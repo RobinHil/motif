@@ -73,7 +73,7 @@ export function loadCatalog(): Promise<void> {
           sounds.push(
             ...data.sounds.filter(isSound).map((s) => {
               const count = bundledFiles.get(s.name)?.length
-              return count === undefined ? s : { ...s, variants: count }
+              return count === undefined || s.category === 'Instruments' ? s : { ...s, variants: count }
             }),
           )
       } catch (error) {
@@ -98,9 +98,11 @@ export function useCatalog(): Catalog {
   )
 }
 
-/** The event a preview button plays: synths need a note to be heard. */
+/** The event a preview button plays: synths and tuned instruments play a C. */
 export function previewValue(sound: CatalogSound): Record<string, unknown> {
-  return sound.category === 'Synths' ? { s: sound.name, note: 'c3' } : { s: sound.name }
+  return sound.category === 'Synths' || sound.category === 'Instruments'
+    ? { s: sound.name, note: 'c3' }
+    : { s: sound.name }
 }
 
 /** URL of one sample of a sound (`name:variant`), or null for synths and unknown sounds. */

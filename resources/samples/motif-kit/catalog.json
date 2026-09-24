@@ -1,5 +1,5 @@
 {
-  "banks": ["MotifKit"],
+  "banks": ["MotifKit", "MotifTape"],
   "sounds": [
     {
       "name": "bd",
@@ -14,6 +14,10 @@
       "category": "Drums"
     },
     {
+      "name": "oh",
+      "category": "Drums"
+    },
+    {
       "name": "cp",
       "category": "Drums"
     },
@@ -22,7 +26,63 @@
       "category": "Drums"
     },
     {
+      "name": "lt",
+      "category": "Drums"
+    },
+    {
+      "name": "mt",
+      "category": "Drums"
+    },
+    {
+      "name": "ht",
+      "category": "Drums"
+    },
+    {
+      "name": "cr",
+      "category": "Drums"
+    },
+    {
+      "name": "rd",
+      "category": "Drums"
+    },
+    {
+      "name": "cb",
+      "category": "Drums"
+    },
+    {
+      "name": "sh",
+      "category": "Drums"
+    },
+    {
+      "name": "epiano",
+      "category": "Instruments"
+    },
+    {
+      "name": "pluck",
+      "category": "Instruments"
+    },
+    {
+      "name": "bell",
+      "category": "Instruments"
+    },
+    {
+      "name": "marimba",
+      "category": "Instruments"
+    },
+    {
       "name": "wind",
+      "category": "Textures"
+    },
+    {
+      "name": "rain",
+      "category": "Textures"
+    },
+    {
+      "name": "vinyl",
+      "category": "Textures"
+    },
+    {
+      "name": "drone",
       "category": "Textures"
     }
   ]

@@ -219,9 +219,7 @@ export function SoundBrowser() {
             <li className="px-2 py-1.5 text-body text-text-3">
               {category === 'My samples'
                 ? 'Your imported samples will appear here. Drop files or a folder, or use Import.'
-                : category === 'Instruments'
-                  ? 'No instrument is bundled yet.'
-                  : 'No sound matches this search.'}
+                : 'No sound matches this search.'}
             </li>
           )}
         </ul>
