@@ -96,6 +96,7 @@ export function EffectList({ track, color }: { track: Track; color: string }) {
                     onGestureStart={beginGesture}
                     onGestureEnd={endGesture}
                     onAnimate={() => uiStore.getState().openModulation(trackId, spec.key)}
+                    midi={{ trackId, param: spec.key }}
                   />
                 )}
                 {transform && argKey && typeof argValue === 'number' && (

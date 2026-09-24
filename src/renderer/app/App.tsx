@@ -3,12 +3,14 @@ import { CodeScreen } from '../screens/code/CodeScreen'
 import { MixerScreen } from '../screens/mixer/MixerScreen'
 import { ArrangementScreen } from '../screens/arrangement/ArrangementScreen'
 import { ModulationScreen } from '../screens/modulation/ModulationScreen'
+import { SettingsScreen } from '../screens/settings/SettingsScreen'
 import { PianoRollScreen } from '../screens/pianoroll/PianoRollScreen'
 import { StudioScreen } from '../screens/studio/StudioScreen'
 import { projectStore } from '../store/project-store'
 import { uiStore, useUi } from '../store/ui-store'
 import { ConversionDialog } from './ConversionDialog'
 import { HomeScreen } from './HomeScreen'
+import { MidiLearnBanner } from './MidiLearnBanner'
 import { ShortcutHelp } from './ShortcutHelp'
 import { TransportBar } from './TransportBar'
 
@@ -44,6 +46,7 @@ export function App() {
   return (
     <div className="flex h-full flex-col bg-bg-app">
       <TransportBar />
+      <MidiLearnBanner />
       <Notice />
       {home ? (
         <HomeScreen />
@@ -57,6 +60,8 @@ export function App() {
         <PianoRollScreen />
       ) : screen === 'modulation' ? (
         <ModulationScreen />
+      ) : screen === 'settings' ? (
+        <SettingsScreen />
       ) : (
         <ArrangementScreen />
       )}

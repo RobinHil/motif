@@ -1,5 +1,8 @@
 import { useRef, useState, type PointerEvent } from 'react'
 import { formatNumber } from '../codegen/format'
+import { MidiBadge } from '../components/MidiBadge'
+import { learnOutline, useMidiBinding } from '../components/useMidiBinding'
+import { TEMPO_TARGET } from '../midi/targets'
 import { setBpm } from '../store/actions'
 import { projectStore, useProject } from '../store/project-store'
 
@@ -10,6 +13,7 @@ export function TempoControl() {
   const [editing, setEditing] = useState(false)
   const drag = useRef<{ y: number; bpm: number; moved: boolean } | null>(null)
   const { update, beginGesture, endGesture } = projectStore.getState()
+  const binding = useMidiBinding(TEMPO_TARGET)
 
   const onPointerDown = (event: PointerEvent<HTMLButtonElement>) => {
     event.currentTarget.setPointerCapture(event.pointerId)
@@ -32,10 +36,19 @@ export function TempoControl() {
 
   return (
     <div
-      className="flex h-11 items-center gap-2 rounded-pill bg-raised px-5"
+      // In MIDI learn mode a click picks the tempo as the next control to map.
+      onPointerDownCapture={(event) => {
+        if (!binding.learning || event.button !== 0) return
+        event.preventDefault()
+        event.stopPropagation()
+        binding.pick()
+      }}
+      data-midi-learn={binding.learning ? (binding.selected ? 'selected' : 'mappable') : undefined}
+      className={`flex h-11 items-center gap-2 rounded-pill bg-raised px-5 ${learnOutline(binding)}`}
       title={`setcpm(${formatNumber(bpm)}/${String(beats)})`}
     >
       <span className="text-body text-text-2">Tempo</span>
+      <MidiBadge cc={binding.cc} />
       {editing ? (
         <input
           autoFocus

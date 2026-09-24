@@ -2,9 +2,13 @@ import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } fr
 import { formatNumber } from '../codegen/format'
 import { getCycle, isPlaying } from '../engine/engine'
 import { modulationAt } from '../engine/modulation-curve'
+import { removeMapping, type MidiTarget } from '../midi/targets'
 import type { Modulation } from '../model/project'
+import { projectStore } from '../store/project-store'
 import { onFrame } from '../viz/frame-loop'
 import { ContextMenu, type MenuPosition } from './ContextMenu'
+import { MidiBadge } from './MidiBadge'
+import { learnOutline, useMidiBinding } from './useMidiBinding'
 import {
   ARC_START,
   ARC_SWEEP,
@@ -43,6 +47,8 @@ export interface KnobProps {
   onAnimate?: () => void
   /** Replaces the animation with a fixed value (what it plays right now). */
   onFreeze?: (value: number) => void
+  /** What a MIDI controller drives through this knob. Absent: not mappable. */
+  midi?: MidiTarget
 }
 
 function valueText(props: KnobProps): string {
@@ -59,6 +65,7 @@ export function Knob(props: KnobProps) {
   const [menu, setMenu] = useState<MenuPosition | null>(null)
   const svgRef = useRef<SVGSVGElement>(null)
   const dotRef = useRef<SVGCircleElement>(null)
+  const binding = useMidiBinding(props.midi)
   const drag = useRef<{ startY: number; start: number } | null>(null)
   const wheelTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const latest = useRef(props)
@@ -196,7 +203,23 @@ export function Knob(props: KnobProps) {
     : arcPath(center, center, r, 0, position)
 
   return (
-    <div className="flex w-[76px] flex-col items-center gap-1">
+    <div
+      // In MIDI learn mode a click picks the knob as the next control to map instead of moving it.
+      onPointerDownCapture={(event) => {
+        if (!binding.learning || event.button !== 0) return
+        event.preventDefault()
+        event.stopPropagation()
+        binding.pick()
+      }}
+      onKeyDownCapture={(event) => {
+        if (!binding.learning || (event.key !== 'Enter' && event.key !== ' ')) return
+        event.preventDefault()
+        event.stopPropagation()
+        binding.pick()
+      }}
+      data-midi-learn={binding.learning ? (binding.selected ? 'selected' : 'mappable') : undefined}
+      className={`flex w-[76px] flex-col items-center gap-1 ${learnOutline(binding)}`}
+    >
       <svg
         ref={svgRef}
         width={size}
@@ -285,6 +308,7 @@ export function Knob(props: KnobProps) {
           {valueText(props)}
         </button>
       )}
+      <MidiBadge cc={binding.cc} />
       {menu && (
         <ContextMenu
           label={`${label} menu`}
@@ -297,7 +321,20 @@ export function Knob(props: KnobProps) {
             modulated && props.onFreeze
               ? { label: 'Freeze', onSelect: freeze }
               : { label: 'Freeze', disabled: true, hint: 'Only an animated knob can be frozen' },
-            { label: 'MIDI learn', disabled: true, hint: 'MIDI arrives in a later version' },
+            props.midi
+              ? { label: 'MIDI learn', onSelect: binding.learn }
+              : { label: 'MIDI learn', disabled: true, hint: 'This control cannot be mapped' },
+            ...(binding.cc !== null && props.midi
+              ? [
+                  {
+                    label: `Forget MIDI mapping (CC ${String(binding.cc)})`,
+                    onSelect: () => {
+                      const target = props.midi
+                      if (target) projectStore.getState().update(removeMapping(target))
+                    },
+                  },
+                ]
+              : []),
             {
               label: 'Reset',
               code: `${props.code} ${props.absentLabel ?? formatNumber(defaultValue)}`,

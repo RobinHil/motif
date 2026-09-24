@@ -1,6 +1,8 @@
 import { useEffect, useRef, type KeyboardEvent, type PointerEvent, type ReactNode } from 'react'
 import { formatNumber } from '../codegen/format'
+import type { MidiTarget } from '../midi/targets'
 import { clamp, fromNormalized, toNormalized, type KnobRange } from './knob-math'
+import { learnOutline, useMidiBinding } from './useMidiBinding'
 
 const THUMB_HEIGHT = 22
 const WHEEL_GESTURE_MS = 400
@@ -15,6 +17,8 @@ export interface FaderProps {
   onGestureEnd: () => void
   /** Drawn on the left of the rail, usually a stereo meter. */
   meter?: ReactNode
+  /** What a MIDI controller drives through this fader. */
+  midi?: MidiTarget
 }
 
 /** Vertical fader (DESIGN.md "Fader"): 6 px rail, 36 x 22 px thumb, meter on the left. */
@@ -28,6 +32,7 @@ export function Fader(props: FaderProps) {
     latest.current = props
   })
   const position = toNormalized(value, range)
+  const binding = useMidiBinding(props.midi)
 
   const travel = () => Math.max(1, (railRef.current?.clientHeight ?? 200) - THUMB_HEIGHT)
   const commit = (next: number) => props.onChange(fromNormalized(clamp(next, 0, 1), range))
@@ -120,7 +125,21 @@ export function Fader(props: FaderProps) {
         onPointerCancel={onPointerUp}
         onDoubleClick={() => props.onChange(defaultValue)}
         onKeyDown={onKeyDown}
-        className="relative h-full w-9 cursor-ns-resize touch-none rounded-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-2"
+        // In MIDI learn mode a click or Enter picks the fader as the next control to map.
+        onPointerDownCapture={(event) => {
+          if (!binding.learning || event.button !== 0) return
+          event.preventDefault()
+          event.stopPropagation()
+          binding.pick()
+        }}
+        onKeyDownCapture={(event) => {
+          if (!binding.learning || (event.key !== 'Enter' && event.key !== ' ')) return
+          event.preventDefault()
+          event.stopPropagation()
+          binding.pick()
+        }}
+        data-midi-learn={binding.learning ? (binding.selected ? 'selected' : 'mappable') : undefined}
+        className={`relative h-full w-9 cursor-ns-resize touch-none rounded-control focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-2 ${learnOutline(binding)}`}
       >
         <div className="absolute inset-y-0 left-1/2 w-1.5 -translate-x-1/2 rounded-pill bg-bg-code" />
         <div

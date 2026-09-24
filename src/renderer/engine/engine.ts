@@ -9,6 +9,7 @@ import {
   initAudio,
   registerSynthSounds,
   samples,
+  setAudioContext,
   superdough,
   webaudioRepl,
   type Repl,
@@ -33,9 +34,13 @@ const listeners = new Set<(result: EvaluationResult) => void>()
 /** The program Strudel is playing and its mini-notation positions, for live highlighting. */
 let evaluated: { code: string; locations: [number, number][] } | null = null
 let lastGenerated: GeneratedCode | null = null
+/** Chosen in the settings: latency applies when the audio starts, the output device at any time. */
+let latencyHint: AudioContextLatencyCategory = 'interactive'
+let outputDevice: string | null = null
 let example: { timer: ReturnType<typeof setTimeout>; wasPlaying: boolean; done: () => void } | null = null
 
 async function boot(): Promise<Repl> {
+  setAudioContext(new AudioContext({ latencyHint }))
   miniAllStrings()
   await evalScope(
     import('@strudel/core'),
@@ -47,6 +52,7 @@ async function boot(): Promise<Repl> {
   const manifest: unknown = await fetch(`${BUNDLED_SAMPLES_URL}motif-kit/strudel.json`).then((r) => r.json())
   await samples(manifest as Record<string, unknown>, `${BUNDLED_SAMPLES_URL}motif-kit/`)
   await initAudio()
+  await applyOutputDevice()
   repl = webaudioRepl({
     transpiler,
     onEvalError: (error) => {
@@ -54,6 +60,33 @@ async function boot(): Promise<Repl> {
     },
   })
   return repl
+}
+
+type SinkContext = AudioContext & { setSinkId?: (id: string) => Promise<void>; sinkId?: string }
+
+async function applyOutputDevice(): Promise<void> {
+  const context = getAudioContext() as SinkContext
+  const wanted = outputDevice ?? ''
+  if (typeof context.setSinkId !== 'function' || context.sinkId === wanted) return
+  try {
+    await context.setSinkId(wanted)
+  } catch (error) {
+    console.warn('[engine] output device unavailable, keeping the default', error)
+  }
+}
+
+/** Settings of the audio output. The latency is used when the engine starts. */
+export async function configureAudio(options: { latency: AudioContextLatencyCategory; output: string | null }) {
+  latencyHint = options.latency
+  outputDevice = options.output
+  if (repl !== null) await applyOutputDevice()
+}
+
+/** The audio output's latency in milliseconds, once the engine runs. */
+export function outputLatency(): number | null {
+  if (repl === null) return null
+  const context = getAudioContext()
+  return Math.round(((context.baseLatency || 0) + (context.outputLatency || 0)) * 1000)
 }
 
 /** Starts Strudel and the audio context. Called lazily by every function that needs them. */

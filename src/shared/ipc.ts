@@ -12,6 +12,12 @@ export const IPC = {
   samplesImport: 'samples:import',
   samplesImportDialog: 'samples:import-dialog',
   samplesRemoveFiles: 'samples:remove-files',
+  samplesRemove: 'samples:remove',
+  samplesFolder: 'samples:folder',
+  samplesMoveFolder: 'samples:move-folder',
+  samplesShowFolder: 'samples:show-folder',
+  settingsGet: 'settings:get',
+  settingsSet: 'settings:set',
 } as const
 
 export type OpenResult =
@@ -66,6 +72,18 @@ export interface MotifApi {
     importDialog(kind: 'files' | 'folder'): Promise<ImportResult | null>
     /** Drops files the audio engine could not decode. */
     removeFiles(name: string, files: readonly string[]): Promise<void>
+    /** Removes a sound from the library. Projects keep their own copies. */
+    remove(name: string): Promise<void>
+    /** Where the library lives on this computer. */
+    folder(): Promise<string>
+    /** Asks for another folder and moves the library there. Null when canceled. */
+    moveFolder(): Promise<string | null>
+    showFolder(): Promise<void>
+  }
+  readonly settings: {
+    get(): Promise<Settings>
+    /** Saves valid fields and applies the zoom at once. */
+    set(changes: Partial<Settings>): Promise<Settings>
   }
   readonly recovery: {
     write(text: string): Promise<void>
@@ -88,4 +106,21 @@ export interface ImportResult {
   added: (LibrarySound & { sources: string[] })[]
   /** File names (never full paths) that were not imported, with the reason. */
   rejected: { file: string; reason: string }[]
+}
+
+export const LATENCIES = ['interactive', 'balanced', 'playback'] as const
+export const ZOOMS = [0.8, 0.9, 1, 1.1, 1.25, 1.5] as const
+
+/** Preferences of this computer (SPEC 10, Settings). Not part of any project. */
+export interface Settings {
+  /** Audio output device id, null for the system default. */
+  audioOutput: string | null
+  /** AudioContext latency hint; applies the next time Motif starts. */
+  latency: (typeof LATENCIES)[number]
+  /** Names of MIDI inputs the user switched off. */
+  midiDisabled: string[]
+  /** UI scale. */
+  zoom: (typeof ZOOMS)[number]
+  /** English only in v1. */
+  language: 'en'
 }

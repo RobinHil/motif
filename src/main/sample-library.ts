@@ -59,10 +59,46 @@ export class SampleLibrary {
   private sounds: LibrarySound[] | null = null
 
   constructor(
-    readonly root: string,
+    private folder: string,
     /** Names already used by bundled sounds and synths. */
     private readonly reserved: ReadonlySet<string>,
   ) {}
+
+  get root(): string {
+    return this.folder
+  }
+
+  /**
+   * Uses another folder for the library. A folder that already holds a Motif library is adopted as
+   * it is; otherwise the current sounds are copied there, then removed from the old folder.
+   */
+  async moveTo(folder: string): Promise<void> {
+    const target = resolve(folder)
+    if (target === resolve(this.folder)) return
+    if (await exists(join(target, INDEX_FILE))) {
+      this.folder = target
+      this.sounds = null
+      return
+    }
+    const sounds = await this.list()
+    for (const file of sounds.flatMap((s) => s.files)) {
+      await mkdir(dirname(join(target, file)), { recursive: true })
+      await copyFile(join(this.folder, file), join(target, file))
+    }
+    const old = this.folder
+    this.folder = target
+    await this.save(sounds)
+    for (const sound of sounds) await rm(join(old, sound.name), { recursive: true, force: true })
+    await rm(join(old, INDEX_FILE), { force: true })
+  }
+
+  /** Removes a sound and its files from the library (projects keep their own copies). */
+  async remove(name: string): Promise<void> {
+    const sounds = await this.list()
+    if (!sounds.some((s) => s.name === name)) return
+    await rm(join(this.folder, name), { recursive: true, force: true })
+    await this.save(sounds.filter((s) => s.name !== name))
+  }
 
   async list(): Promise<LibrarySound[]> {
     if (this.sounds) return this.sounds
@@ -76,7 +112,7 @@ export class SampleLibrary {
 
   private async save(sounds: LibrarySound[]): Promise<void> {
     this.sounds = sounds
-    await mkdir(this.root, { recursive: true })
+    await mkdir(this.folder, { recursive: true })
     await writeFileAtomic(join(this.root, INDEX_FILE), JSON.stringify(sounds, null, 2))
   }
 
