@@ -69,6 +69,7 @@ export function ModulationSidebar({ track, target }: { track: Track; target: Par
                 onGestureEnd={endGesture}
                 onAnimate={() => openModulation(track.id, param.key)}
                 onFreeze={(v) => update(setParam(track.id, param.key, v))}
+                midi={{ trackId: track.id, param: param.key }}
               />
             </li>
           )

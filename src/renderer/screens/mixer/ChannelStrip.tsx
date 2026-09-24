@@ -1,4 +1,6 @@
 import { useCallback } from 'react'
+import { useMidiBinding } from '../../components/useMidiBinding'
+import { MidiBadge } from '../../components/MidiBadge'
 import { paramsCode } from '../../codegen/params'
 import { transformsCode } from '../../codegen/transforms'
 import { Fader } from '../../components/Fader'
@@ -49,6 +51,7 @@ export function ChannelStrip({ trackId }: { trackId: ID }) {
   const track = useProject((s) => s.project.tracks.find((t) => t.id === trackId))
   const orbit = track?.orbit ?? 0
   const levels = useCallback(() => trackLevels(orbit), [orbit])
+  const gainCc = useMidiBinding({ trackId, param: 'gain' }).cc
   if (!track || !GAIN) return null
   const { update, beginGesture, endGesture } = projectStore.getState()
   const gain = typeof track.params.gain === 'number' ? track.params.gain : GAIN.defaultValue
@@ -90,6 +93,7 @@ export function ChannelStrip({ trackId }: { trackId: ID }) {
                 onGestureStart={beginGesture}
                 onGestureEnd={endGesture}
                 onAnimate={() => uiStore.getState().openModulation(trackId, key)}
+                midi={{ trackId, param: key }}
                 onFreeze={(value) => update(setParam(trackId, key, value))}
               />
             </div>
@@ -106,12 +110,14 @@ export function ChannelStrip({ trackId }: { trackId: ID }) {
           onGestureStart={beginGesture}
           onGestureEnd={endGesture}
           meter={<StereoMeter levels={levels} label={track.name} />}
+          midi={{ trackId, param: 'gain' }}
         />
       </div>
       <div className="flex items-center justify-between">
         <span className="font-mono text-body text-text">
           gain {typeof track.params.gain === 'number' ? track.params.gain : 'animated'}
         </span>
+        <MidiBadge cc={gainCc} />
         <MuteSolo trackId={trackId} mute={track.mute} solo={track.solo} />
       </div>
       <code

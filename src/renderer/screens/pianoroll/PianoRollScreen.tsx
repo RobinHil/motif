@@ -4,6 +4,7 @@ import type { ID } from '../../model/project'
 import { addTrack } from '../../store/actions'
 import { setNoteMode, setScale } from '../../store/note-actions'
 import { projectStore, useProject } from '../../store/project-store'
+import { midiStore, useMidi } from '../../store/midi-store'
 import { uiStore, useUi } from '../../store/ui-store'
 import { SWATCH } from '../studio/StudioTrackRow'
 import { NotePanel } from './NotePanel'
@@ -50,6 +51,7 @@ export function PianoRollScreen() {
   const grid = usePianoRoll((s) => s.grid)
   const snap = usePianoRoll((s) => s.snapToScale)
   const cycle = usePianoRoll((s) => s.editCycle)
+  const recording = useMidi((s) => s.recording)
   const set = pianoRollStore.getState().set
   const { update } = projectStore.getState()
 
@@ -164,7 +166,17 @@ export function PianoRollScreen() {
               <option disabled>Triplets (later)</option>
             </select>
           </label>
-          <div role="group" aria-label="Tool" className="ml-auto flex gap-1.5">
+          <button
+            type="button"
+            aria-pressed={recording}
+            onClick={() => midiStore.getState().setRecording(!recording)}
+            title="Notes played on a MIDI keyboard are written here, on the grid: at the playhead while playing, at the cursor when stopped"
+            className={`ml-auto flex h-9 items-center gap-2 rounded-control border px-3 text-body ${recording ? 'border-danger text-text' : 'border-line text-text-2 hover:text-text'}`}
+          >
+            <span className={`size-2.5 rounded-pill ${recording ? 'bg-danger' : 'bg-text-3'}`} />
+            Record MIDI
+          </button>
+          <div role="group" aria-label="Tool" className="flex gap-1.5">
             {TOOLS.map((t) => (
               <button
                 key={t.tool}

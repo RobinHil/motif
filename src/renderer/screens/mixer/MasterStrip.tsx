@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import { useMidiBinding } from '../../components/useMidiBinding'
+import { MidiBadge } from '../../components/MidiBadge'
 import { formatNumber } from '../../codegen/format'
 import { ContextMenu, type MenuPosition } from '../../components/ContextMenu'
 import { Fader } from '../../components/Fader'
@@ -36,6 +38,7 @@ export function masterSummary(master: MasterSettings): string {
 export function MasterStrip() {
   const master = useProject((s) => s.project.master)
   const [menu, setMenu] = useState<MenuPosition | null>(null)
+  const gainCc = useMidiBinding({ trackId: 'master', param: 'gain' }).cc
   const { update, beginGesture, endGesture } = projectStore.getState()
   const change = (changes: Partial<MasterSettings>) => update(setMaster(changes))
   const off = DYNAMICS.filter((d) => !master[d.key])
@@ -99,6 +102,7 @@ export function MasterStrip() {
               onReset={() => change({ [knob.key]: knob.defaultValue })}
               onGestureStart={beginGesture}
               onGestureEnd={endGesture}
+              midi={{ trackId: 'master', param: knob.key }}
             />
           </div>
         ))}
@@ -113,9 +117,13 @@ export function MasterStrip() {
           onGestureStart={beginGesture}
           onGestureEnd={endGesture}
           meter={<StereoMeter levels={masterLevels} label="Master" />}
+          midi={{ trackId: 'master', param: 'gain' }}
         />
       </div>
-      <span className="font-mono text-body text-text">gain {formatNumber(master.gain)}</span>
+      <div className="flex items-center gap-2">
+        <span className="font-mono text-body text-text">gain {formatNumber(master.gain)}</span>
+        <MidiBadge cc={gainCc} />
+      </div>
       <code
         title="The master bus is processed by Motif's audio engine, after Strudel"
         className="truncate rounded-control bg-bg-code px-2.5 py-2 font-mono text-knob-value text-text-2"

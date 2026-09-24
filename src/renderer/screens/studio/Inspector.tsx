@@ -220,6 +220,7 @@ export function Inspector() {
               onGestureStart={beginGesture}
               onGestureEnd={endGesture}
               onAnimate={() => uiStore.getState().openModulation(trackId, spec.key)}
+              midi={{ trackId, param: spec.key }}
               onFreeze={(value) => update(setParam(trackId, spec.key, value))}
             />
           ))}

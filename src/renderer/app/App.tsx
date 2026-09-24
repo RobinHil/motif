@@ -9,6 +9,7 @@ import { projectStore } from '../store/project-store'
 import { uiStore, useUi } from '../store/ui-store'
 import { ConversionDialog } from './ConversionDialog'
 import { HomeScreen } from './HomeScreen'
+import { MidiLearnBanner } from './MidiLearnBanner'
 import { ShortcutHelp } from './ShortcutHelp'
 import { TransportBar } from './TransportBar'
 
@@ -44,6 +45,7 @@ export function App() {
   return (
     <div className="flex h-full flex-col bg-bg-app">
       <TransportBar />
+      <MidiLearnBanner />
       <Notice />
       {home ? (
         <HomeScreen />
