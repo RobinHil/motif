@@ -21,7 +21,8 @@
     "licenses": "bun scripts/third-party-licenses.ts",
     "package": "electron-vite build && bun run licenses && electron-builder",
     "test:coverage": "vitest run --coverage",
-    "samples:kit": "bun scripts/generate-kit.ts"
+    "samples:kit": "bun scripts/generate-kit.ts",
+    "test:e2e": "electron-vite build && playwright test"
   },
   "dependencies": {
     "@codemirror/lang-javascript": "6.2.5",
@@ -44,6 +45,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@playwright/test": "1.63.0",
     "@tailwindcss/vite": "4.3.3",
     "@types/node": "24.13.6",
     "@types/react": "19.3.0",
