@@ -1,6 +1,7 @@
 import { join } from 'node:path'
 import { app, BrowserWindow, dialog, session } from 'electron'
 import { APP_NAME } from '@shared/app-info'
+import { registerExportIpc } from './export-ipc'
 import { registerProjectIpc } from './project-ipc'
 import type { Recovery } from './recovery'
 import { registerSampleIpc, sampleRoots } from './sample-ipc'
@@ -83,6 +84,7 @@ void app.whenReady().then(async () => {
   const library = await registerSampleIpc()
   handleSampleProtocol(sampleRoots)
   recovery = await registerProjectIpc(library)
+  registerExportIpc()
   createWindow()
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()

@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import {
   IPC,
   type MotifApi,
+  type ExportResult,
   type ImportResult,
   type LibrarySound,
   type OpenResult,
@@ -36,6 +37,12 @@ const api: MotifApi = {
     folder: () => ipcRenderer.invoke(IPC.samplesFolder) as Promise<string>,
     moveFolder: () => ipcRenderer.invoke(IPC.samplesMoveFolder) as Promise<string | null>,
     showFolder: () => ipcRenderer.invoke(IPC.samplesShowFolder) as Promise<void>,
+  },
+  export: {
+    save: (files, kind) => ipcRenderer.invoke(IPC.exportSave, [...files], kind) as Promise<ExportResult>,
+  },
+  app: {
+    licenses: () => ipcRenderer.invoke(IPC.appLicenses) as Promise<string>,
   },
   settings: {
     get: () => ipcRenderer.invoke(IPC.settingsGet) as Promise<Settings>,

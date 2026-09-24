@@ -16,6 +16,8 @@ export const IPC = {
   samplesFolder: 'samples:folder',
   samplesMoveFolder: 'samples:move-folder',
   samplesShowFolder: 'samples:show-folder',
+  exportSave: 'export:save',
+  appLicenses: 'app:licenses',
   settingsGet: 'settings:get',
   settingsSet: 'settings:set',
 } as const
@@ -80,6 +82,17 @@ export interface MotifApi {
     moveFolder(): Promise<string | null>
     showFolder(): Promise<void>
   }
+  readonly export: {
+    /**
+     * Asks where to save and writes the files: one file through a save dialog, several (stems)
+     * into a chosen folder. Names are file names only, never paths.
+     */
+    save(files: readonly ExportFile[], kind: 'wav' | 'js'): Promise<ExportResult>
+  }
+  readonly app: {
+    /** The license texts of the bundled samples and third-party code, for the About window. */
+    licenses(): Promise<string>
+  }
   readonly settings: {
     get(): Promise<Settings>
     /** Saves valid fields and applies the zoom at once. */
@@ -124,3 +137,11 @@ export interface Settings {
   /** English only in v1. */
   language: 'en'
 }
+
+export interface ExportFile {
+  name: string
+  data: ArrayBuffer
+}
+
+export type ExportResult =
+  { status: 'saved'; where: string } | { status: 'canceled' } | { status: 'error'; message: string }
