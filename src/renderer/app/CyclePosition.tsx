@@ -1,25 +1,50 @@
 import { useEffect, useRef } from 'react'
-import { getCycle } from '../engine/engine'
+import { getCycle, isPlaying } from '../engine/engine'
+import { fitCanvas, onFrame, token } from '../viz/frame-loop'
 
-/** Playback position, written straight into the DOM every frame: no React state (golden rule 3). */
+/**
+ * Position in cycles with 4 progress segments (SPEC 6.0). Updated from the shared frame loop
+ * straight into the DOM and a canvas: no React state (golden rule 3).
+ */
 export function CyclePosition() {
-  const ref = useRef<HTMLSpanElement>(null)
+  const text = useRef<HTMLSpanElement>(null)
+  const canvas = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
-    let frame = 0
-    const draw = () => {
-      if (ref.current) ref.current.textContent = getCycle().toFixed(2)
-      frame = requestAnimationFrame(draw)
-    }
-    frame = requestAnimationFrame(draw)
-    return () => {
-      cancelAnimationFrame(frame)
-    }
+    let shown = ''
+    let lit = -1
+    const on = token('accent')
+    const off = token('line-strong')
+    return onFrame(() => {
+      const cycle = isPlaying() ? getCycle() : 0
+      const label = cycle.toFixed(1)
+      if (text.current && label !== shown) {
+        shown = label
+        text.current.textContent = label
+      }
+      const segments = isPlaying() ? (Math.floor(cycle) % 4) + 1 : 0
+      if (!canvas.current || segments === lit) return
+      lit = segments
+      const context = fitCanvas(canvas.current)
+      if (!context) return
+      const { clientWidth: width, clientHeight: height } = canvas.current
+      context.clearRect(0, 0, width, height)
+      const w = (width - 3 * 6) / 4
+      for (let i = 0; i < 4; i++) {
+        context.fillStyle = i < segments ? on : off
+        context.beginPath()
+        context.roundRect(i * (w + 6), 0, w, height, height / 2)
+        context.fill()
+      }
+    })
   }, [])
 
   return (
-    <span className="font-mono text-knob-value text-text-2">
-      cycle <span ref={ref}>0.00</span>
-    </span>
+    <div className="flex shrink-0 flex-col gap-1.5" aria-label="Position in cycles">
+      <span className="font-mono text-body text-text">
+        cycle <span ref={text}>0.0</span>
+      </span>
+      <canvas ref={canvas} aria-hidden="true" className="h-1 w-[76px]" />
+    </div>
   )
 }

@@ -102,6 +102,16 @@
 }
 
 @layer base {
+  :root {
+    /* Native scrollbars and form controls follow the dark design. */
+    color-scheme: dark;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-active) transparent;
+  }
+
   html,
   body,
   #root {

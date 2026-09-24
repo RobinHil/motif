@@ -1,33 +1,47 @@
-import { useProject } from '../store/project-store'
-import { useUi } from '../store/ui-store'
-import { CodePanel } from './CodePanel'
-import { TrackRow } from './TrackRow'
-import { TransportControls } from './TransportControls'
+import { useEffect } from 'react'
+import { StudioScreen } from '../screens/studio/StudioScreen'
+import { projectStore } from '../store/project-store'
+import { uiStore, useUi } from '../store/ui-store'
+import { HomeScreen } from './HomeScreen'
+import { PlaceholderScreen } from './PlaceholderScreen'
+import { ShortcutHelp } from './ShortcutHelp'
+import { TransportBar } from './TransportBar'
 
-/** Phase 1 shell: exercises the model, code generation, stores and engine. The studio comes in phase 2. */
-export function App() {
-  const trackIds = useProject((s) => s.project.tracks.map((t) => t.id).join('\n'))
+function Notice() {
   const notice = useUi((s) => s.notice)
+  if (!notice) return null
+  return (
+    <p role="status" className="flex items-center gap-3 border-b border-line bg-panel px-6 py-2 text-body text-text-2">
+      {notice}
+      <button type="button" onClick={() => uiStore.getState().setNotice(null)} className="text-text hover:text-accent">
+        Dismiss
+      </button>
+    </p>
+  )
+}
+
+/** App shell: transport bar, then the home screen or one of the six screens (SPEC 6). */
+export function App() {
+  const home = useUi((s) => s.home)
+  const screen = useUi((s) => s.screen)
+
+  // Keep a track selected so the inspector always has something to show.
+  useEffect(
+    () =>
+      projectStore.subscribe((state) => {
+        const { selectedTrackId, selectTrack } = uiStore.getState()
+        if (!state.project.tracks.some((t) => t.id === selectedTrackId))
+          selectTrack(state.project.tracks[0]?.id ?? null)
+      }),
+    [],
+  )
 
   return (
     <div className="flex h-full flex-col bg-bg-app">
-      <TransportControls />
-      {notice && (
-        <p role="status" className="border-b border-line bg-panel px-5 py-2 text-small text-text-2">
-          {notice}
-        </p>
-      )}
-      <main className="grid flex-1 grid-cols-[minmax(320px,1fr)_2fr] gap-4 overflow-auto p-5">
-        <ul className="flex flex-col gap-3" aria-label="Tracks">
-          {trackIds
-            .split('\n')
-            .filter(Boolean)
-            .map((id) => (
-              <TrackRow key={id} trackId={id} />
-            ))}
-        </ul>
-        <CodePanel />
-      </main>
+      <TransportBar />
+      <Notice />
+      {home ? <HomeScreen /> : screen === 'studio' ? <StudioScreen /> : <PlaceholderScreen screen={screen} />}
+      <ShortcutHelp />
     </div>
   )
 }

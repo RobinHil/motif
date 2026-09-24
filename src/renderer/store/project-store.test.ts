@@ -241,9 +241,8 @@ describe('actions', () => {
     apply(actions.setParam('demo-bass', 'gain', undefined))
     apply(actions.setParam('demo-bass', 'vowel', 'a'))
     expect(track('demo-bass')?.params).toEqual({
-      gain: 0.9,
+      gain: 1,
       pan: 0.5,
-      lpq: 4,
       room: { kind: 'sequence', values: [0.1, 0.5] },
       vowel: 'a',
     })
@@ -290,5 +289,59 @@ describe('actions', () => {
     expect(track('demo-bass')?.transforms).toEqual([{ id: 'f', type: 'fast', args: { factor: 4 }, enabled: false }])
     apply(actions.removeTransform('demo-bass', 'f'))
     expect(track('demo-bass')?.transforms).toEqual([])
+  })
+})
+
+describe('conversion and row sounds', () => {
+  it('converts a structured track to free code that generates the same program', async () => {
+    const { generateProjectCode } = await import('../codegen/generate')
+    const { playedEvents } = await import('../codegen/strudel-harness')
+    const store = createProjectStore(createDemoProject(new Date(0)))
+    const before = generateProjectCode(store.getState().project).code
+    store.getState().update(actions.convertToFreeCode('demo-lead'))
+    store.getState().update(actions.convertToFreeCode('demo-drums'))
+    const lead = store.getState().project.tracks.find((t) => t.id === 'demo-lead')
+    expect(lead).toMatchObject({ kind: 'code', transforms: [] })
+    expect(lead?.notes).toBeUndefined()
+    expect(lead?.code).toBe('n("0 2 4 <5 7> ~ 4 2 ~").scale("C:minor").s("triangle").jux(rev)')
+    expect(ProjectSchema.safeParse(store.getState().project).success).toBe(true)
+    const after = generateProjectCode(store.getState().project).code
+    expect(await playedEvents(after, 0, 2)).toEqual(await playedEvents(before, 0, 2))
+    store.getState().update(actions.convertToFreeCode('demo-lead'))
+    expect(store.getState().past).toHaveLength(2)
+  })
+
+  it('replaces the sound of a row and drops its variant', () => {
+    const store = createProjectStore(createDemoProject())
+    store.getState().update(actions.setVariant('demo-drums', 'demo-drums-sd', 2.4))
+    expect(store.getState().project.tracks[0]?.steps?.rows[1]?.variant).toBe(2)
+    store.getState().update(actions.setRowSound('demo-drums', 'demo-drums-sd', 'cp'))
+    const row = store.getState().project.tracks[0]?.steps?.rows[1]
+    expect(row).toMatchObject({ sound: 'cp' })
+    expect(row?.variant).toBeUndefined()
+    store.getState().update(actions.setVariant('demo-drums', 'demo-drums-bd', 1))
+    store.getState().update(actions.setVariant('demo-drums', 'demo-drums-bd', undefined))
+    store.getState().update(actions.setVariant('demo-drums', 'missing', 1))
+    expect(store.getState().project.tracks[0]?.steps?.rows[0]?.variant).toBeUndefined()
+  })
+})
+
+describe('dropOnTrack', () => {
+  it('sets banks and adds rows on step tracks, instruments on note tracks, nothing on free code', () => {
+    const store = createProjectStore(createDemoProject(new Date(0)))
+    const { update } = store.getState()
+    update(actions.dropOnTrack('demo-drums', { kind: 'bank', bank: 'OtherKit' }))
+    update(actions.dropOnTrack('demo-drums', { kind: 'sound', name: 'cp', category: 'Drums' }, () => 'cp-row'))
+    update(actions.dropOnTrack('demo-bass', { kind: 'sound', name: 'square', category: 'Synths' }))
+    update(actions.dropOnTrack('demo-lead', { kind: 'sound', name: 'wind', category: 'Textures' }))
+    update(actions.dropOnTrack('demo-lead', { kind: 'bank', bank: 'OtherKit' }))
+    update(actions.dropOnTrack('demo-texture', { kind: 'sound', name: 'bd', category: 'Drums' }))
+    const [drums, bass, lead, texture] = store.getState().project.tracks
+    expect(drums?.source).toEqual({ type: 'bank', bank: 'OtherKit' })
+    expect(drums?.steps?.rows.at(-1)).toMatchObject({ id: 'cp-row', sound: 'cp' })
+    expect(bass?.source).toEqual({ type: 'synth', name: 'square' })
+    expect(lead?.source).toEqual({ type: 'sample', name: 'wind' })
+    expect(texture).toEqual(createDemoProject(new Date(0)).tracks[3])
+    expect(store.getState().past).toHaveLength(4)
   })
 })

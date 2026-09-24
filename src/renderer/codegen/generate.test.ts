@@ -17,10 +17,10 @@ describe('generateProjectCode', () => {
         '',
         '$: s(`bd ~  ~  ~  ~  ~  ~  ~  bd ~  bd ~  ~  ~  ~  ~ ,',
         '      ~  ~  ~  ~  sd ~  ~  ~  ~  ~  ~  ~  sd ~  ~  ~ ,',
-        '      hh ~  hh ~  hh ~  hh ~  hh ~  hh ~  hh ~  hh hh`).bank("RolandTR909").orbit(1)',
-        '$: note("c2@2 ~ c2 ~ ~ eb2@2 c2@2 ~ ~ g1@2 bb1@2").s("sawtooth").gain(0.9).lpf(600).lpq(4).orbit(2)',
+        '      hh ~  hh ~  hh ~  hh ~  hh ~  hh ~  hh ~  hh hh`).bank("MotifKit").orbit(1)',
+        '$: note("c2 c2 eb2 g1").s("sawtooth").lpf(sine.range(300, 1200).slow(4)).orbit(2)',
         '$: n("0 2 4 <5 7> ~ 4 2 ~").scale("C:minor").s("triangle").room(0.4).jux(rev).orbit(3)',
-        '$: note("<c4 eb4 g4 bb4>/2").s("sine").attack(0.5).release(2).gain(0.6).room(0.6).orbit(4)',
+        '$: s("wind*2").speed(perlin.range(0.5, 1.5)).chop(8).degradeBy(0.3).orbit(4)',
         '',
       ].join('\n'),
     )
@@ -41,7 +41,7 @@ describe('generateProjectCode', () => {
   it('produces code that Strudel evaluates, for the demo project', async () => {
     const events = await playedEvents(generateProjectCode(createDemoProject()).code)
     const sounds = new Set(events.map((e) => e.value['s']))
-    expect(sounds).toEqual(new Set(['bd', 'sd', 'hh', 'sawtooth', 'triangle', 'sine']))
+    expect(sounds).toEqual(new Set(['bd', 'sd', 'hh', 'sawtooth', 'triangle', 'wind']))
   })
 
   it('writes only the tempo line for an empty project', () => {

@@ -38,3 +38,14 @@ export function ensureOrbitAnalyser(orbit: number): AnalyserNode {
 export function orbitOutput(orbit: number): GainNode {
   return getSuperdoughAudioController().getOrbit(orbit).output
 }
+
+const levelBuffer = new Float32Array(512)
+
+/** Peak absolute sample of an orbit over the analyser window (0 when silent). For meters. */
+export function orbitPeak(orbit: number): number {
+  const analyser = ensureOrbitAnalyser(orbit)
+  analyser.getFloatTimeDomainData(levelBuffer)
+  let peak = 0
+  for (const sample of levelBuffer) peak = Math.max(peak, Math.abs(sample))
+  return peak
+}

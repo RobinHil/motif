@@ -21,7 +21,7 @@ const drums: Track = {
   kind: 'steps',
   mute: false,
   solo: false,
-  source: { type: 'bank', bank: 'RolandTR909' },
+  source: { type: 'bank', bank: 'MotifKit' },
   params: { gain: 1, pan: 0.5 },
   transforms: [],
   steps: {
@@ -43,18 +43,16 @@ const bass: Track = {
   mute: false,
   solo: false,
   source: { type: 'synth', name: 'sawtooth' },
-  params: { gain: 0.9, pan: 0.5, lpf: 600, lpq: 4 },
+  params: { gain: 1, pan: 0.5, lpf: { kind: 'signal', shape: 'sine', min: 300, max: 1200, cycles: 4 } },
   transforms: [],
   notes: {
     mode: 'note',
     stepsPerCycle: 16,
     notes: [
-      note('demo-bass-1', 0, 2, 'c2'),
-      note('demo-bass-2', 3, 1, 'c2'),
-      note('demo-bass-3', 6, 2, 'eb2'),
-      note('demo-bass-4', 8, 2, 'c2'),
-      note('demo-bass-5', 12, 2, 'g1'),
-      note('demo-bass-6', 14, 2, 'bb1'),
+      note('demo-bass-1', 0, 4, 'c2'),
+      note('demo-bass-2', 4, 4, 'c2'),
+      note('demo-bass-3', 8, 4, 'eb2'),
+      note('demo-bass-4', 12, 4, 'g1'),
     ],
   },
 }
@@ -94,9 +92,9 @@ const texture: Track = {
   mute: false,
   solo: false,
   source: { type: 'synth', name: 'sine' },
-  params: { gain: 0.6, pan: 0.5, room: 0.6 },
+  params: { gain: 1, pan: 0.5 },
   transforms: [],
-  code: 'note("<c4 eb4 g4 bb4>/2").s("sine").attack(0.5).release(2)',
+  code: 's("wind*2").speed(perlin.range(0.5, 1.5)).chop(8).degradeBy(0.3)',
 }
 
 /** The project loaded on first launch (SPEC 10, onboarding): Drums, Bass, Lead, Texture. */

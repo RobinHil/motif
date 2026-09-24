@@ -18,12 +18,18 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "samples:test": "bun scripts/generate-test-samples.ts",
     "licenses": "bun scripts/third-party-licenses.ts",
     "package": "electron-vite build && bun run licenses && electron-builder",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "samples:kit": "bun scripts/generate-kit.ts",
+    "test:e2e": "electron-vite build && playwright test"
   },
   "dependencies": {
+    "@codemirror/lang-javascript": "6.2.5",
+    "@codemirror/language": "6.12.4",
+    "@codemirror/state": "6.7.6",
+    "@codemirror/view": "6.43.13",
+    "@lezer/highlight": "1.2.3",
     "@strudel/core": "1.2.6",
     "@strudel/mini": "1.2.6",
     "@strudel/tonal": "1.2.6",
@@ -39,6 +45,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@playwright/test": "1.63.0",
     "@tailwindcss/vite": "4.3.3",
     "@types/node": "24.13.6",
     "@types/react": "19.3.0",

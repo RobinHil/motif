@@ -150,3 +150,23 @@ describe('TrustedProjects', () => {
     expect(await new TrustedProjects(file).isTrusted(base)).toBe(false)
   })
 })
+
+describe('RecentProjects', () => {
+  it('keeps the latest 10 folders, most recent first, and resolves opaque ids', async () => {
+    const { RecentProjects } = await import('./recent-projects')
+    const file = join(base, 'recent.json')
+    const recent = new RecentProjects(file)
+    for (let i = 0; i < 12; i++) await recent.add(`/music/Song ${String(i)}.motif`)
+    await recent.add('/music/Song 5.motif')
+    const list = await new RecentProjects(file).list()
+    expect(list).toHaveLength(10)
+    expect(list[0]?.name).toBe('Song 5')
+    expect(list[1]?.name).toBe('Song 11')
+    expect(JSON.stringify(list)).not.toContain('/music')
+    expect(await recent.resolve(list[0]?.id)).toBe('/music/Song 5.motif')
+    expect(await recent.resolve('nope')).toBeNull()
+    expect(await recent.resolve(42)).toBeNull()
+    await recent.remove('/music/Song 5.motif')
+    expect((await recent.list())[0]?.name).toBe('Song 11')
+  })
+})

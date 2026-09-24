@@ -16,6 +16,7 @@ Requires [Bun](https://bun.sh).
 bun install          # dependencies
 bun run dev          # run the app in development mode
 bun run test         # unit tests (Vitest; do not use `bun test`)
+bun run test:e2e     # end-to-end tests (Playwright, Electron)
 bun run lint         # ESLint
 bun run typecheck    # TypeScript
 bun run package      # installer for the current OS, in dist/

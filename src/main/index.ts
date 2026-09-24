@@ -64,6 +64,9 @@ function createWindow(): void {
 }
 
 app.setName(APP_NAME)
+// End-to-end tests run each app in a fresh profile. Only the test launcher sets this variable.
+const e2eUserData = process.env['MOTIF_E2E_USER_DATA']
+if (e2eUserData) app.setPath('userData', e2eUserData)
 registerSampleScheme()
 hardenWebContents(devServerOrigin)
 

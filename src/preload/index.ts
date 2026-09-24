@@ -1,5 +1,12 @@
 import { contextBridge, ipcRenderer } from 'electron'
-import { IPC, type MotifApi, type OpenResult, type RecoveredProject, type SaveResult } from '@shared/ipc'
+import {
+  IPC,
+  type MotifApi,
+  type OpenResult,
+  type RecentProject,
+  type RecoveredProject,
+  type SaveResult,
+} from '@shared/ipc'
 
 const api: MotifApi = {
   platform: process.platform,
@@ -8,6 +15,8 @@ const api: MotifApi = {
     save: (text, suggestedName) => ipcRenderer.invoke(IPC.projectSave, text, suggestedName) as Promise<SaveResult>,
     saveAs: (text, suggestedName) => ipcRenderer.invoke(IPC.projectSaveAs, text, suggestedName) as Promise<SaveResult>,
     reset: () => ipcRenderer.invoke(IPC.projectNew) as Promise<void>,
+    recent: () => ipcRenderer.invoke(IPC.projectRecent) as Promise<RecentProject[]>,
+    openRecent: (id) => ipcRenderer.invoke(IPC.projectOpenRecent, id) as Promise<OpenResult>,
   },
   recovery: {
     write: (text) => ipcRenderer.invoke(IPC.recoveryWrite, text) as Promise<void>,

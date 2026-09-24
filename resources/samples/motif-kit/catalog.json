@@ -1,0 +1,29 @@
+{
+  "banks": ["MotifKit"],
+  "sounds": [
+    {
+      "name": "bd",
+      "category": "Drums"
+    },
+    {
+      "name": "sd",
+      "category": "Drums"
+    },
+    {
+      "name": "hh",
+      "category": "Drums"
+    },
+    {
+      "name": "cp",
+      "category": "Drums"
+    },
+    {
+      "name": "rim",
+      "category": "Drums"
+    },
+    {
+      "name": "wind",
+      "category": "Textures"
+    }
+  ]
+}
