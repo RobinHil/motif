@@ -21,6 +21,12 @@ const api: MotifApi = {
     reset: () => ipcRenderer.invoke(IPC.projectNew) as Promise<void>,
     recent: () => ipcRenderer.invoke(IPC.projectRecent) as Promise<RecentProject[]>,
     openRecent: (id) => ipcRenderer.invoke(IPC.projectOpenRecent, id) as Promise<OpenResult>,
+    pendingOpen: () => ipcRenderer.invoke(IPC.projectPendingOpen) as Promise<OpenResult | null>,
+    onOpenedExternally: (listener) => {
+      const handler = (_event: unknown, result: OpenResult) => listener(result)
+      ipcRenderer.on(IPC.projectOpenedExternally, handler)
+      return () => ipcRenderer.off(IPC.projectOpenedExternally, handler)
+    },
   },
   samples: {
     library: () => ipcRenderer.invoke(IPC.samplesLibrary) as Promise<LibrarySound[]>,
@@ -43,6 +49,11 @@ const api: MotifApi = {
   },
   app: {
     licenses: () => ipcRenderer.invoke(IPC.appLicenses) as Promise<string>,
+    onShowAbout: (listener) => {
+      const handler = () => listener()
+      ipcRenderer.on(IPC.appShowAbout, handler)
+      return () => ipcRenderer.off(IPC.appShowAbout, handler)
+    },
   },
   settings: {
     get: () => ipcRenderer.invoke(IPC.settingsGet) as Promise<Settings>,

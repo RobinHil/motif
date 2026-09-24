@@ -16,6 +16,9 @@ export const IPC = {
   samplesFolder: 'samples:folder',
   samplesMoveFolder: 'samples:move-folder',
   samplesShowFolder: 'samples:show-folder',
+  projectPendingOpen: 'project:pending-open',
+  projectOpenedExternally: 'project:opened-externally',
+  appShowAbout: 'app:show-about',
   exportSave: 'export:save',
   appLicenses: 'app:licenses',
   settingsGet: 'settings:get',
@@ -64,6 +67,10 @@ export interface MotifApi {
     reset(): Promise<void>
     recent(): Promise<RecentProject[]>
     openRecent(id: string): Promise<OpenResult>
+    /** A project the system asked Motif to open at launch (double-click on a .motif), once. */
+    pendingOpen(): Promise<OpenResult | null>
+    /** Projects the system asks to open while Motif runs. Returns the unsubscribe function. */
+    onOpenedExternally(listener: (result: OpenResult) => void): () => void
   }
   readonly samples: {
     /** The user's imported sounds. */
@@ -92,6 +99,8 @@ export interface MotifApi {
   readonly app: {
     /** The license texts of the bundled samples and third-party code, for the About window. */
     licenses(): Promise<string>
+    /** "About Motif" from the macOS application menu. */
+    onShowAbout(listener: () => void): () => void
   }
   readonly settings: {
     get(): Promise<Settings>
