@@ -70,3 +70,36 @@ test('makes zero outbound requests', async () => {
   expect(remote).toEqual([])
   expect(requests.some((url) => url.startsWith('motif-sample://'))).toBe(true)
 })
+
+test('reaches every kind of control with the Tab key', async () => {
+  const { page } = running
+  await page.locator('body').click({ position: { x: 5, y: 300 } })
+  const reached = new Set<string>()
+  for (let i = 0; i < 160; i++) {
+    await page.keyboard.press('Tab')
+    const name = await page.evaluate(() => {
+      let element = document.activeElement
+      while (element?.shadowRoot?.activeElement) element = element.shadowRoot.activeElement
+      if (!element) return ''
+      return element.getAttribute('aria-label') ?? element.textContent.trim().slice(0, 40)
+    })
+    reached.add(name)
+  }
+  for (const control of [
+    'Play',
+    'Studio',
+    'Preview bd',
+    'Drums',
+    'Mute',
+    'bd step 1',
+    '+ Row',
+    '+ Add track',
+    'Volume',
+    'Speed',
+    'Generated Strudel code',
+  ]) {
+    expect([...reached], control).toContain(control)
+  }
+  expect([...reached].some((name) => name.startsWith('Tempo'))).toBe(true)
+  expect([...reached].some((name) => name.startsWith('Speed up x2'))).toBe(true)
+})

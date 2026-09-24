@@ -12,8 +12,6 @@
     "src/preload/**/*",
     "src/shared/**/*",
     "src/renderer/model/**/*",
-    "scripts/**/*",
-    "e2e/**/*",
-    "playwright.config.ts"
+    "scripts/**/*"
   ]
 }

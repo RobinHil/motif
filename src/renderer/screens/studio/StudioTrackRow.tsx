@@ -105,6 +105,10 @@ export function StudioTrackRow({ trackId, index }: { trackId: ID; index: number 
     } else if (event.key === 'F2') {
       event.preventDefault()
       setRenaming(true)
+    } else if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+      event.preventDefault()
+      const rect = (event.target as HTMLElement).getBoundingClientRect()
+      setMenu({ x: rect.left, y: rect.bottom + 4 })
     }
   }
 
@@ -126,12 +130,12 @@ export function StudioTrackRow({ trackId, index }: { trackId: ID; index: number 
         if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDropping(false)
       }}
       onDrop={onDrop}
-      className={`grid grid-cols-[220px_1fr] border-b border-line ${selected ? 'bg-selected-row' : ''} ${dropping ? 'outline-2 -outline-offset-2 outline-line-strong' : ''}`}
+      className={`grid grid-cols-[196px_1fr] border-b border-line ${selected ? 'bg-selected-row' : ''} ${dropping ? 'outline-2 -outline-offset-2 outline-line-strong' : ''}`}
     >
       <div
         draggable={!renaming}
         onDragStart={(event) => dragTrack(event, trackId)}
-        className="flex flex-col gap-3 border-r border-line px-5 py-4"
+        className="flex flex-col gap-3 border-r border-line px-4 py-4"
       >
         <div className="flex items-start gap-3">
           <span className={`mt-1.5 size-3.5 shrink-0 rounded-xs ${SWATCH[color]}`} />
@@ -157,7 +161,7 @@ export function StudioTrackRow({ trackId, index }: { trackId: ID; index: number 
                 onClick={select}
                 onDoubleClick={() => setRenaming(true)}
                 onKeyDown={onNameKeyDown}
-                title="Double-click or F2 to rename, Alt+arrows to move"
+                title="Double-click or F2 to rename, Alt+arrows to move, Shift+F10 for the menu"
                 className={`truncate text-left text-track-name font-medium ${selected ? NAME_COLOR[color] : 'text-text'}`}
               >
                 {name}
@@ -188,7 +192,7 @@ export function StudioTrackRow({ trackId, index }: { trackId: ID; index: number 
           <TrackMeter orbit={orbit} label={name} />
         </div>
       </div>
-      <div className="flex min-w-0 flex-col justify-center gap-2 px-6 py-4">
+      <div className="flex min-w-0 flex-col justify-center gap-2 px-5 py-4">
         {kind === 'steps' && <StepGrid trackId={trackId} color={color} />}
         {kind === 'notes' && <NotePreview trackId={trackId} color={color} />}
         {kind === 'code' && <FreeCodePreview trackId={trackId} />}

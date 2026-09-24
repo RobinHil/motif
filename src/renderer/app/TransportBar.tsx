@@ -31,7 +31,7 @@ function RoundButton(props: {
       title={props.hint ?? props.label}
       onClick={props.onClick}
       disabled={props.disabled}
-      className={`grid size-12 place-items-center rounded-pill transition-colors disabled:cursor-not-allowed ${
+      className={`grid size-9 shrink-0 place-items-center rounded-pill transition-colors disabled:cursor-not-allowed ${
         props.primary
           ? 'bg-accent text-bg-app hover:bg-accent-hover'
           : 'bg-raised text-text hover:bg-active disabled:text-text-3'
@@ -49,14 +49,14 @@ export function TransportBar() {
   const home = useUi((s) => s.home)
 
   return (
-    <header className="flex items-center gap-4 border-b border-line bg-bg-deep px-6 py-3">
+    <header className="flex items-center gap-3 border-b border-line bg-bg-deep px-5 py-2.5 whitespace-nowrap">
       <button
         type="button"
         onClick={() => uiStore.getState().setHome(true)}
         title="Home"
-        className="flex items-center gap-3 rounded-control pr-2"
+        className="flex shrink-0 items-center gap-2.5 rounded-control pr-1"
       >
-        <img src={lockup} alt="Motif" className="h-6" />
+        <img src={lockup} alt="Motif" className="h-5" />
         <span className="text-small text-label">{APP_TAGLINE}</span>
       </button>
       <div className="flex items-center gap-2">
@@ -99,7 +99,7 @@ export function TransportBar() {
       </div>
       <TempoControl />
       <CyclePosition />
-      <nav aria-label="Screens" className="ml-4 flex items-center gap-1">
+      <nav aria-label="Screens" className="ml-2 flex items-center gap-0.5">
         {SCREENS.map((s, index) => (
           <button
             key={s}
@@ -107,13 +107,13 @@ export function TransportBar() {
             aria-current={!home && screen === s ? 'page' : undefined}
             title={`${SCREEN_LABELS[s]} (${String(index + 1)})`}
             onClick={() => uiStore.getState().setScreen(s)}
-            className={`h-10 rounded-pill px-4 text-body-lg transition-colors ${!home && screen === s ? 'bg-pill-active text-text' : 'text-text-2 hover:text-text'}`}
+            className={`h-8 rounded-pill px-3 text-body transition-colors ${!home && screen === s ? 'bg-pill-active text-text' : 'text-text-2 hover:text-text'}`}
           >
             {SCREEN_LABELS[s]}
           </button>
         ))}
       </nav>
-      <span className="ml-auto flex items-center gap-2 text-body text-text-2">
+      <span className="ml-auto flex items-center gap-2 text-small text-text-2">
         <span className="size-2 rounded-pill bg-success" />
         Offline · bundled samples
       </span>
@@ -121,7 +121,7 @@ export function TransportBar() {
         type="button"
         disabled
         title="Export arrives in a later version"
-        className="h-10 rounded-pill border border-line-strong px-5 text-body text-text disabled:cursor-not-allowed disabled:opacity-60"
+        className="h-8 rounded-pill border border-line-strong px-4 text-body text-text disabled:cursor-not-allowed disabled:opacity-60"
       >
         Export
       </button>

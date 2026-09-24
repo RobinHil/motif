@@ -129,6 +129,14 @@ export function Knob(props: KnobProps) {
     }
   }
 
+  const onMenuKey = (event: KeyboardEvent) => {
+    if (event.key !== 'ContextMenu' && !(event.shiftKey && event.key === 'F10')) return false
+    event.preventDefault()
+    const rect = event.currentTarget.getBoundingClientRect()
+    setMenu({ x: rect.left, y: rect.bottom + 4 })
+    return true
+  }
+
   const r = size / 2 - 3
   const center = size / 2
   const arc = modulated
@@ -159,7 +167,9 @@ export function Knob(props: KnobProps) {
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
         onDoubleClick={props.onReset}
-        onKeyDown={onKeyDown}
+        onKeyDown={(event) => {
+          if (!onMenuKey(event)) onKeyDown(event)
+        }}
         onContextMenu={(event) => {
           event.preventDefault()
           setMenu({ x: event.clientX, y: event.clientY })

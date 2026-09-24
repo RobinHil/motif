@@ -40,11 +40,11 @@ export function CyclePosition() {
   }, [])
 
   return (
-    <div className="flex flex-col gap-1.5" aria-label="Position in cycles">
-      <span className="font-mono text-body-lg text-text">
+    <div className="flex shrink-0 flex-col gap-1.5" aria-label="Position in cycles">
+      <span className="font-mono text-body text-text">
         cycle <span ref={text}>0.0</span>
       </span>
-      <canvas ref={canvas} aria-hidden="true" className="h-1 w-[90px]" />
+      <canvas ref={canvas} aria-hidden="true" className="h-1 w-[76px]" />
     </div>
   )
 }

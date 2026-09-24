@@ -50,7 +50,7 @@ export function TempoControl() {
             if (event.key === 'Enter') event.currentTarget.blur()
             if (event.key === 'Escape') setEditing(false)
           }}
-          className="w-14 rounded-xs bg-bg-code px-1 font-mono text-body-lg text-text outline-none"
+          className="w-14 rounded-xs bg-bg-code px-1 font-mono text-body text-text outline-none"
         />
       ) : (
         <button
@@ -69,7 +69,7 @@ export function TempoControl() {
               setEditing(true)
             }
           }}
-          className="cursor-ns-resize touch-none font-mono text-body-lg text-text"
+          className="cursor-ns-resize touch-none font-mono text-body text-text"
         >
           {formatNumber(bpm)} BPM
         </button>
