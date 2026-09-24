@@ -345,3 +345,34 @@ describe('dropOnTrack', () => {
     expect(store.getState().past).toHaveLength(4)
   })
 })
+
+describe('mixer actions', () => {
+  it('bypasses an effect without losing its value, and the code skips it', async () => {
+    const { generateTrackCode } = await import('../codegen/generate')
+    const store = createProjectStore(createDemoProject(new Date(0)))
+    store.getState().update(actions.toggleBypass('demo-lead', 'room'))
+    const lead = store.getState().project.tracks[2]
+    expect(lead?.bypassed).toEqual(['room'])
+    expect(lead?.params.room).toBe(0.4)
+    expect(generateTrackCode(lead as never, false)).not.toContain('.room(')
+    expect(ProjectSchema.safeParse(store.getState().project).success).toBe(true)
+    store.getState().update(actions.toggleBypass('demo-lead', 'room'))
+    expect(store.getState().project.tracks[2]?.bypassed).toBeUndefined()
+  })
+
+  it('sets master settings and reorders transforms', () => {
+    const store = createProjectStore(createDemoProject(new Date(0)))
+    store.getState().update(actions.setMaster({ gain: 0.6, compressor: true, width: 1.4 }))
+    expect(store.getState().project.master).toMatchObject({ gain: 0.6, compressor: true, width: 1.4, limiter: false })
+    store.getState().update(actions.addTransform('demo-lead', 'chop', () => 'chop-1'))
+    store.getState().update(actions.moveTransform('demo-lead', 'chop-1', 0))
+    expect(store.getState().project.tracks[2]?.transforms.map((t) => t.type)).toEqual(['chop', 'jux'])
+    store.getState().update(actions.moveTransform('demo-lead', 'missing', 0))
+  })
+
+  it('still loads projects saved without the newer master fields', () => {
+    const project = createDemoProject()
+    const { width: _w, low: _l, high: _h, ...master } = project.master
+    expect(ProjectSchema.safeParse({ ...project, master }).success).toBe(true)
+  })
+})

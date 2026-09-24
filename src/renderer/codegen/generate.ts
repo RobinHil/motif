@@ -65,7 +65,7 @@ export function generateTrackCode(track: Track, muted: boolean): string {
   const prefix = muted ? '_$: ' : '$: '
   const pattern = patternCode(track, prefix.length)
   const suffix =
-    soundCode(track) + paramsCode(track.params) + transformsCode(track.transforms) + `.orbit(${String(track.orbit)})`
+    soundCode(track) + paramsCode(track.params, track.bypassed) + transformsCode(track.transforms) + `.orbit(${String(track.orbit)})`
   // Free code ending in a line comment would swallow the suffix: start it on a new line.
   const lastLine = pattern.slice(pattern.lastIndexOf('\n') + 1)
   const separator = track.kind === 'code' && lastLine.includes('//') ? '\n  ' : ''

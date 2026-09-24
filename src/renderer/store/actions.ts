@@ -243,3 +243,26 @@ export const setVariant = (trackId: ID, rowId: ID, variant: number | undefined):
     if (variant === undefined) delete row.variant
     else row.variant = Math.max(0, Math.round(variant))
   })
+
+/** Switches an effect off in the mixer without losing its value, or back on. */
+export const toggleBypass = (trackId: ID, key: ParamKey): Recipe =>
+  withTrack(trackId, (track) => {
+    const bypassed = track.bypassed ?? []
+    track.bypassed = bypassed.includes(key) ? bypassed.filter((k) => k !== key) : [...bypassed, key]
+    if (track.bypassed.length === 0) delete track.bypassed
+  })
+
+export const setMaster =
+  (changes: Partial<Project['master']>): Recipe =>
+  (project) => {
+    Object.assign(project.master, changes)
+  }
+
+/** Moves a transform in the track's chain (mixer effect order). */
+export const moveTransform = (trackId: ID, transformId: ID, toIndex: number): Recipe =>
+  withTrack(trackId, (track) => {
+    const from = track.transforms.findIndex((t) => t.id === transformId)
+    if (from < 0) return
+    const [moved] = track.transforms.splice(from, 1)
+    if (moved) track.transforms.splice(clamp(toIndex, 0, track.transforms.length), 0, moved)
+  })

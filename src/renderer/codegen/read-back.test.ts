@@ -336,3 +336,15 @@ describe('readBack side effects', () => {
     expect(result.project.tracks[1]).toMatchObject({ mute: false, params: { room: 0.2 } })
   })
 })
+
+describe('bypassed effects', () => {
+  it('keeps the value of a bypassed effect when the code is read back', () => {
+    const project = demo()
+    project.tracks[2] = { ...(project.tracks[2] as Track), bypassed: ['room'] }
+    const code = generateProjectCode(project).code
+    expect(code).not.toContain('.room(0.4)')
+    const result = readBack(code.replace('.jux(rev).orbit(3)', '.jux(rev).fast(2).orbit(3)'), project)
+    expect(result.pending).toEqual([])
+    expect(result.project.tracks[2]).toMatchObject({ bypassed: ['room'], params: { room: 0.4 } })
+  })
+})

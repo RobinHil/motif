@@ -47,7 +47,7 @@ export function createProject(name = 'Untitled', now: Date = new Date()): Projec
     scenes: [],
     arrangement: [],
     automations: [],
-    master: { gain: 0.8, compressor: false, limiter: false },
+    master: { gain: 0.8, compressor: false, limiter: false, width: 1, low: 0, high: 0 },
     sampleLibrary: [],
     midiMappings: [],
   }
