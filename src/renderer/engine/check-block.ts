@@ -7,9 +7,12 @@ export interface BlockIssue {
   line?: number
 }
 
-const LABEL = /^\s*_?\$:\s?/
+const LABEL = /^\s*(?:_?\$:|const [A-Za-z_$][\w$]* =)\s?/
 
-/** `$: s("bd")` -> `s("bd")`, so the block can be checked alone without registering a pattern. */
+/**
+ * `$: s("bd")` or `const drums = s("bd")` -> `s("bd")`, so the block can be checked alone without
+ * registering a pattern.
+ */
 export function stripLabel(block: string): string {
   return block.replace(LABEL, '')
 }

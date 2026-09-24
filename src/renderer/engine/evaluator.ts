@@ -68,10 +68,12 @@ export class Evaluator {
     const accepted = new Map<ID, string>()
     const blocks: string[] = []
 
-    for (const { trackId, code } of generated.blocks) {
+    // Loop and song blocks have different shapes: each keeps its own last valid versions.
+    const key = (trackId: ID) => `${generated.kind ?? 'loop'}:${trackId}`
+    for (const { trackId, code, fallback } of generated.blocks) {
       const issue = await this.backend.checkBlock(code)
       if (issue === null) {
-        accepted.set(trackId, code)
+        accepted.set(key(trackId), code)
         blocks.push(code)
         continue
       }
@@ -80,16 +82,19 @@ export class Evaluator {
         issue.line !== undefined && from !== undefined
           ? { message: issue.message, line: from + issue.line - 1 }
           : { message: issue.message }
-      const previous = this.lastValid.get(trackId)
+      const previous = this.lastValid.get(key(trackId)) ?? fallback
       if (previous !== undefined) blocks.push(previous)
     }
 
-    const code = `${[generated.header, ...(blocks.length > 0 ? ['', ...blocks] : [])].join('\n')}\n`
+    const body = [generated.header, ...(blocks.length > 0 ? ['', ...blocks] : [])]
+    if (generated.footer !== undefined) body.push(generated.footer)
+    const code = `${body.join('\n')}\n`
     const failure = await this.backend.evaluate(code)
     let globalError: string | null = null
     if (failure === null) {
-      const present = new Set(generated.blocks.map((b) => b.trackId))
-      for (const id of this.lastValid.keys()) if (!present.has(id)) this.lastValid.delete(id)
+      const present = new Set(generated.blocks.map((b) => key(b.trackId)))
+      const prefix = key('')
+      for (const id of this.lastValid.keys()) if (id.startsWith(prefix) && !present.has(id)) this.lastValid.delete(id)
       for (const [id, block] of accepted) this.lastValid.set(id, block)
     } else {
       globalError = describeError(failure).message
