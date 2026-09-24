@@ -216,6 +216,8 @@ export class CodeView {
       playing,
     ]
     if (options.editable) {
+      // Before the keymap below: Enter must accept a completion before it inserts a new line.
+      if (options.completions) extensions.push(autocompletion({ override: [options.completions], icons: false }))
       extensions.push(
         history(),
         keymap.of([
@@ -232,7 +234,6 @@ export class CodeView {
           }
         }),
       )
-      if (options.completions) extensions.push(autocompletion({ override: [options.completions], icons: false }))
     } else {
       extensions.push(EditorState.readOnly.of(true), EditorView.editable.of(false))
     }

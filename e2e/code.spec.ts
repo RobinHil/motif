@@ -95,3 +95,35 @@ test('live highlighting follows the music', async () => {
   }
   expect(seen.size).toBeGreaterThan(4)
 })
+
+test('completes Strudel functions and documents them', async () => {
+  const { page } = running
+  await openCodeScreen(page)
+  await editor(page).locator('.cm-line').nth(5).click()
+  await page.keyboard.press('End')
+  await page.keyboard.type('.ju')
+  const option = page.getByRole('option', { name: /jux\s*stereo/ })
+  await expect(option).toBeVisible()
+  await expect(
+    page.getByRole('complementary', { name: 'Documentation' }).getByRole('heading', { name: 'jux(function)' }),
+  ).toBeVisible()
+  // CodeMirror ignores Enter for 75 ms after the list opens, against accidental accepts.
+  await page.waitForTimeout(150)
+  await page.keyboard.press('Enter')
+  await expect(editor(page)).toContainText('.orbit(2).jux')
+})
+
+test('direct edit in the Studio code panel reads the code back', async () => {
+  const { page } = running
+  await page.getByRole('group', { name: 'Code mode' }).getByRole('button', { name: 'Direct edit' }).click()
+  const panel = page.getByRole('textbox', { name: 'Strudel code, editable' })
+  await expect(panel).toBeVisible()
+  const lines = await panel.locator('.cm-line').allTextContents()
+  await panel.click()
+  await page.keyboard.press('Control+a')
+  await page.keyboard.insertText(lines.join('\n').replace('.room(0.4)', '.room(0.9)'))
+  await page.keyboard.press('Control+Enter')
+  await expect(page.getByRole('slider', { name: 'Reverb' })).toHaveCount(1)
+  await page.getByRole('listitem', { name: 'Lead, Notes, orbit 3' }).getByRole('button', { name: 'Lead' }).click()
+  await expect(page.getByRole('slider', { name: 'Reverb' })).toHaveAttribute('aria-valuenow', '0.9')
+})
