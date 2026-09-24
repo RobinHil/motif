@@ -49,6 +49,8 @@ declare module '@strudel/webaudio' {
   export interface Scheduler {
     now(): number
     started: boolean
+    cps: number
+    pattern?: import('@strudel/core').Pattern
   }
 
   export interface Repl {

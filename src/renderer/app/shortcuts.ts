@@ -3,7 +3,8 @@ import { duplicateTrack, setMute, setSolo } from '../store/actions'
 import { projectStore } from '../store/project-store'
 import { SCREENS, uiStore } from '../store/ui-store'
 import { newProject, openProject, saveProject, saveProjectAs } from './project-session'
-import { evaluate, panicAll, togglePlay } from './transport'
+import { evaluateDraft } from './direct-edit'
+import { panicAll, togglePlay } from './transport'
 
 export const IS_MAC = navigator.userAgent.includes('Mac')
 const MOD = IS_MAC ? 'Cmd' : 'Ctrl'
@@ -42,7 +43,7 @@ export function handleShortcut(event: KeyboardEvent): void {
 
   if (mod) {
     if (key === '.') run(event, panicAll)
-    else if (key === 'enter') run(event, evaluate)
+    else if (key === 'enter') run(event, evaluateDraft)
     else if (key === 'z' && event.shiftKey) run(event, project.redo)
     else if (key === 'z' || (key === 'y' && !IS_MAC)) run(event, key === 'y' ? project.redo : project.undo)
     else if (key === 's') run(event, event.shiftKey ? saveProjectAs : saveProject)
