@@ -158,3 +158,13 @@ Format: date - problem - decision.
 - **Meters**: orbit and master taps split left and right into two analysers for stereo meters; track meters in the Studio show the louder side.
 - **Not in this phase**: MIDI learn (banner, CC badges, dashed outlines) is phase 9; recording (format, stems, offline render, Record output) is phase 10 and is shown disabled.
 - **Measurements** (Playwright, mixer open while playing the demo): 59.6 frames per second over 5 seconds, worst frame 54 ms, and 0 audio underruns in `AudioContext.playbackStats`.
+
+## 2026-09-24 - Phase 5: piano roll
+
+- **Triplets**: the model has 16 steps per cycle (SPEC 3), which cannot hold a triplet grid. The grid offers 1/16, 1/8 and 1/4; triplets are listed but disabled until the model gets a finer resolution.
+- **Humanize** varies velocity only (plus or minus 0.12, seeded). Timing offsets would need positions between steps, which the model does not have either; the mockup's "Humanize (velocity and timing)" is labeled "Humanize velocity".
+- **Mode switch**: going from notes to scale degrees moves every note (and alternative) to the nearest degree of the scale, ties going down, so out-of-scale notes snap. Going back gives exact note names. Changing the scale in degree mode only rewrites `.scale(...)`: the stored degrees do not change, which is the acceptance criterion.
+- **Edit cycle**: cycle 1 edits a note's `pitch`, cycle n its alternative n-1 (created from the previous one when missing), "All" shifts every pitch together. Notes playing another pitch on other cycles are drawn dashed at those pitches. Tabs show one cycle per alternative, at least two, at most eight. "+ Add variant" copies the last pitch as a new alternative and switches to its cycle.
+- **Keyboard**: the grid keeps a cursor (step and pitch), outlined only when focused from the keyboard. Arrows move the selection, or the cursor when nothing is selected; Shift with up or down moves by an octave (12 semitones, or the scale's length in degrees). Enter adds a note at the cursor, Ctrl+C and Ctrl+V copy and paste right after the selected notes (at the cursor when nothing is selected), Delete removes.
+- **Code excerpt**: the right panel shows the track's generated block with the selected notes' tokens marked, from positions returned by the note codegen (`noteTokenRanges`), relative to the pattern string.
+- **Range**: the keyboard spans C1 to B6 and scrolls; it opens centered on the track's notes.
