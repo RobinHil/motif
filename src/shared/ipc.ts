@@ -16,6 +16,11 @@ export const IPC = {
   samplesFolder: 'samples:folder',
   samplesMoveFolder: 'samples:move-folder',
   samplesShowFolder: 'samples:show-folder',
+  projectPendingOpen: 'project:pending-open',
+  projectOpenedExternally: 'project:opened-externally',
+  appShowAbout: 'app:show-about',
+  exportSave: 'export:save',
+  appLicenses: 'app:licenses',
   settingsGet: 'settings:get',
   settingsSet: 'settings:set',
 } as const
@@ -62,6 +67,10 @@ export interface MotifApi {
     reset(): Promise<void>
     recent(): Promise<RecentProject[]>
     openRecent(id: string): Promise<OpenResult>
+    /** A project the system asked Motif to open at launch (double-click on a .motif), once. */
+    pendingOpen(): Promise<OpenResult | null>
+    /** Projects the system asks to open while Motif runs. Returns the unsubscribe function. */
+    onOpenedExternally(listener: (result: OpenResult) => void): () => void
   }
   readonly samples: {
     /** The user's imported sounds. */
@@ -79,6 +88,19 @@ export interface MotifApi {
     /** Asks for another folder and moves the library there. Null when canceled. */
     moveFolder(): Promise<string | null>
     showFolder(): Promise<void>
+  }
+  readonly export: {
+    /**
+     * Asks where to save and writes the files: one file through a save dialog, several (stems)
+     * into a chosen folder. Names are file names only, never paths.
+     */
+    save(files: readonly ExportFile[], kind: 'wav' | 'js'): Promise<ExportResult>
+  }
+  readonly app: {
+    /** The license texts of the bundled samples and third-party code, for the About window. */
+    licenses(): Promise<string>
+    /** "About Motif" from the macOS application menu. */
+    onShowAbout(listener: () => void): () => void
   }
   readonly settings: {
     get(): Promise<Settings>
@@ -124,3 +146,11 @@ export interface Settings {
   /** English only in v1. */
   language: 'en'
 }
+
+export interface ExportFile {
+  name: string
+  data: ArrayBuffer
+}
+
+export type ExportResult =
+  { status: 'saved'; where: string } | { status: 'canceled' } | { status: 'error'; message: string }

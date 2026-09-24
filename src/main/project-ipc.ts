@@ -60,7 +60,27 @@ function setCurrentDir(dir: string | null) {
   setProjectSamplesDir(dir === null ? null : join(dir, SAMPLES_DIR))
 }
 
-export async function registerProjectIpc(library: SampleLibrary): Promise<Recovery> {
+export interface ProjectIpc {
+  recovery: Recovery
+  /** Opens a project folder the system handed to Motif (file manager, dock, command line). */
+  openFromSystem: (dir: string) => void
+}
+
+/** `.../Song.motif` from a command line, or null. */
+export function projectArgument(argv: readonly string[]): string | null {
+  return (
+    argv.slice(1).find(
+      (arg) =>
+        !arg.startsWith('-') &&
+        arg
+          .toLowerCase()
+          .replace(/[\\/]+$/, '')
+          .endsWith(PROJECT_EXTENSION),
+    ) ?? null
+  )
+}
+
+export async function registerProjectIpc(library: SampleLibrary): Promise<ProjectIpc> {
   const userData = app.getPath('userData')
   const recovery = new Recovery(join(userData, 'recovery'))
   const trusted = new TrustedProjects(join(userData, 'trusted-projects.json'))
@@ -174,5 +194,26 @@ export async function registerProjectIpc(library: SampleLibrary): Promise<Recove
 
   ipcMain.handle(IPC.recoveryClear, () => recovery.clear())
 
-  return recovery
+  // A project asked for before the window could take it waits here; the renderer asks once ready.
+  let pending: Promise<OpenResult> | null = null
+  ipcMain.handle(IPC.projectPendingOpen, async (): Promise<OpenResult | null> => {
+    const result = pending
+    pending = null
+    return result ? await result : null
+  })
+
+  const openFromSystem = (dir: string) => {
+    const window = BrowserWindow.getAllWindows()[0]
+    const opening = openDir(window, dir).catch((error: unknown): OpenResult => ({
+      status: 'error',
+      message: message(error),
+    }))
+    if (window && !window.webContents.isLoading()) {
+      if (window.isMinimized()) window.restore()
+      window.focus()
+      void opening.then((result) => window.webContents.send(IPC.projectOpenedExternally, result))
+    } else pending = opening
+  }
+
+  return { recovery, openFromSystem }
 }

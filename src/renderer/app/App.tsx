@@ -8,6 +8,7 @@ import { PianoRollScreen } from '../screens/pianoroll/PianoRollScreen'
 import { StudioScreen } from '../screens/studio/StudioScreen'
 import { projectStore } from '../store/project-store'
 import { uiStore, useUi } from '../store/ui-store'
+import { AboutDialog } from './AboutDialog'
 import { ConversionDialog } from './ConversionDialog'
 import { HomeScreen } from './HomeScreen'
 import { MidiLearnBanner } from './MidiLearnBanner'
@@ -65,6 +66,7 @@ export function App() {
       ) : (
         <ArrangementScreen />
       )}
+      <AboutDialog />
       <ShortcutHelp />
       <ConversionDialog />
     </div>

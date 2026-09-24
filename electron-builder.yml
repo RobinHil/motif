@@ -13,6 +13,8 @@ files:
 extraResources:
   - from: resources/samples
     to: samples
+  - from: resources/brand/icons/512x512.png
+    to: icon.png
   - from: LICENSE
     to: LICENSE
   - from: THIRD_PARTY_LICENSES
@@ -20,19 +22,41 @@ extraResources:
 asar: true
 electronLanguages:
   - en-US
+# A project is a folder named *.motif (SPEC 3): a package on macOS, a registered type elsewhere.
+fileAssociations:
+  - ext: motif
+    name: Motif project
+    description: Motif project
+    role: Editor
+    isPackage: true
+    mimeType: application/x-motif-project
+    icon: document
 linux:
   target:
     - AppImage
   category: AudioVideo
+  icon: resources/brand/icons
   syncDesktopName: true
 win:
   target:
     - nsis
+  icon: resources/brand/icon.ico
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
+  installerIcon: resources/brand/icon.ico
+  uninstallerIcon: resources/brand/icon.ico
 mac:
   target:
     - dmg
   category: public.app-category.music
+  icon: resources/brand/icon.icns
+  # Signed and notarized only when the release workflow has the secrets (AGENTS.md, CI/CD).
+  notarize: false
+dmg:
+  icon: resources/brand/icon.icns
+# The newer AppImage runtime drops Chromium's sandbox only where the system cannot provide it
+# (no unprivileged user namespaces), instead of always passing --no-sandbox.
+toolsets:
+  appimage: 1.0.3
 publish: null

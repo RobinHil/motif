@@ -1,0 +1,61 @@
+import { readFile } from 'node:fs/promises'
+import { dirname, join } from 'node:path'
+import { app, BrowserWindow, dialog, ipcMain } from 'electron'
+import { IPC, type ExportResult } from '@shared/ipc'
+import { validExportFiles, writeExportFiles } from './export-files'
+import { bundledSamplesRoot } from './sample-protocol'
+
+function resource(name: string): string {
+  return app.isPackaged ? join(process.resourcesPath, name) : join(app.getAppPath(), name)
+}
+
+export function registerExportIpc(): void {
+  ipcMain.handle(IPC.exportSave, async (event, files: unknown, kind: unknown): Promise<ExportResult> => {
+    const valid = validExportFiles(files)
+    if (valid === null || (kind !== 'wav' && kind !== 'js')) return { status: 'error', message: 'Nothing to save.' }
+    const window = BrowserWindow.fromWebContents(event.sender) ?? undefined
+    try {
+      const first = valid[0]
+      if (valid.length === 1 && first) {
+        const options: Electron.SaveDialogOptions = {
+          title: kind === 'wav' ? 'Export audio' : 'Export code',
+          defaultPath: join(app.getPath('music'), first.name),
+          buttonLabel: 'Export',
+          filters: [
+            kind === 'wav' ? { name: 'WAV audio', extensions: ['wav'] } : { name: 'JavaScript', extensions: ['js'] },
+          ],
+          properties: ['createDirectory', 'showOverwriteConfirmation'],
+        }
+        const result = window ? await dialog.showSaveDialog(window, options) : await dialog.showSaveDialog(options)
+        if (result.canceled || !result.filePath) return { status: 'canceled' }
+        await writeExportFiles(dirname(result.filePath), [
+          { name: result.filePath.split(/[\\/]/).pop() ?? first.name, data: first.data },
+        ])
+        return { status: 'saved', where: result.filePath }
+      }
+      const options: Electron.OpenDialogOptions = {
+        title: 'Choose a folder for the exported files',
+        defaultPath: app.getPath('music'),
+        buttonLabel: 'Export here',
+        properties: ['openDirectory', 'createDirectory'],
+      }
+      const result = window ? await dialog.showOpenDialog(window, options) : await dialog.showOpenDialog(options)
+      const folder = result.filePaths[0]
+      if (result.canceled || folder === undefined) return { status: 'canceled' }
+      await writeExportFiles(folder, valid)
+      return { status: 'saved', where: folder }
+    } catch (error) {
+      return { status: 'error', message: error instanceof Error ? error.message : String(error) }
+    }
+  })
+
+  // The About window's licenses: Motif's, its dependencies' and the bundled samples'.
+  ipcMain.handle(IPC.appLicenses, async (): Promise<string> => {
+    const read = (path: string) => readFile(path, 'utf8').catch(() => '')
+    const [dependencies, samples] = await Promise.all([
+      read(resource('THIRD_PARTY_LICENSES')),
+      read(join(bundledSamplesRoot(), 'LICENSES.md')),
+    ])
+    return [samples, dependencies].filter(Boolean).join('\n\n')
+  })
+}

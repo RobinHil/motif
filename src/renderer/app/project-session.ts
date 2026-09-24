@@ -46,7 +46,10 @@ export function openRecentProject(id: string): Promise<void> {
 }
 
 async function applyOpen(pending: ReturnType<typeof window.motif.project.open>): Promise<void> {
-  const result = await pending
+  applyOpenResult(await pending)
+}
+
+function applyOpenResult(result: Awaited<ReturnType<typeof window.motif.project.open>>): void {
   if (result.status === 'canceled') return
   if (result.status === 'error') {
     notify(result.message)
@@ -124,6 +127,14 @@ export function startAutosave(): () => void {
     clearInterval(timer)
     window.removeEventListener('beforeunload', guard)
   }
+}
+
+/** Opens projects the system hands over: at launch (double-click on a .motif) and later. */
+export function startExternalOpen(): () => void {
+  void window.motif.project.pendingOpen().then((result) => {
+    if (result) applyOpenResult(result)
+  })
+  return window.motif.project.onOpenedExternally(applyOpenResult)
 }
 
 /** Loads the sample library, then follows the imported sounds of each loaded project. */

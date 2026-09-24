@@ -19,7 +19,9 @@ import { checkBlock } from './check-block'
 import { Evaluator, type EvaluationResult } from './evaluator'
 import { ensureMasterBus, setMasterSettings } from './master-bus'
 import type { MasterValues } from './master-settings'
-import { orbitPeaks, peak } from './orbit-taps'
+import { trimRecording } from './export-trim'
+import { ensureOrbitTap, orbitOutput, orbitPeaks, peak } from './orbit-taps'
+import { startRecording } from './recorder'
 
 export type { EvaluationResult } from './evaluator'
 
@@ -80,6 +82,11 @@ export async function configureAudio(options: { latency: AudioContextLatencyCate
   latencyHint = options.latency
   outputDevice = options.output
   if (repl !== null) await applyOutputDevice()
+}
+
+/** Sample rate of the running audio, which exports use; null before the engine starts. */
+export function outputSampleRate(): number | null {
+  return repl === null ? null : getAudioContext().sampleRate
 }
 
 /** The audio output's latency in milliseconds, once the engine runs. */
@@ -333,4 +340,116 @@ export function masterSpectrum(out: Float32Array<ArrayBuffer>): boolean {
   if (repl === null) return false
   ensureMasterBus().analyser.getFloatFrequencyData(out)
   return true
+}
+
+export interface RenderedAudio {
+  sampleRate: number
+  master: Float32Array[]
+  /** One recording per orbit, before the master bus (SPIKE 2). */
+  stems: Map<number, Float32Array[]>
+  /** Frames the recorder missed; above zero the file has a gap. */
+  droppedFrames: number
+}
+
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+/**
+ * Real-time export (SPEC 9): plays the current program from cycle 0 for `cycles` cycles while
+ * recording the master (and `orbits` for stems), then keeps exactly those cycles. The start is the
+ * audio time the scheduler gives cycle 0, so the file starts on the first beat.
+ */
+export async function renderCycles(
+  cycles: number,
+  orbits: readonly number[],
+  onProgress?: (done: number) => void,
+): Promise<RenderedAudio> {
+  const instance = await initEngine()
+  const context = getAudioContext()
+  await context.resume()
+  ensureMasterBus()
+  if (playing) {
+    stop()
+    // Let what was playing ring out before recording starts.
+    await wait(600)
+  }
+  await evaluator.flush()
+  if (!hasProgram) throw new Error('There is nothing to play yet.')
+
+  const stopMaster = await startRecording()
+  const stopStems = await Promise.all(
+    orbits.map(async (orbit) => {
+      ensureOrbitTap(orbit)
+      return [orbit, await startRecording(orbitOutput(orbit))] as const
+    }),
+  )
+  const { scheduler } = instance
+  const before = scheduler.seconds_at_cps_change
+  // Pre-roll: the scheduler starts half a second before cycle 0, silenced, because its first ticks
+  // may be skipped as "too late" while the main thread is busy starting playback.
+  const preroll = 0.5 * scheduler.cps
+  if (scheduler.pattern) scheduler.pattern = scheduler.pattern.filterWhen((t) => t >= 0)
+  scheduler.lastEnd = -preroll
+  playing = true
+  instance.start()
+  try {
+    // The first tick after start fixes when cycle 0 sounds.
+    for (let i = 0; scheduler.seconds_at_cps_change === before || scheduler.seconds_at_cps_change === undefined; i++) {
+      if (i > 200) throw new Error('The scheduler did not start.')
+      await wait(10)
+    }
+    const start =
+      (scheduler.seconds_at_cps_change ?? 0) + scheduler.latency - scheduler.num_cycles_at_cps_change / scheduler.cps
+    const seconds = cycles / scheduler.cps
+    while (context.currentTime < start + seconds + 0.05) {
+      onProgress?.(Math.max(0, Math.min(1, (context.currentTime - start) / seconds)))
+      await wait(50)
+    }
+    onProgress?.(1)
+    stop()
+    const master = await stopMaster()
+    const stems = new Map<number, Float32Array[]>()
+    let droppedFrames = master.droppedFrames
+    for (const [orbit, stopStem] of stopStems) {
+      const stem = await stopStem()
+      droppedFrames += stem.droppedFrames
+      stems.set(orbit, trimRecording(stem, start, seconds))
+    }
+    return { sampleRate: master.sampleRate, master: trimRecording(master, start, seconds), stems, droppedFrames }
+  } catch (error) {
+    stop()
+    await stopMaster()
+    for (const [, stopStem] of stopStems) await stopStem()
+    throw error
+  }
+}
+
+/**
+ * Free recording of the output ("Record output"): from now until the returned function is called.
+ * `orbits` also records one stem per orbit.
+ */
+export async function startOutputRecording(orbits: readonly number[]): Promise<() => Promise<RenderedAudio>> {
+  await initEngine()
+  await getAudioContext().resume()
+  ensureMasterBus()
+  const stopMaster = await startRecording()
+  const stopStems = await Promise.all(
+    orbits.map(async (orbit) => {
+      ensureOrbitTap(orbit)
+      return [orbit, await startRecording(orbitOutput(orbit))] as const
+    }),
+  )
+  return async () => {
+    const master = await stopMaster()
+    const stems = new Map<number, Float32Array[]>()
+    let droppedFrames = master.droppedFrames
+    // Stems start on the master's first frame, so all files line up.
+    const start = master.startFrame / master.sampleRate
+    const seconds = (master.channels[0]?.length ?? 0) / master.sampleRate
+    for (const [orbit, stopStem] of stopStems) {
+      const stem = await stopStem()
+      droppedFrames += stem.droppedFrames
+      stems.set(orbit, trimRecording(stem, start, seconds))
+    }
+    return { sampleRate: master.sampleRate, master: master.channels, stems, droppedFrames }
+  }
 }
