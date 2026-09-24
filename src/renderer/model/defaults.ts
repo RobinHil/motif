@@ -111,6 +111,7 @@ export const TRANSFORM_DEFAULT_ARGS: Record<TransformType, TransformInstance['ar
   chop: { parts: 8 },
   striate: { parts: 4 },
   slice: { parts: 8, pattern: '0 2 1 3' },
+  splice: { parts: 8, pattern: '0 1 2 3 4 5 6 7' },
   loopAt: { cycles: 2 },
   custom: { code: '' },
 }

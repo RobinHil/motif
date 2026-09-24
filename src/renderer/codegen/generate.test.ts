@@ -298,6 +298,7 @@ describe('transforms', () => {
     chop: '.chop(8)',
     striate: '.striate(4)',
     slice: '.slice(8, "0 2 1 3")',
+    splice: '.splice(8, "0 1 2 3 4 5 6 7")',
     loopAt: '.loopAt(2)',
     custom: '',
   }
