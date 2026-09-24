@@ -66,6 +66,10 @@ export const TRANSFORMS: Record<TransformType, TransformDef> = {
     code: (a) => `.slice(${formatNumber(num(a, 'parts', 'slice'))}, ${quote(str(a, 'pattern', 'slice'))})`,
     label: () => 'Replay slices',
   },
+  splice: {
+    code: (a) => `.splice(${formatNumber(num(a, 'parts', 'splice'))}, ${quote(str(a, 'pattern', 'splice'))})`,
+    label: () => 'Replay slices at tempo',
+  },
   loopAt: {
     code: (a) => `.loopAt(${formatNumber(num(a, 'cycles', 'loopAt'))})`,
     label: (a) => `Fit to ${formatNumber(num(a, 'cycles', 'loopAt'))} cycles`,

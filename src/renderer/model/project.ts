@@ -108,6 +108,7 @@ export const TRANSFORM_TYPES = [
   'chop',
   'striate',
   'slice',
+  'splice',
   'loopAt',
   'custom',
 ] as const

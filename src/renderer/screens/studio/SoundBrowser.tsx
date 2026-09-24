@@ -1,10 +1,13 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type DragEvent } from 'react'
+import type { ImportResult } from '@shared/ipc'
 import { dragBank, dragSound } from '../../app/drag-data'
+import { finishImport } from '../../app/sample-library'
 import { CATEGORIES, previewValue, useCatalog, type CatalogSound, type Category } from '../../app/sound-catalog'
 import { previewSound } from '../../engine/engine'
 import { dropOnTrack } from '../../store/actions'
 import { projectStore } from '../../store/project-store'
 import { uiStore } from '../../store/ui-store'
+import { ContextMenu, type MenuPosition } from '../../components/ContextMenu'
 
 function applyToSelectedTrack(dropped: Parameters<typeof dropOnTrack>[1]) {
   const trackId = uiStore.getState().selectedTrackId
@@ -33,7 +36,12 @@ function SoundRow({ sound }: { sound: CatalogSound }) {
           <path d="M2 1 L9 5 L2 9 Z" />
         </svg>
       </button>
-      <span className="flex-1 font-mono text-body text-text">{sound.name}</span>
+      <span className="flex-1 font-mono text-body text-text">
+        {sound.name}
+        {sound.category === 'My samples' && sound.variants !== undefined && sound.variants > 1 && (
+          <span className="ml-2 font-sans text-small text-text-2">{sound.variants} variants</span>
+        )}
+      </span>
       <button
         type="button"
         onClick={() => applyToSelectedTrack({ kind: 'sound', name: sound.name, category: sound.category })}
@@ -47,11 +55,33 @@ function SoundRow({ sound }: { sound: CatalogSound }) {
   )
 }
 
+const hasFiles = (event: DragEvent) => event.dataTransfer.types.includes('Files')
+
 /** Left panel: search, categories, drum banks and sounds with one-click preview (SPEC 6.1). */
 export function SoundBrowser() {
   const catalog = useCatalog()
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState<Category>('All')
+  const [importMenu, setImportMenu] = useState<MenuPosition | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [dropping, setDropping] = useState(false)
+
+  const runImport = async (pending: Promise<ImportResult | null>) => {
+    setBusy(true)
+    try {
+      const done = await finishImport(await pending)
+      if (done === null) return
+      uiStore.getState().setNotice(done.message)
+      if (done.added.length > 0) {
+        setCategory('My samples')
+        setQuery('')
+      }
+    } catch (error) {
+      uiStore.getState().setNotice(`Import failed: ${error instanceof Error ? error.message : String(error)}`)
+    } finally {
+      setBusy(false)
+    }
+  }
 
   const sounds = useMemo(() => {
     const q = query.trim().toLowerCase()
@@ -63,14 +93,59 @@ export function SoundBrowser() {
     (b) => (category === 'All' || category === 'Drums') && b.toLowerCase().includes(query.trim().toLowerCase()),
   )
 
+  const folders = category === 'My samples' ? [...new Set(sounds.map((s) => s.folder ?? ''))] : null
+
   return (
     <aside
       aria-labelledby="browser-title"
-      className="flex min-h-0 flex-col gap-5 overflow-y-auto border-r border-line bg-panel p-5"
+      aria-busy={busy}
+      onDragOver={(event) => {
+        if (!hasFiles(event)) return
+        event.preventDefault()
+        setDropping(true)
+      }}
+      onDragLeave={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setDropping(false)
+      }}
+      onDrop={(event) => {
+        if (!hasFiles(event)) return
+        event.preventDefault()
+        setDropping(false)
+        void runImport(window.motif.samples.importFiles([...event.dataTransfer.files]))
+      }}
+      className={`flex min-h-0 flex-col gap-5 overflow-y-auto border-r bg-panel p-5 ${dropping ? 'border-accent' : 'border-line'}`}
     >
-      <h2 id="browser-title" className="text-section font-medium uppercase tracking-[0.14em] text-label">
-        Sound browser
-      </h2>
+      <div className="flex items-center justify-between">
+        <h2 id="browser-title" className="text-section font-medium uppercase tracking-[0.14em] text-label">
+          Sound browser
+        </h2>
+        <button
+          type="button"
+          aria-haspopup="menu"
+          disabled={busy}
+          onClick={(event) => {
+            const rect = event.currentTarget.getBoundingClientRect()
+            setImportMenu({ x: rect.left, y: rect.bottom + 4 })
+          }}
+          className="rounded-pill border border-line-strong px-3 py-1 text-body text-text-2 hover:text-text disabled:opacity-40"
+        >
+          {busy ? 'Importing...' : 'Import'}
+        </button>
+        {importMenu && (
+          <ContextMenu
+            label="Import samples"
+            position={importMenu}
+            onClose={() => setImportMenu(null)}
+            items={[
+              { label: 'Sample files...', onSelect: () => void runImport(window.motif.samples.importDialog('files')) },
+              {
+                label: 'A folder (one sound, one variant per file)...',
+                onSelect: () => void runImport(window.motif.samples.importDialog('folder')),
+              },
+            ]}
+          />
+        )}
+      </div>
       <label className="flex flex-col gap-2">
         <span className="text-body text-text-2">Search sounds</span>
         <input
@@ -126,31 +201,33 @@ export function SoundBrowser() {
           Sounds
         </h3>
         <ul className="flex flex-col">
-          {sounds.map((sound) => (
-            <SoundRow key={`${sound.category}-${sound.name}`} sound={sound} />
-          ))}
+          {folders
+            ? folders.map((folder) => (
+                <li key={folder} className="flex flex-col">
+                  <span className="px-2 pt-2 pb-1 text-small text-text-3">{folder || 'Imported'}</span>
+                  <ul className="flex flex-col">
+                    {sounds
+                      .filter((s) => (s.folder ?? '') === folder)
+                      .map((sound) => (
+                        <SoundRow key={`${sound.category}-${sound.name}`} sound={sound} />
+                      ))}
+                  </ul>
+                </li>
+              ))
+            : sounds.map((sound) => <SoundRow key={`${sound.category}-${sound.name}`} sound={sound} />)}
           {sounds.length === 0 && (
             <li className="px-2 py-1.5 text-body text-text-3">
               {category === 'My samples'
-                ? 'Your imported samples will appear here.'
-                : category === 'Instruments'
-                  ? 'No instrument is bundled yet.'
-                  : 'No sound matches this search.'}
+                ? 'Your imported samples will appear here. Drop files or a folder, or use Import.'
+                : 'No sound matches this search.'}
             </li>
           )}
         </ul>
       </section>
       <div
-        onDragOver={(event) => {
-          if (event.dataTransfer.types.includes('Files')) event.preventDefault()
-        }}
-        onDrop={(event) => {
-          event.preventDefault()
-          uiStore.getState().setNotice('Importing your own samples arrives in a later version.')
-        }}
-        className="mt-auto rounded-panel border border-dashed border-line-strong px-4 py-4 text-center text-body text-text-2"
+        className={`mt-auto rounded-panel border border-dashed px-4 py-4 text-center text-body ${dropping ? 'border-accent text-text' : 'border-line-strong text-text-2'}`}
       >
-        Drop a sample folder here to add it to your library
+        {busy ? 'Importing...' : 'Drop a sample folder here to add it to your library'}
       </div>
     </aside>
   )

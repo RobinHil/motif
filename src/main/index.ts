@@ -3,7 +3,8 @@ import { app, BrowserWindow, dialog, session } from 'electron'
 import { APP_NAME } from '@shared/app-info'
 import { registerProjectIpc } from './project-ipc'
 import type { Recovery } from './recovery'
-import { bundledSamplesRoot, handleSampleProtocol, registerSampleScheme } from './sample-protocol'
+import { registerSampleIpc, sampleRoots } from './sample-ipc'
+import { handleSampleProtocol, registerSampleScheme } from './sample-protocol'
 import { hardenSession, hardenWebContents } from './security'
 
 const devServerUrl = !app.isPackaged ? (process.env['ELECTRON_RENDERER_URL'] ?? null) : null
@@ -72,8 +73,9 @@ hardenWebContents(devServerOrigin)
 
 void app.whenReady().then(async () => {
   hardenSession(session.defaultSession, devServerOrigin)
-  handleSampleProtocol({ bundled: bundledSamplesRoot() })
-  recovery = await registerProjectIpc()
+  const library = await registerSampleIpc()
+  handleSampleProtocol(sampleRoots)
+  recovery = await registerProjectIpc(library)
   createWindow()
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()

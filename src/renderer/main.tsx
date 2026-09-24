@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { App } from './app/App'
 import { startEngineBridge } from './app/engine-bridge'
 import { startLiveHighlight } from './app/live-highlight'
-import { restoreRecovery, startAutosave } from './app/project-session'
+import { restoreRecovery, startAutosave, startSampleLibrary } from './app/project-session'
 import { startShortcuts } from './app/shortcuts'
 import { projectStore } from './store/project-store'
 import { uiStore } from './store/ui-store'
@@ -29,6 +29,7 @@ uiStore.getState().selectTrack(projectStore.getState().project.tracks[0]?.id ?? 
 startEngineBridge()
 startLiveHighlight()
 startAutosave()
+startSampleLibrary()
 startShortcuts()
 
 createRoot(root).render(

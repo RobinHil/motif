@@ -163,6 +163,7 @@ function transformOf(call: ChainCall, source: string): Omit<TransformInstance, '
       args['cycles'] = numberOf(call.args[0])
       break
     case 'slice':
+    case 'splice':
       args['parts'] = numberOf(call.args[0])
       args['pattern'] = stringOf(call.args[1])
       break

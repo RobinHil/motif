@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useCatalog } from '../../app/sound-catalog'
 import { Knob, type KnobProps } from '../../components/Knob'
 import { TRANSFORMS } from '../../codegen/transforms'
@@ -7,6 +8,7 @@ import { addTransform, setParam, setSource, setTransformArg, setTransformEnabled
 import { projectStore, useProject } from '../../store/project-store'
 import { uiStore, useUi } from '../../store/ui-store'
 import { INSPECTOR_KNOBS } from './knob-specs'
+import { SampleEditor, trackSampleSounds } from './SampleEditor'
 import { KIND_LABEL, SWATCH } from './StudioTrackRow'
 
 const LISTED_TRANSFORMS = TRANSFORM_TYPES.filter((t) => t !== 'custom')
@@ -118,6 +120,25 @@ function TransformList({ trackId, color }: { trackId: ID; color: string }) {
 }
 
 /** Right panel: the selected track's sound, parameters and transforms (SPEC 6.1). */
+function SampleEditorButton({ trackId }: { trackId: ID }) {
+  const track = useProject((s) => s.project.tracks.find((t) => t.id === trackId))
+  useCatalog()
+  const [open, setOpen] = useState(false)
+  if (!track || trackSampleSounds(track).length === 0) return null
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="-mt-3 self-start text-body text-accent hover:text-accent-hover"
+      >
+        Edit sample: start, end, slices →
+      </button>
+      {open && <SampleEditor trackId={trackId} onClose={() => setOpen(false)} />}
+    </>
+  )
+}
+
 export function Inspector() {
   const trackId = useUi((s) => s.selectedTrackId)
   const name = useProject((s) => s.project.tracks.find((t) => t.id === trackId)?.name)
@@ -150,6 +171,7 @@ export function Inspector() {
         </div>
       </header>
       <SoundSourceField trackId={trackId} />
+      <SampleEditorButton trackId={trackId} />
       <section aria-labelledby="params-title" className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h3 id="params-title" className="text-section font-medium uppercase tracking-[0.14em] text-label">

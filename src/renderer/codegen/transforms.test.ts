@@ -18,6 +18,7 @@ describe('transform labels', () => {
       chop: 'Chop into 8',
       striate: 'Interleave',
       slice: 'Replay slices',
+      splice: 'Replay slices at tempo',
       loopAt: 'Fit to 2 cycles',
       custom: 'Custom transform',
     })
@@ -40,6 +41,7 @@ describe('transform code', () => {
     expect(TRANSFORMS.sometimes.code({ speed: 0.5 })).toBe('.sometimes(x => x.speed(0.5))')
     expect(TRANSFORMS.lastOf.code({ every: 3, factor: 4 })).toBe('.lastOf(3, x => x.fast(4))')
     expect(TRANSFORMS.striate.code({ parts: 2 })).toBe('.striate(2)')
+    expect(TRANSFORMS.splice.code({ parts: 4, pattern: '0 1 2 3' })).toBe('.splice(4, "0 1 2 3")')
   })
 
   it('falls back to the default when an argument has the wrong type or is missing', () => {

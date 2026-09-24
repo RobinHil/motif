@@ -1,7 +1,9 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, webUtils } from 'electron'
 import {
   IPC,
   type MotifApi,
+  type ImportResult,
+  type LibrarySound,
   type OpenResult,
   type RecentProject,
   type RecoveredProject,
@@ -17,6 +19,18 @@ const api: MotifApi = {
     reset: () => ipcRenderer.invoke(IPC.projectNew) as Promise<void>,
     recent: () => ipcRenderer.invoke(IPC.projectRecent) as Promise<RecentProject[]>,
     openRecent: (id) => ipcRenderer.invoke(IPC.projectOpenRecent, id) as Promise<OpenResult>,
+  },
+  samples: {
+    library: () => ipcRenderer.invoke(IPC.samplesLibrary) as Promise<LibrarySound[]>,
+    // Only real dropped files have a path: a File built by page code maps to '' and is skipped.
+    importFiles: (files) => {
+      const paths = Array.from(files, (file) => (file instanceof File ? webUtils.getPathForFile(file) : '')).filter(
+        (path) => path !== '',
+      )
+      return ipcRenderer.invoke(IPC.samplesImport, paths) as Promise<ImportResult>
+    },
+    importDialog: (kind) => ipcRenderer.invoke(IPC.samplesImportDialog, kind) as Promise<ImportResult | null>,
+    removeFiles: (name, files) => ipcRenderer.invoke(IPC.samplesRemoveFiles, name, [...files]) as Promise<void>,
   },
   recovery: {
     write: (text) => ipcRenderer.invoke(IPC.recoveryWrite, text) as Promise<void>,
