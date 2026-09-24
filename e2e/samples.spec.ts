@@ -65,6 +65,18 @@ async function importFolder(page: Page, dir: string) {
   await page.getByRole('menuitem', { name: /A folder/ }).click()
 }
 
+/** Clicks "Use" on a sound row; the button shows on hover, so hover again if the list moved. */
+async function useSound(page: Page, name: string) {
+  const row = page
+    .getByRole('complementary', { name: 'Sound browser' })
+    .locator('li[draggable]')
+    .filter({ hasText: name })
+  await expect(async () => {
+    await row.hover()
+    await row.getByRole('button', { name: 'Use', exact: true }).click({ timeout: 1000 })
+  }).toPass()
+}
+
 /** Plays one second and returns what Strudel logged about `sound`: loaded, or problems. */
 async function playAndListen(page: Page, sound: string): Promise<{ loaded: boolean; problems: string[] }> {
   const messages: string[] = []
@@ -91,8 +103,7 @@ test('a folder of 20 WAV files becomes one sound with 20 variants, usable at onc
     page.getByText(/Not imported: .*broken\.wav.*notes\.txt|Not imported: .*notes\.txt.*broken/),
   ).toBeVisible()
 
-  await browser.locator('li[draggable]').filter({ hasText: 'glass_hits' }).hover()
-  await browser.getByRole('button', { name: 'Use', exact: true }).click()
+  await useSound(page, 'glass_hits')
   await page.getByRole('gridcell', { name: 'glass_hits step 1', exact: true }).click()
   await expect.poll(() => generatedCode(page)).toMatch(/glass_hits ~/)
   expect(await playAndListen(page, 'glass_hits')).toEqual({ loaded: true, problems: [] })
@@ -101,9 +112,7 @@ test('a folder of 20 WAV files becomes one sound with 20 variants, usable at onc
 test('a project moved to another machine still plays its imported samples', async () => {
   const { page } = running
   await importFolder(page, sampleFolder())
-  const browser = page.getByRole('complementary', { name: 'Sound browser' })
-  await browser.locator('li[draggable]').filter({ hasText: 'glass_hits' }).hover()
-  await browser.getByRole('button', { name: 'Use', exact: true }).click()
+  await useSound(page, 'glass_hits')
   await page.getByRole('gridcell', { name: 'glass_hits step 1', exact: true }).click()
 
   const saved = join(base, 'first', 'Song.motif')
