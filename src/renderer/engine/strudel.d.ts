@@ -8,12 +8,22 @@ declare module '@strudel/core' {
   }
   export interface Hap {
     context: { locations?: Location[] }
+    value: unknown
     hasOnset(): boolean
   }
   export class Pattern {
     queryArc(begin: number, end: number): Hap[]
     p(id: string): Pattern
+    range(min: number, max: number): Pattern
+    slow(factor: number): Pattern
   }
+  export const sine: Pattern
+  export const tri: Pattern
+  export const saw: Pattern
+  export const isaw: Pattern
+  export const square: Pattern
+  export const perlin: Pattern
+  export const rand: Pattern
   export function stack(...patterns: Pattern[]): Pattern
   export function isPattern(value: unknown): value is Pattern
   export function evalScope(...modules: unknown[]): Promise<unknown[]>
