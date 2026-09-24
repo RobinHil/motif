@@ -1,7 +1,7 @@
 {
   "name": "motif",
   "productName": "Motif",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Desktop music production app built on Strudel",
   "license": "AGPL-3.0-or-later",
   "author": "Motif contributors",
