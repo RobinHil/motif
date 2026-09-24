@@ -95,6 +95,7 @@ declare module '@strudel/webaudio' {
   export function webaudioRepl(options?: ReplOptions): Repl
   export function initAudio(options?: { disableWorklets?: boolean; maxPolyphony?: number }): Promise<void>
   export function getAudioContext(): AudioContext
+  export function setAudioContext(context: AudioContext | null): AudioContext | null
   export function registerSynthSounds(): void
   export function samples(sampleMap: string | Record<string, unknown>, baseUrl?: string): Promise<void>
 }

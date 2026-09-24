@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 import { App } from './app/App'
 import { startEngineBridge } from './app/engine-bridge'
 import { startLiveScenes } from './app/live-scenes'
+import { startMidiBridge } from './app/midi-bridge'
+import { loadSettings } from './app/settings-session'
 import { startLiveHighlight } from './app/live-highlight'
 import { restoreRecovery, startAutosave, startSampleLibrary } from './app/project-session'
 import { startShortcuts } from './app/shortcuts'
@@ -27,8 +29,13 @@ try {
 uiStore.getState().setHome(launchedBefore && !restored)
 uiStore.getState().selectTrack(projectStore.getState().project.tracks[0]?.id ?? null)
 
+// The engine starts with the first evaluation: read the settings (latency, output) first.
+await loadSettings().catch((error: unknown) => {
+  console.warn('[settings] could not read the settings', error)
+})
 startEngineBridge()
 startLiveScenes()
+startMidiBridge()
 startLiveHighlight()
 startAutosave()
 startSampleLibrary()
