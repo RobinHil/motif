@@ -1,0 +1,60 @@
+# Maintainer: Robin Hilaire <hilairerob84 at gmail dot com>
+pkgname=motif-git
+_pkgname=motif
+pkgver=r0
+pkgrel=1
+pkgdesc='Desktop music production app built on Strudel: every gesture writes live code'
+arch=('x86_64')
+url='https://github.com/RobinHil/motif'
+license=('AGPL-3.0-or-later')
+depends=('gtk3' 'nss' 'alsa-lib' 'libxss' 'libxkbcommon' 'libdrm' 'mesa' 'at-spi2-core' 'libcups' 'hicolor-icon-theme')
+makedepends=('git' 'bun')
+provides=("$_pkgname")
+conflicts=("$_pkgname")
+options=('!strip' '!debug')
+source=("$_pkgname::git+$url.git"
+        'motif.desktop'
+        'motif.sh'
+        'motif.xml')
+sha256sums=('SKIP'
+            '0ecb2e7252511f1e8bf0fbfcb44c4a47d33b42d2c1584b8da9113d8c015faaf9'
+            'd8a7a00a24b1a5fd6d179c8027bfcbf7ff41d6ce08fc1ded78ee3e422b03dc31'
+            'a5be2bce77931122d2516a82ad2e356f99f58ecefe8650cc9c6f974647e41524')
+
+pkgver() {
+  cd "$_pkgname"
+  printf 'r%s.%s' "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+build() {
+  cd "$_pkgname"
+  export ELECTRON_CACHE="$srcdir/electron-cache" ELECTRON_BUILDER_CACHE="$srcdir/electron-builder-cache"
+  bun install --frozen-lockfile
+  # Renderer, main and preload, plus THIRD_PARTY_LICENSES.
+  bun run build
+  # The unpacked app only: pacman installs it, no AppImage.
+  bunx electron-builder --linux dir --publish never
+}
+
+package() {
+  cd "$_pkgname"
+  install -d "$pkgdir/opt/$_pkgname"
+  cp -a dist/linux-unpacked/. "$pkgdir/opt/$_pkgname/"
+  # Chromium's setuid sandbox helper, used where unprivileged user namespaces are disabled.
+  chmod 4755 "$pkgdir/opt/$_pkgname/chrome-sandbox"
+
+  install -Dm755 "$srcdir/motif.sh" "$pkgdir/usr/bin/$_pkgname"
+  install -Dm644 "$srcdir/motif.desktop" "$pkgdir/usr/share/applications/$_pkgname.desktop"
+  install -Dm644 "$srcdir/motif.xml" "$pkgdir/usr/share/mime/packages/$_pkgname.xml"
+
+  for icon in resources/brand/icons/*x*.png; do
+    size=$(basename "$icon" .png)
+    install -Dm644 "$icon" "$pkgdir/usr/share/icons/hicolor/$size/apps/$_pkgname.png"
+  done
+  install -Dm644 resources/brand/document-512.png \
+    "$pkgdir/usr/share/icons/hicolor/512x512/mimetypes/application-x-motif-project.png"
+
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 THIRD_PARTY_LICENSES "$pkgdir/usr/share/licenses/$pkgname/THIRD_PARTY_LICENSES"
+  install -Dm644 resources/samples/LICENSES.md "$pkgdir/usr/share/licenses/$pkgname/SAMPLES.md"
+}

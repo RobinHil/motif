@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Motif
+GenericName=Music production
+Comment=Make music with the mouse, read and edit the Strudel code it writes
+Exec=motif %U
+Icon=motif
+Terminal=false
+Type=Application
+Categories=AudioVideo;Audio;Music;Midi;
+MimeType=application/x-motif-project;
+StartupWMClass=motif
+Keywords=music;daw;strudel;tidalcycles;live coding;sequencer;
