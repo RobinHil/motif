@@ -244,6 +244,78 @@ function tape(samples: Float32Array, seed: number): Float32Array {
   return out
 }
 
+/**
+ * Tek kick (free party, hard tek): a fast pitch drop into a long distorted sub, with a click.
+ * `drive` saturates the body, `tail` sets how long the sub rings, `grit` adds industrial noise.
+ */
+function tekKick(drive: number, tail: number, grit: number, seed: number): Float32Array {
+  const random = mulberry32(seed)
+  let phase = 0
+  let noise = 0
+  return render(tail, (t) => {
+    const freq = 46 + 190 * Math.exp(-t * 38)
+    phase += (2 * Math.PI * freq) / SAMPLE_RATE
+    const body = Math.sin(phase) * Math.exp(-t * (2.2 / tail))
+    const click = (random() * 2 - 1) * Math.exp(-t * 900) * 0.6
+    noise += 0.3 * (random() * 2 - 1 - noise)
+    const rumble = grit > 0 ? noise * grit * Math.exp(-t * 6) : 0
+    return Math.tanh((body + click + rumble) * drive) * 0.9
+  })
+}
+
+/** Industrial metal hit: inharmonic partials with a noisy strike, like a struck pipe or plate. */
+function metalHit(freqs: number[], decay: number, seed: number): Float32Array {
+  const random = mulberry32(seed)
+  return render(0.7, (t) => {
+    const ring = freqs.reduce(
+      (sum, f, i) => sum + Math.sin(2 * Math.PI * f * t) * Math.exp(-t * decay * (1 + i * 0.4)),
+      0,
+    )
+    const strike = (random() * 2 - 1) * Math.exp(-t * 120)
+    return Math.tanh((ring / freqs.length) * 2.5 + strike * 0.5)
+  })
+}
+
+/** A 4-second noise riser: filtered noise and a saw sweeping up, for build-ups. */
+function riser(): Float32Array {
+  const random = mulberry32(8)
+  const seconds = 4
+  let low = 0
+  let phase = 0
+  return render(seconds, (t) => {
+    const progress = t / seconds
+    low += (0.02 + 0.5 * progress ** 2) * (random() * 2 - 1 - low)
+    phase += (2 * Math.PI * (120 + 1800 * progress ** 2)) / SAMPLE_RATE
+    const saw = ((phase / Math.PI) % 2) - 1
+    return (low * 0.8 + saw * 0.25) * progress ** 1.5
+  })
+}
+
+/** Impact: a sub drop under a burst of noise, to land a drop. */
+function impact(): Float32Array {
+  const random = mulberry32(9)
+  let phase = 0
+  let low = 0
+  return render(2.2, (t) => {
+    phase += (2 * Math.PI * (70 * Math.exp(-t * 1.2) + 28)) / SAMPLE_RATE
+    low += 0.25 * (random() * 2 - 1 - low)
+    return Math.tanh(Math.sin(phase) * Math.exp(-t * 1.6) * 1.6 + low * Math.exp(-t * 3))
+  })
+}
+
+/** Industrial static: crackling, stuttering noise, for the ending. */
+function staticNoise(): Float32Array {
+  const random = mulberry32(10)
+  let low = 0
+  return render(2, (t) => {
+    low += 0.4 * (random() * 2 - 1 - low)
+    const gate = Math.sin(2 * Math.PI * 12 * t) > 0.2 ? 1 : 0.15
+    const crackle = random() > 0.996 ? random() * 2 - 1 : 0
+    const edge = Math.min(1, t / 0.05, (2 - t) / 0.05)
+    return (low * gate * 0.6 + crackle) * edge
+  })
+}
+
 function encodeWav16(samples: Float32Array): Buffer {
   const dataSize = samples.length * 2
   const buffer = Buffer.alloc(44 + dataSize)
@@ -296,6 +368,12 @@ const drums: Record<string, Float32Array[]> = {
   rd: [normalize(metal([530, 751, 1060, 1411], 1.2, 3, 0.3))],
   cb: [normalize(metal([562, 845], 0.35, 14, 0.45))],
   sh: [normalize(shaker())],
+  tek: [tekKick(2.5, 0.6, 0, 11), tekKick(4, 0.8, 0.15, 12), tekKick(6, 0.9, 0.6, 13)].map(normalize),
+  metal: [
+    metalHit([523, 1289, 2311, 3700], 9, 14),
+    metalHit([311, 877, 1543, 2890], 6, 15),
+    metalHit([741, 1666, 2789, 4410], 14, 16),
+  ].map(normalize),
 }
 
 const sounds: Record<string, Sound> = {
@@ -322,6 +400,9 @@ const sounds: Record<string, Sound> = {
   rain: { category: 'Textures', samples: [normalize(rain())] },
   vinyl: { category: 'Textures', samples: [normalize(vinyl())] },
   drone: { category: 'Textures', samples: [normalize(drone())] },
+  riser: { category: 'Textures', samples: [normalize(riser())] },
+  impact: { category: 'Textures', samples: [normalize(impact())] },
+  static: { category: 'Textures', samples: [normalize(staticNoise())] },
 }
 
 rmSync(OUT_DIR, { recursive: true, force: true })
