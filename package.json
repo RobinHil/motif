@@ -11,7 +11,7 @@
   "packageManager": "bun@1.4.2",
   "scripts": {
     "dev": "electron-vite dev",
-    "build": "electron-vite build",
+    "build": "electron-vite build && bun run licenses",
     "preview": "electron-vite preview",
     "typecheck": "tsc -b",
     "lint": "eslint .",
@@ -19,11 +19,11 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "licenses": "bun scripts/third-party-licenses.ts",
-    "package": "electron-vite build && bun run licenses && electron-builder",
+    "package": "bun run build && electron-builder",
     "test:coverage": "vitest run --coverage",
     "samples:kit": "bun scripts/generate-kit.ts",
     "icons": "bun scripts/generate-icons.ts",
-    "test:e2e": "electron-vite build && playwright test"
+    "test:e2e": "bun run build && playwright test"
   },
   "dependencies": {
     "@codemirror/autocomplete": "6.20.3",
