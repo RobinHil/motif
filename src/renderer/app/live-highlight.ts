@@ -47,16 +47,20 @@ export function startLiveHighlight(): () => void {
     const current = evaluatedProgram()
     const generated = codeStore.getState().generated
     if (current !== program) program = current
-    const enabled = uiStore.getState().liveHighlight
-    const active = enabled ? activeLocations() : new Set<string>()
-    const activeKey = [...active].sort().join(',')
 
     // Positions are only valid on the exact program Strudel is playing.
     const source =
       program !== null && generated !== null && program.code === generated.code ? { program, generated } : null
+    const text = source?.program.code.replace(/\n$/, '')
+    const showing = new Set([...views].filter((view) => text !== undefined && view.text === text))
+
+    // Querying the pattern every frame is not free: only when an editor shows the program.
+    const enabled = uiStore.getState().liveHighlight && showing.size > 0
+    const active = enabled ? activeLocations() : new Set<string>()
+    const activeKey = [...active].sort().join(',')
 
     for (const view of views) {
-      const matches = source !== null && view.text === source.program.code.replace(/\n$/, '')
+      const matches = source !== null && showing.has(view)
       const key = matches ? source.program.code : ''
       if (marked.get(view) !== key) {
         marked.set(view, key)
