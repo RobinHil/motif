@@ -2,7 +2,7 @@
 import { mkdtempSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { _electron as electron, type ElectronApplication, type Page } from '@playwright/test'
+import { _electron as electron, expect, type ElectronApplication, type Page } from '@playwright/test'
 
 export interface RunningApp {
   app: ElectronApplication
@@ -11,8 +11,12 @@ export interface RunningApp {
   close: () => Promise<void>
 }
 
-/** `args` are passed after the app path, like a file manager passing a project. */
-export async function launchApp(options: { args?: string[] } = {}): Promise<RunningApp> {
+/**
+ * `args` are passed after the app path, like a file manager passing a project. Unless `firstLaunch`
+ * is set, the tutorial invitation is closed and the mockups' demo (Drums, Bass, Lead, Texture) is
+ * opened from the home screen, which most tests start from.
+ */
+export async function launchApp(options: { args?: string[]; firstLaunch?: boolean } = {}): Promise<RunningApp> {
   const userData = mkdtempSync(join(tmpdir(), 'motif-e2e-'))
   // ELECTRON_RUN_AS_NODE (set by some editors) would start Electron as plain Node.
   const { ELECTRON_RUN_AS_NODE: _runAsNode, ...inherited } = process.env
@@ -24,6 +28,7 @@ export async function launchApp(options: { args?: string[] } = {}): Promise<Runn
   const page = await app.firstWindow()
   page.on('request', (request) => requests.push(request.url()))
   await page.waitForLoadState('domcontentloaded')
+  if (!options.firstLaunch && !options.args?.length) await openMockupDemo(page)
   return {
     app,
     page,
@@ -46,4 +51,14 @@ export async function launchApp(options: { args?: string[] } = {}): Promise<Runn
 export async function generatedCode(page: Page): Promise<string> {
   const lines = await page.locator('.cm-content .cm-line').allTextContents()
   return lines.join('\n')
+}
+
+/** Closes the tutorial invitation and opens the demo of the mockups from the home screen. */
+export async function openMockupDemo(page: Page): Promise<void> {
+  const invitation = page.getByRole('button', { name: 'Close the invitation for good' })
+  await expect(invitation).toBeVisible()
+  await invitation.click()
+  await page.getByRole('button', { name: /powered by Strudel/ }).click()
+  await page.getByRole('button', { name: 'Demo', exact: true }).click()
+  await expect(page.getByRole('listitem', { name: 'Drums, Rhythm, orbit 1' })).toBeVisible()
 }

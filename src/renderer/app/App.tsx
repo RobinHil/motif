@@ -9,6 +9,8 @@ import { StudioScreen } from '../screens/studio/StudioScreen'
 import { projectStore } from '../store/project-store'
 import { uiStore, useUi } from '../store/ui-store'
 import { AboutDialog } from './AboutDialog'
+import { TutorialPanel } from './TutorialPanel'
+import { WelcomeBanner } from './WelcomeBanner'
 import { ConversionDialog } from './ConversionDialog'
 import { HomeScreen } from './HomeScreen'
 import { MidiLearnBanner } from './MidiLearnBanner'
@@ -48,6 +50,7 @@ export function App() {
     <div className="flex h-full flex-col bg-bg-app">
       <TransportBar />
       <MidiLearnBanner />
+      <WelcomeBanner />
       <Notice />
       {home ? (
         <HomeScreen />
@@ -67,6 +70,7 @@ export function App() {
         <ArrangementScreen />
       )}
       <AboutDialog />
+      <TutorialPanel />
       <ShortcutHelp />
       <ConversionDialog />
     </div>

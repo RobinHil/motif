@@ -3,6 +3,7 @@ import { createDemoProject } from '../model/demo'
 import { createProject } from '../model/defaults'
 import { migrateProject, ProjectLoadError, serializeProject } from '../model/migrations'
 import { projectSampleLibrary } from '../model/samples'
+import { createStarterDemo } from '../tutorial/tracks'
 import { projectStore, selectIsDirty } from '../store/project-store'
 import { uiStore } from '../store/ui-store'
 import { loadLibrary, syncProjectSamples, userSounds } from './sample-library'
@@ -127,6 +128,15 @@ export function startAutosave(): () => void {
     clearInterval(timer)
     window.removeEventListener('beforeunload', guard)
   }
+}
+
+/**
+ * First launch: the project the system handed over, if any, otherwise "demo", saved in Motif's own
+ * folder and listed with the recent projects.
+ */
+export async function openFirstLaunch(): Promise<void> {
+  const pending = await window.motif.project.pendingOpen()
+  applyOpenResult(pending ?? (await window.motif.project.createStarter(serializeProject(createStarterDemo()))))
 }
 
 /** Opens projects the system hands over: at launch (double-click on a .motif) and later. */

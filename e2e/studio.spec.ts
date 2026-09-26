@@ -11,7 +11,7 @@ test.afterEach(async () => {
   await running.close()
 })
 
-test('opens the demo in the Studio on first launch', async () => {
+test('opens the demo of the mockups from the home screen', async () => {
   const { page } = running
   await expect(
     page.getByRole('navigation', { name: 'Screens' }).getByRole('button', { name: 'Studio' }),
