@@ -6,7 +6,11 @@
     "short": "sound",
     "description": "Plays samples or synths by name, one event per word of the mini-notation.",
     "example": "s(\"bd sd hh cp\")",
-    "seeAlso": ["bank", "note", "n"]
+    "seeAlso": [
+      "bank",
+      "note",
+      "n"
+    ]
   },
   {
     "name": "note",
@@ -15,7 +19,11 @@
     "short": "pitch",
     "description": "Sets the pitch of each event, with note names like c3 or eb2, or MIDI numbers.",
     "example": "note(\"c3 e3 g3 b3\").s(\"sawtooth\")",
-    "seeAlso": ["n", "scale", "transpose"]
+    "seeAlso": [
+      "n",
+      "scale",
+      "transpose"
+    ]
   },
   {
     "name": "n",
@@ -24,7 +32,11 @@
     "short": "number",
     "description": "Chooses a sample variant by number, or a scale degree when followed by scale().",
     "example": "n(\"0 2 4 6\").scale(\"C:minor\").s(\"triangle\")",
-    "seeAlso": ["scale", "note", "s"]
+    "seeAlso": [
+      "scale",
+      "note",
+      "s"
+    ]
   },
   {
     "name": "bank",
@@ -33,7 +45,9 @@
     "short": "drum bank",
     "description": "Plays the sounds from a drum machine bank: s(\"bd\").bank(\"MotifKit\") plays MotifKit_bd.",
     "example": "s(\"bd sd hh cp\").bank(\"MotifKit\")",
-    "seeAlso": ["s"]
+    "seeAlso": [
+      "s"
+    ]
   },
   {
     "name": "stack",
@@ -42,7 +56,10 @@
     "short": "play together",
     "description": "Plays several patterns at the same time.",
     "example": "stack(s(\"bd*4\"), note(\"c2 eb2\").s(\"sawtooth\"))",
-    "seeAlso": ["cat", "superimpose"]
+    "seeAlso": [
+      "cat",
+      "superimpose"
+    ]
   },
   {
     "name": "cat",
@@ -51,7 +68,9 @@
     "short": "one after another",
     "description": "Plays patterns one after the other, one pattern per cycle.",
     "example": "cat(s(\"bd*2\"), s(\"sd*4\"))",
-    "seeAlso": ["stack"]
+    "seeAlso": [
+      "stack"
+    ]
   },
   {
     "name": "silence",
@@ -60,7 +79,9 @@
     "short": "no sound",
     "description": "A pattern without any event. Useful as a placeholder.",
     "example": "stack(s(\"bd*2\"), silence)",
-    "seeAlso": ["stack"]
+    "seeAlso": [
+      "stack"
+    ]
   },
   {
     "name": "setcpm",
@@ -69,7 +90,11 @@
     "short": "tempo",
     "description": "Sets the tempo in cycles per minute. With 4 beats per cycle, setcpm(120/4) is 120 BPM.",
     "example": "setcpm(90/4)\n$: s(\"bd sd bd sd\")",
-    "seeAlso": ["setcps", "fast", "slow"]
+    "seeAlso": [
+      "setcps",
+      "fast",
+      "slow"
+    ]
   },
   {
     "name": "setcps",
@@ -78,7 +103,9 @@
     "short": "tempo",
     "description": "Sets the tempo in cycles per second. setcps(0.5) plays one cycle every two seconds.",
     "example": "setcps(0.75)\n$: s(\"bd sd bd sd\")",
-    "seeAlso": ["setcpm"]
+    "seeAlso": [
+      "setcpm"
+    ]
   },
   {
     "name": "fast",
@@ -87,7 +114,11 @@
     "short": "speed up",
     "description": "Speeds the pattern up: fast(2) plays it twice per cycle.",
     "example": "s(\"bd sd\").fast(2)",
-    "seeAlso": ["slow", "hurry", "ply"]
+    "seeAlso": [
+      "slow",
+      "hurry",
+      "ply"
+    ]
   },
   {
     "name": "slow",
@@ -96,7 +127,9 @@
     "short": "slow down",
     "description": "Slows the pattern down: slow(2) stretches it over two cycles.",
     "example": "note(\"c3 e3 g3 b3\").s(\"triangle\").slow(2)",
-    "seeAlso": ["fast"]
+    "seeAlso": [
+      "fast"
+    ]
   },
   {
     "name": "rev",
@@ -105,7 +138,10 @@
     "short": "reverse",
     "description": "Plays each cycle backwards.",
     "example": "note(\"c3 d3 e3 g3\").s(\"sawtooth\").rev()",
-    "seeAlso": ["jux", "iter"]
+    "seeAlso": [
+      "jux",
+      "iter"
+    ]
   },
   {
     "name": "ply",
@@ -114,7 +150,9 @@
     "short": "repeat each event",
     "description": "Repeats every event inside its own time: ply(2) doubles each note.",
     "example": "s(\"bd sd\").ply(2)",
-    "seeAlso": ["fast"]
+    "seeAlso": [
+      "fast"
+    ]
   },
   {
     "name": "early",
@@ -123,7 +161,10 @@
     "short": "shift earlier",
     "description": "Shifts the pattern earlier in time, by a fraction of a cycle.",
     "example": "stack(s(\"bd*4\"), s(\"hh*4\").early(0.125))",
-    "seeAlso": ["late", "off"]
+    "seeAlso": [
+      "late",
+      "off"
+    ]
   },
   {
     "name": "late",
@@ -132,7 +173,10 @@
     "short": "shift later",
     "description": "Shifts the pattern later in time, by a fraction of a cycle.",
     "example": "stack(s(\"bd*4\"), s(\"cp*2\").late(0.125))",
-    "seeAlso": ["early", "off"]
+    "seeAlso": [
+      "early",
+      "off"
+    ]
   },
   {
     "name": "hurry",
@@ -141,7 +185,10 @@
     "short": "faster and higher",
     "description": "Speeds the pattern up and raises the pitch of samples by the same factor.",
     "example": "s(\"bd sd hh cp\").hurry(2)",
-    "seeAlso": ["fast", "speed"]
+    "seeAlso": [
+      "fast",
+      "speed"
+    ]
   },
   {
     "name": "iter",
@@ -150,7 +197,10 @@
     "short": "rotate each cycle",
     "description": "Starts the pattern one division later every cycle, so it rotates over n cycles.",
     "example": "note(\"c3 e3 g3 b3\").s(\"triangle\").iter(4)",
-    "seeAlso": ["rev", "chunk"]
+    "seeAlso": [
+      "rev",
+      "chunk"
+    ]
   },
   {
     "name": "euclid",
@@ -159,7 +209,10 @@
     "short": "euclidean rhythm",
     "description": "Spreads a number of pulses as evenly as possible over a number of steps.",
     "example": "s(\"bd\").euclid(3, 8)",
-    "seeAlso": ["struct", "mask"]
+    "seeAlso": [
+      "struct",
+      "mask"
+    ]
   },
   {
     "name": "struct",
@@ -168,7 +221,10 @@
     "short": "set the rhythm",
     "description": "Gives the pattern the rhythm of a pattern of x and ~.",
     "example": "note(\"c3\").s(\"sawtooth\").struct(\"x ~ x x ~ x ~ x\")",
-    "seeAlso": ["mask", "euclid"]
+    "seeAlso": [
+      "mask",
+      "euclid"
+    ]
   },
   {
     "name": "mask",
@@ -177,7 +233,10 @@
     "short": "mute parts",
     "description": "Silences the parts of the pattern where the mask is 0 or ~.",
     "example": "s(\"hh*8\").mask(\"1 0 1 1\")",
-    "seeAlso": ["struct", "degradeBy"]
+    "seeAlso": [
+      "struct",
+      "degradeBy"
+    ]
   },
   {
     "name": "chop",
@@ -186,7 +245,11 @@
     "short": "cut samples",
     "description": "Cuts each sample into equal parts and plays them in order.",
     "example": "s(\"wind\").chop(8)",
-    "seeAlso": ["striate", "slice", "loopAt"]
+    "seeAlso": [
+      "striate",
+      "slice",
+      "loopAt"
+    ]
   },
   {
     "name": "striate",
@@ -195,7 +258,10 @@
     "short": "interleave samples",
     "description": "Cuts the samples into parts and interleaves the parts of every sample.",
     "example": "s(\"wind bd\").striate(4)",
-    "seeAlso": ["chop", "slice"]
+    "seeAlso": [
+      "chop",
+      "slice"
+    ]
   },
   {
     "name": "slice",
@@ -204,7 +270,11 @@
     "short": "replay slices",
     "description": "Cuts the sample into equal slices and plays them in the order given by the index pattern.",
     "example": "s(\"wind\").slice(8, \"0 2 1 3\")",
-    "seeAlso": ["chop", "begin", "end"]
+    "seeAlso": [
+      "chop",
+      "begin",
+      "end"
+    ]
   },
   {
     "name": "loopAt",
@@ -213,7 +283,10 @@
     "short": "fit to cycles",
     "description": "Changes the sample speed so it lasts the given number of cycles. The pitch changes with the speed.",
     "example": "s(\"wind\").loopAt(2)",
-    "seeAlso": ["speed", "chop"]
+    "seeAlso": [
+      "speed",
+      "chop"
+    ]
   },
   {
     "name": "begin",
@@ -222,7 +295,10 @@
     "short": "sample start",
     "description": "Starts sample playback at a position between 0 (start) and 1 (end).",
     "example": "s(\"wind\").begin(0.5)",
-    "seeAlso": ["end", "slice"]
+    "seeAlso": [
+      "end",
+      "slice"
+    ]
   },
   {
     "name": "end",
@@ -231,7 +307,10 @@
     "short": "sample end",
     "description": "Stops sample playback at a position between 0 (start) and 1 (end).",
     "example": "s(\"wind\").end(0.25)",
-    "seeAlso": ["begin", "slice"]
+    "seeAlso": [
+      "begin",
+      "slice"
+    ]
   },
   {
     "name": "degradeBy",
@@ -240,7 +319,10 @@
     "short": "drop at random",
     "description": "Removes events at random. degradeBy(0.3) drops about 30% of them.",
     "example": "s(\"hh*16\").degradeBy(0.3)",
-    "seeAlso": ["degrade", "sometimes"]
+    "seeAlso": [
+      "degrade",
+      "sometimes"
+    ]
   },
   {
     "name": "degrade",
@@ -249,7 +331,9 @@
     "short": "drop half",
     "description": "Removes about half of the events at random.",
     "example": "s(\"hh*8\").degrade()",
-    "seeAlso": ["degradeBy"]
+    "seeAlso": [
+      "degradeBy"
+    ]
   },
   {
     "name": "sometimes",
@@ -258,7 +342,11 @@
     "short": "half of the time",
     "description": "Applies a function to about half of the events, chosen at random.",
     "example": "s(\"hh*8\").sometimes(x => x.speed(2))",
-    "seeAlso": ["often", "rarely", "degradeBy"]
+    "seeAlso": [
+      "often",
+      "rarely",
+      "degradeBy"
+    ]
   },
   {
     "name": "often",
@@ -267,7 +355,10 @@
     "short": "most of the time",
     "description": "Applies a function to about 75% of the events, chosen at random.",
     "example": "s(\"hh*8\").often(x => x.speed(0.5))",
-    "seeAlso": ["sometimes", "rarely"]
+    "seeAlso": [
+      "sometimes",
+      "rarely"
+    ]
   },
   {
     "name": "rarely",
@@ -276,7 +367,10 @@
     "short": "now and then",
     "description": "Applies a function to about 25% of the events, chosen at random.",
     "example": "s(\"hh*8\").rarely(x => x.speed(2))",
-    "seeAlso": ["sometimes", "often"]
+    "seeAlso": [
+      "sometimes",
+      "often"
+    ]
   },
   {
     "name": "lastOf",
@@ -285,7 +379,10 @@
     "short": "every nth cycle",
     "description": "Applies a function on the last cycle of every group of n cycles.",
     "example": "s(\"bd sd\").lastOf(4, x => x.fast(2))",
-    "seeAlso": ["firstOf", "chunk"]
+    "seeAlso": [
+      "firstOf",
+      "chunk"
+    ]
   },
   {
     "name": "firstOf",
@@ -294,7 +391,9 @@
     "short": "every nth cycle",
     "description": "Applies a function on the first cycle of every group of n cycles.",
     "example": "note(\"c3 e3 g3\").s(\"sawtooth\").firstOf(3, x => x.rev())",
-    "seeAlso": ["lastOf"]
+    "seeAlso": [
+      "lastOf"
+    ]
   },
   {
     "name": "chunk",
@@ -303,7 +402,10 @@
     "short": "one part per cycle",
     "description": "Divides the cycle into parts and applies a function to one part per cycle, in turn.",
     "example": "s(\"hh*8\").chunk(4, x => x.speed(2))",
-    "seeAlso": ["iter", "lastOf"]
+    "seeAlso": [
+      "iter",
+      "lastOf"
+    ]
   },
   {
     "name": "jux",
@@ -312,7 +414,12 @@
     "short": "stereo split",
     "description": "Plays the original pattern in the left ear and a transformed version in the right ear. An instant way to add stereo width.",
     "example": "s(\"bd sd hh cp\").jux(rev)",
-    "seeAlso": ["juxBy", "rev", "pan", "superimpose"]
+    "seeAlso": [
+      "juxBy",
+      "rev",
+      "pan",
+      "superimpose"
+    ]
   },
   {
     "name": "juxBy",
@@ -321,7 +428,10 @@
     "short": "adjustable stereo split",
     "description": "Like jux, with a width between 0 (both in the middle) and 1 (fully left and right).",
     "example": "s(\"bd sd hh cp\").juxBy(0.5, rev)",
-    "seeAlso": ["jux", "pan"]
+    "seeAlso": [
+      "jux",
+      "pan"
+    ]
   },
   {
     "name": "pan",
@@ -330,7 +440,10 @@
     "short": "stereo position",
     "description": "Places the sound between left (0), center (0.5) and right (1).",
     "example": "s(\"hh*8\").pan(sine)",
-    "seeAlso": ["jux", "juxBy"]
+    "seeAlso": [
+      "jux",
+      "juxBy"
+    ]
   },
   {
     "name": "superimpose",
@@ -339,7 +452,11 @@
     "short": "layer a copy",
     "description": "Plays a transformed copy of the pattern on top of the original.",
     "example": "s(\"bd sd\").superimpose(x => x.fast(2))",
-    "seeAlso": ["off", "stack", "jux"]
+    "seeAlso": [
+      "off",
+      "stack",
+      "jux"
+    ]
   },
   {
     "name": "off",
@@ -348,7 +465,10 @@
     "short": "delayed copy",
     "description": "Adds a transformed copy of the pattern, shifted later by a fraction of a cycle.",
     "example": "s(\"bd sd\").off(0.125, x => x.speed(2))",
-    "seeAlso": ["superimpose", "late"]
+    "seeAlso": [
+      "superimpose",
+      "late"
+    ]
   },
   {
     "name": "scale",
@@ -357,7 +477,10 @@
     "short": "musical scale",
     "description": "Turns the numbers of n() into notes of a scale, written as root:type, like C:minor.",
     "example": "n(\"0 2 4 6\").scale(\"C:minor\").s(\"triangle\")",
-    "seeAlso": ["n", "transpose"]
+    "seeAlso": [
+      "n",
+      "transpose"
+    ]
   },
   {
     "name": "transpose",
@@ -366,7 +489,10 @@
     "short": "shift pitch",
     "description": "Shifts notes up or down by a number of semitones.",
     "example": "note(\"c3 e3 g3\").transpose(5).s(\"sawtooth\")",
-    "seeAlso": ["note", "scale"]
+    "seeAlso": [
+      "note",
+      "scale"
+    ]
   },
   {
     "name": "arp",
@@ -375,7 +501,10 @@
     "short": "arpeggio",
     "description": "Plays the notes of each chord one at a time, in the order of the index pattern.",
     "example": "note(\"<[c3,e3,g3] [a2,c3,e3]>\").arp(\"0 1 2 1\").s(\"triangle\")",
-    "seeAlso": ["note", "scale"]
+    "seeAlso": [
+      "note",
+      "scale"
+    ]
   },
   {
     "name": "gain",
@@ -384,7 +513,10 @@
     "short": "volume",
     "description": "Sets the volume. 1 is the default, 0 is silent.",
     "example": "s(\"hh*8\").gain(\"0.4 1\")",
-    "seeAlso": ["velocity", "pan"]
+    "seeAlso": [
+      "velocity",
+      "pan"
+    ]
   },
   {
     "name": "velocity",
@@ -393,7 +525,9 @@
     "short": "note strength",
     "description": "Scales the volume of each event between 0 and 1, like how hard a key or pad is hit.",
     "example": "s(\"hh*4\").velocity(\"1 0.5 0.8 0.5\")",
-    "seeAlso": ["gain"]
+    "seeAlso": [
+      "gain"
+    ]
   },
   {
     "name": "lpf",
@@ -402,7 +536,10 @@
     "short": "low-pass filter",
     "description": "Low-pass filter: keeps the frequencies below the cutoff, in Hz. Lower values sound darker.",
     "example": "note(\"c2*4\").s(\"sawtooth\").lpf(600)",
-    "seeAlso": ["lpq", "hpf"]
+    "seeAlso": [
+      "lpq",
+      "hpf"
+    ]
   },
   {
     "name": "lpq",
@@ -411,7 +548,9 @@
     "short": "filter resonance",
     "description": "Resonance of the low-pass filter: higher values boost the cutoff frequency.",
     "example": "note(\"c2*4\").s(\"sawtooth\").lpf(800).lpq(10)",
-    "seeAlso": ["lpf"]
+    "seeAlso": [
+      "lpf"
+    ]
   },
   {
     "name": "hpf",
@@ -420,7 +559,9 @@
     "short": "high-pass filter",
     "description": "High-pass filter: keeps the frequencies above the cutoff, in Hz. Higher values sound thinner.",
     "example": "s(\"bd sd hh cp\").hpf(1000)",
-    "seeAlso": ["lpf"]
+    "seeAlso": [
+      "lpf"
+    ]
   },
   {
     "name": "room",
@@ -429,7 +570,10 @@
     "short": "reverb",
     "description": "Adds reverb, between 0 and 1. The reverb is shared by all sounds of the same orbit.",
     "example": "s(\"cp*2\").room(0.6)",
-    "seeAlso": ["size", "delay"]
+    "seeAlso": [
+      "size",
+      "delay"
+    ]
   },
   {
     "name": "size",
@@ -438,7 +582,9 @@
     "short": "reverb size",
     "description": "Size of the reverb room: larger values give a longer tail. Also written roomsize.",
     "example": "s(\"cp*2\").room(0.6).size(4)",
-    "seeAlso": ["room"]
+    "seeAlso": [
+      "room"
+    ]
   },
   {
     "name": "delay",
@@ -447,7 +593,11 @@
     "short": "echo",
     "description": "Adds echoes, between 0 and 1. The delay is shared by all sounds of the same orbit.",
     "example": "s(\"cp\").delay(0.5)",
-    "seeAlso": ["delaytime", "delayfeedback", "room"]
+    "seeAlso": [
+      "delaytime",
+      "delayfeedback",
+      "room"
+    ]
   },
   {
     "name": "delaytime",
@@ -456,7 +606,10 @@
     "short": "echo time",
     "description": "Time between two echoes of the delay, in seconds.",
     "example": "s(\"cp\").delay(0.5).delaytime(0.125)",
-    "seeAlso": ["delay", "delayfeedback"]
+    "seeAlso": [
+      "delay",
+      "delayfeedback"
+    ]
   },
   {
     "name": "delayfeedback",
@@ -465,7 +618,10 @@
     "short": "echo repeats",
     "description": "How much of each echo is fed back, between 0 and 1: more feedback, more repeats.",
     "example": "s(\"cp\").delay(0.5).delayfeedback(0.6)",
-    "seeAlso": ["delay", "delaytime"]
+    "seeAlso": [
+      "delay",
+      "delaytime"
+    ]
   },
   {
     "name": "shape",
@@ -474,7 +630,9 @@
     "short": "saturation",
     "description": "Saturates the sound with waveshaping distortion, between 0 and 1.",
     "example": "s(\"bd*4\").shape(0.5)",
-    "seeAlso": ["crush"]
+    "seeAlso": [
+      "crush"
+    ]
   },
   {
     "name": "crush",
@@ -483,7 +641,9 @@
     "short": "bitcrusher",
     "description": "Reduces the bit depth, from 16 (clean) down to 1 (very harsh).",
     "example": "s(\"hh*8\").crush(4)",
-    "seeAlso": ["shape"]
+    "seeAlso": [
+      "shape"
+    ]
   },
   {
     "name": "speed",
@@ -492,7 +652,10 @@
     "short": "sample speed",
     "description": "Changes the playback speed of samples: 2 is an octave up, negative values play backwards.",
     "example": "s(\"bd sd\").speed(\"1 2\")",
-    "seeAlso": ["hurry", "loopAt"]
+    "seeAlso": [
+      "hurry",
+      "loopAt"
+    ]
   },
   {
     "name": "attack",
@@ -501,7 +664,9 @@
     "short": "fade in",
     "description": "Time the sound takes to reach full volume, in seconds.",
     "example": "note(\"c3 e3\").s(\"sawtooth\").attack(0.2)",
-    "seeAlso": ["release"]
+    "seeAlso": [
+      "release"
+    ]
   },
   {
     "name": "release",
@@ -510,7 +675,9 @@
     "short": "fade out",
     "description": "Time the sound takes to fade out after the note ends, in seconds.",
     "example": "note(\"c3 e3\").s(\"sawtooth\").release(1)",
-    "seeAlso": ["attack"]
+    "seeAlso": [
+      "attack"
+    ]
   },
   {
     "name": "sine",
@@ -519,7 +686,10 @@
     "short": "smooth wave",
     "description": "A signal that goes smoothly from 0 to 1 and back once per cycle. Use it as the value of a parameter.",
     "example": "s(\"hh*16\").gain(sine)",
-    "seeAlso": ["perlin", "range"]
+    "seeAlso": [
+      "perlin",
+      "range"
+    ]
   },
   {
     "name": "perlin",
@@ -528,7 +698,10 @@
     "short": "smooth noise",
     "description": "A signal that wanders smoothly and randomly between 0 and 1.",
     "example": "s(\"hh*16\").gain(perlin.range(0.2, 1))",
-    "seeAlso": ["sine", "range"]
+    "seeAlso": [
+      "sine",
+      "range"
+    ]
   },
   {
     "name": "range",
@@ -537,6 +710,769 @@
     "short": "signal range",
     "description": "Scales a signal from 0..1 to min..max, for example a filter sweep between 300 and 1200 Hz.",
     "example": "note(\"c2*8\").s(\"sawtooth\").lpf(sine.range(300, 1200))",
-    "seeAlso": ["sine", "perlin"]
+    "seeAlso": [
+      "sine",
+      "perlin"
+    ]
+  },
+  {
+    "name": "seq",
+    "category": "sound",
+    "signature": "seq(...patterns)",
+    "short": "one after the other in a cycle",
+    "description": "Plays its patterns one after the other, all squeezed into a single cycle, like words in the mini-notation.",
+    "example": "seq(\"bd\", \"sd\", [\"hh\", \"hh\"]).s()",
+    "seeAlso": [
+      "cat",
+      "stack"
+    ]
+  },
+  {
+    "name": "polymeter",
+    "category": "sound",
+    "signature": "polymeter(...patterns)",
+    "short": "align steps",
+    "description": "Lines up the steps of several patterns and repeats each one until they fit together, which makes polymeters: three steps against two, five against four.",
+    "example": "polymeter(\"c3 eb3 g3\", \"c2 g2\").note()",
+    "seeAlso": [
+      "stack",
+      "seq"
+    ]
+  },
+  {
+    "name": "arrange",
+    "category": "sound",
+    "signature": "arrange([cycles, pattern], ...)",
+    "short": "sections in order",
+    "description": "Plays sections one after the other, each for its number of cycles, then starts again. Motif writes the song this way.",
+    "example": "arrange([2, s(\"bd*4\")], [2, s(\"bd*4, hh*8\")])",
+    "seeAlso": [
+      "cat",
+      "stack"
+    ]
+  },
+  {
+    "name": "pick",
+    "category": "sound",
+    "signature": "pick(list)",
+    "short": "choose patterns by index",
+    "description": "Uses a pattern of numbers to pick patterns from a list: 0 plays the first, 1 the second, and so on.",
+    "example": "s(\"<0 1 [2,0]>\".pick([\"bd sd\", \"cp cp\", \"hh*4\"]))",
+    "seeAlso": [
+      "cat",
+      "arrange"
+    ]
+  },
+  {
+    "name": "run",
+    "category": "sound",
+    "signature": "run(n)",
+    "short": "numbers 0 to n-1",
+    "description": "A pattern of the numbers from 0 to n-1 in one cycle, handy for scales and slices.",
+    "example": "n(run(8)).scale(\"C:minor\").s(\"triangle\")",
+    "seeAlso": [
+      "n",
+      "scale"
+    ]
+  },
+  {
+    "name": "segment",
+    "category": "time",
+    "signature": "segment(n)",
+    "short": "sample n times per cycle",
+    "description": "Samples a continuous pattern, like a signal, n times per cycle, turning it into separate events.",
+    "example": "note(saw.range(40, 52).segment(16)).s(\"sawtooth\")",
+    "seeAlso": [
+      "range",
+      "saw"
+    ]
+  },
+  {
+    "name": "palindrome",
+    "category": "time",
+    "signature": "palindrome()",
+    "short": "forwards then backwards",
+    "description": "Plays the pattern forwards, then backwards on the next cycle, and so on.",
+    "example": "note(\"c3 d3 e3 g3\").palindrome().s(\"triangle\")",
+    "seeAlso": [
+      "rev",
+      "iter"
+    ]
+  },
+  {
+    "name": "inside",
+    "category": "time",
+    "signature": "inside(factor, function)",
+    "short": "transform inside a cycle",
+    "description": "Slows the pattern down by the factor, applies the function, then speeds it back up, so the function works on a smaller scale.",
+    "example": "n(\"0 1 2 3 4 3 2 1\".inside(4, rev)).scale(\"C:major\").s(\"triangle\")",
+    "seeAlso": [
+      "outside",
+      "rev"
+    ]
+  },
+  {
+    "name": "outside",
+    "category": "time",
+    "signature": "outside(factor, function)",
+    "short": "transform across cycles",
+    "description": "Speeds the pattern up by the factor, applies the function, then slows it back down, so the function works across several cycles.",
+    "example": "n(\"<[0 1] 2 [3 4] 5>\".outside(4, rev)).scale(\"C:major\").s(\"triangle\")",
+    "seeAlso": [
+      "inside",
+      "rev"
+    ]
+  },
+  {
+    "name": "linger",
+    "category": "time",
+    "signature": "linger(fraction)",
+    "short": "repeat the start",
+    "description": "Keeps only the first part of each cycle (a half, a quarter...) and repeats it to fill the cycle.",
+    "example": "s(\"bd sd hh cp, hh*8\").linger(\"<1 .5 .25>\")",
+    "seeAlso": [
+      "zoom",
+      "chop"
+    ]
+  },
+  {
+    "name": "zoom",
+    "category": "time",
+    "signature": "zoom(begin, end)",
+    "short": "play a portion",
+    "description": "Plays only part of each cycle, between begin and end (0 to 1), stretched over the whole cycle.",
+    "example": "s(\"bd*2 hh*3 [sd bd]*2 cp\").zoom(0.25, 0.75)",
+    "seeAlso": [
+      "linger",
+      "compress"
+    ]
+  },
+  {
+    "name": "compress",
+    "category": "time",
+    "signature": "compress(begin, end)",
+    "short": "squeeze into a span",
+    "description": "Squeezes each cycle into the span between begin and end (0 to 1) and leaves silence around it.",
+    "example": "s(\"bd sd hh cp\").compress(0.25, 0.75)",
+    "seeAlso": [
+      "zoom",
+      "fast"
+    ]
+  },
+  {
+    "name": "bite",
+    "category": "time",
+    "signature": "bite(slices, pattern)",
+    "short": "reorder slices of a pattern",
+    "description": "Cuts each cycle of a pattern into slices and plays them in the order of a pattern of slice numbers. Like slice, for patterns instead of samples.",
+    "example": "n(\"0 1 2 3 4 5 6 7\".bite(4, \"3 2 1 0\")).scale(\"C:minor\").s(\"triangle\")",
+    "seeAlso": [
+      "slice",
+      "chunk"
+    ]
+  },
+  {
+    "name": "euclidRot",
+    "category": "time",
+    "signature": "euclidRot(pulses, steps, rotation)",
+    "short": "rotated euclidean rhythm",
+    "description": "An euclidean rhythm shifted by a number of steps, for example the samba rhythm euclidRot(3, 16, 14).",
+    "example": "s(\"bd\").euclidRot(3, 16, 14)",
+    "seeAlso": [
+      "euclid",
+      "euclidLegato"
+    ]
+  },
+  {
+    "name": "euclidLegato",
+    "category": "time",
+    "signature": "euclidLegato(pulses, steps)",
+    "short": "euclidean rhythm, held",
+    "description": "Like euclid, but each pulse lasts until the next one, with no gaps.",
+    "example": "note(\"c3\").euclidLegato(3, 8).s(\"sawtooth\")",
+    "seeAlso": [
+      "euclid",
+      "euclidRot"
+    ]
+  },
+  {
+    "name": "brak",
+    "category": "time",
+    "signature": "brak()",
+    "short": "breakbeat feel",
+    "description": "Every other cycle, plays the pattern twice as fast and a quarter cycle late, for a breakbeat feel.",
+    "example": "s(\"bd sd, hh*4\").brak()",
+    "seeAlso": [
+      "press",
+      "late"
+    ]
+  },
+  {
+    "name": "press",
+    "category": "time",
+    "signature": "press()",
+    "short": "syncopate",
+    "description": "Moves each event halfway into its step, which syncopates the rhythm.",
+    "example": "s(\"bd sd bd sd\").press()",
+    "seeAlso": [
+      "brak",
+      "swing"
+    ]
+  },
+  {
+    "name": "swingBy",
+    "category": "time",
+    "signature": "swingBy(amount, subdivision)",
+    "short": "swing by an amount",
+    "description": "Cuts each cycle into slices and delays the second half of each slice by the amount (0 to 1), for a shuffle.",
+    "example": "s(\"hh*8\").swingBy(1/3, 4)",
+    "seeAlso": [
+      "swing",
+      "late"
+    ]
+  },
+  {
+    "name": "swing",
+    "category": "time",
+    "signature": "swing(subdivision)",
+    "short": "swing",
+    "description": "Shorthand for swingBy(1/3, subdivision): the classic shuffle.",
+    "example": "s(\"hh*8\").swing(4)",
+    "seeAlso": [
+      "swingBy",
+      "press"
+    ]
+  },
+  {
+    "name": "invert",
+    "category": "time",
+    "signature": "invert()",
+    "short": "swap 1 and 0",
+    "description": "Swaps the 1s and 0s of a rhythm made of 1 and 0, so what played becomes silent and the other way round.",
+    "example": "s(\"bd\").struct(\"1 0 0 1 0 0 1 0\".lastOf(4, invert))",
+    "seeAlso": [
+      "struct",
+      "mask"
+    ]
+  },
+  {
+    "name": "when",
+    "category": "conditions",
+    "signature": "when(pattern, function)",
+    "short": "apply while true",
+    "description": "Applies the function while a pattern of 1 and 0 is at 1.",
+    "example": "note(\"c3 eb3 g3\".when(\"<0 1>\", x => x.add(12))).s(\"triangle\")",
+    "seeAlso": [
+      "lastOf",
+      "mask"
+    ]
+  },
+  {
+    "name": "someCyclesBy",
+    "category": "conditions",
+    "signature": "someCyclesBy(probability, function)",
+    "short": "some cycles at random",
+    "description": "Applies the function to whole cycles, chosen at random with the given probability.",
+    "example": "s(\"bd, hh*8\").someCyclesBy(0.3, x => x.speed(0.5))",
+    "seeAlso": [
+      "sometimesBy",
+      "lastOf"
+    ]
+  },
+  {
+    "name": "sometimesBy",
+    "category": "random",
+    "signature": "sometimesBy(probability, function)",
+    "short": "some events at random",
+    "description": "Applies the function to events chosen at random, with the given probability (0 to 1).",
+    "example": "s(\"hh*8\").sometimesBy(0.4, x => x.speed(0.5))",
+    "seeAlso": [
+      "sometimes",
+      "someCyclesBy"
+    ]
+  },
+  {
+    "name": "almostNever",
+    "category": "random",
+    "signature": "almostNever(function)",
+    "short": "10% of the time",
+    "description": "Applies the function to about one event in ten, chosen at random.",
+    "example": "s(\"hh*8\").almostNever(x => x.speed(0.5))",
+    "seeAlso": [
+      "rarely",
+      "almostAlways"
+    ]
+  },
+  {
+    "name": "almostAlways",
+    "category": "random",
+    "signature": "almostAlways(function)",
+    "short": "90% of the time",
+    "description": "Applies the function to about nine events in ten, chosen at random.",
+    "example": "s(\"hh*8\").almostAlways(x => x.speed(0.5))",
+    "seeAlso": [
+      "often",
+      "almostNever"
+    ]
+  },
+  {
+    "name": "rand",
+    "category": "random",
+    "signature": "rand",
+    "short": "random signal",
+    "description": "A continuous random value between 0 and 1, different at every moment. Use it with range, like any signal.",
+    "example": "s(\"hh*8\").gain(rand.range(0.4, 1))",
+    "seeAlso": [
+      "irand",
+      "perlin",
+      "range"
+    ]
+  },
+  {
+    "name": "irand",
+    "category": "random",
+    "signature": "irand(n)",
+    "short": "random whole number",
+    "description": "A continuous random whole number from 0 to n-1, for picking notes or samples at random.",
+    "example": "n(irand(8)).struct(\"x x*2 x x*3\").scale(\"C:minor\").s(\"triangle\")",
+    "seeAlso": [
+      "rand",
+      "choose"
+    ]
+  },
+  {
+    "name": "choose",
+    "category": "random",
+    "signature": "choose(...values)",
+    "short": "pick a value at random",
+    "description": "Picks one of the given values at random for each event.",
+    "example": "note(\"c2 g2 d2 f2\").s(choose(\"sine\", \"triangle\", \"sawtooth\"))",
+    "seeAlso": [
+      "chooseCycles",
+      "wchoose"
+    ]
+  },
+  {
+    "name": "chooseCycles",
+    "category": "random",
+    "signature": "chooseCycles(...patterns)",
+    "short": "a pattern per cycle at random",
+    "description": "Plays one of the given patterns, chosen at random for each cycle.",
+    "example": "chooseCycles(\"bd\", \"hh\", \"sd\").s().fast(8)",
+    "seeAlso": [
+      "choose",
+      "cat"
+    ]
+  },
+  {
+    "name": "wchoose",
+    "category": "random",
+    "signature": "wchoose([value, weight], ...)",
+    "short": "weighted random choice",
+    "description": "Picks values at random, each with its own weight, so some come up more often.",
+    "example": "note(\"c2 g2 d2 f2\").s(wchoose([\"sine\", 10], [\"triangle\", 1]))",
+    "seeAlso": [
+      "choose",
+      "rand"
+    ]
+  },
+  {
+    "name": "shuffle",
+    "category": "random",
+    "signature": "shuffle(parts)",
+    "short": "play parts in random order",
+    "description": "Cuts each cycle into parts and plays them in a random order, each part exactly once.",
+    "example": "note(\"c3 d3 e3 f3\").shuffle(4).s(\"triangle\")",
+    "seeAlso": [
+      "scramble",
+      "bite"
+    ]
+  },
+  {
+    "name": "scramble",
+    "category": "random",
+    "signature": "scramble(parts)",
+    "short": "play parts at random",
+    "description": "Cuts each cycle into parts and plays parts at random: some may repeat, some may be left out.",
+    "example": "note(\"c3 d3 e3 f3\").scramble(4).s(\"triangle\")",
+    "seeAlso": [
+      "shuffle",
+      "degradeBy"
+    ]
+  },
+  {
+    "name": "undegradeBy",
+    "category": "random",
+    "signature": "undegradeBy(amount)",
+    "short": "keep events at random",
+    "description": "The other half of degradeBy: keeps exactly the events degradeBy would remove.",
+    "example": "s(\"hh*8\").undegradeBy(0.2)",
+    "seeAlso": [
+      "degradeBy",
+      "degrade"
+    ]
+  },
+  {
+    "name": "saw",
+    "category": "signals",
+    "signature": "saw",
+    "short": "rising ramp signal",
+    "description": "A signal that rises from 0 to 1 over each cycle, then jumps back to 0. Motif calls it Ramp.",
+    "example": "s(\"hh*16\").lpf(saw.range(500, 5000))",
+    "seeAlso": [
+      "isaw",
+      "sine",
+      "range"
+    ]
+  },
+  {
+    "name": "isaw",
+    "category": "signals",
+    "signature": "isaw",
+    "short": "falling ramp signal",
+    "description": "A signal that falls from 1 to 0 over each cycle. Motif calls it Reverse ramp.",
+    "example": "s(\"hh*16\").lpf(isaw.range(500, 5000))",
+    "seeAlso": [
+      "saw",
+      "sine"
+    ]
+  },
+  {
+    "name": "tri",
+    "category": "signals",
+    "signature": "tri",
+    "short": "triangle signal",
+    "description": "A signal that rises from 0 to 1 then falls back over each cycle, in straight lines.",
+    "example": "s(\"hh*16\").gain(tri.range(0.3, 1))",
+    "seeAlso": [
+      "sine",
+      "saw"
+    ]
+  },
+  {
+    "name": "square",
+    "category": "signals",
+    "signature": "square",
+    "short": "square signal",
+    "description": "A signal that is 0 for the first half of each cycle and 1 for the second half.",
+    "example": "s(\"hh*16\").lpf(square.range(800, 4000))",
+    "seeAlso": [
+      "sine",
+      "tri"
+    ]
+  },
+  {
+    "name": "cosine",
+    "category": "signals",
+    "signature": "cosine",
+    "short": "cosine signal",
+    "description": "A sine signal shifted by a quarter cycle: it starts at its highest point.",
+    "example": "s(\"hh*16\").pan(cosine)",
+    "seeAlso": [
+      "sine",
+      "range"
+    ]
+  },
+  {
+    "name": "rangex",
+    "category": "signals",
+    "signature": "rangex(min, max)",
+    "short": "scale exponentially",
+    "description": "Like range, but follows an exponential curve, which sounds more even for frequencies.",
+    "example": "s(\"bd sd, hh*8\").lpf(sine.rangex(500, 4000))",
+    "seeAlso": [
+      "range",
+      "sine"
+    ]
+  },
+  {
+    "name": "add",
+    "category": "tonal",
+    "signature": "add(amount)",
+    "short": "add to numbers",
+    "description": "Adds a number, or a pattern of numbers, to every value: degrees, notes or any number.",
+    "example": "n(\"0 2 4\".add(\"<0 3 4 0>\")).scale(\"C:major\").s(\"triangle\")",
+    "seeAlso": [
+      "sub",
+      "transpose"
+    ]
+  },
+  {
+    "name": "sub",
+    "category": "tonal",
+    "signature": "sub(amount)",
+    "short": "subtract from numbers",
+    "description": "Subtracts a number, or a pattern of numbers, from every value.",
+    "example": "n(\"0 2 4\".sub(\"<0 1 2 3>\")).scale(\"C4:minor\").s(\"triangle\")",
+    "seeAlso": [
+      "add",
+      "transpose"
+    ]
+  },
+  {
+    "name": "mul",
+    "category": "tonal",
+    "signature": "mul(factor)",
+    "short": "multiply numbers",
+    "description": "Multiplies every value by a number, or a pattern of numbers.",
+    "example": "s(\"hh*8\").speed(\"1 2\".mul(\"<1 1.5>\"))",
+    "seeAlso": [
+      "add",
+      "range"
+    ]
+  },
+  {
+    "name": "chord",
+    "category": "tonal",
+    "signature": "chord(symbols)",
+    "short": "chords by name",
+    "description": "Chord symbols such as C, Am, Fm7 or G7. Follow with voicing() to turn them into notes.",
+    "example": "chord(\"<Am C D F>\").voicing().s(\"triangle\")",
+    "seeAlso": [
+      "voicing",
+      "rootNotes"
+    ]
+  },
+  {
+    "name": "voicing",
+    "category": "tonal",
+    "signature": "voicing()",
+    "short": "play chords",
+    "description": "Turns chord symbols into notes that move smoothly from one chord to the next.",
+    "example": "chord(\"<C Am F G>\").voicing().s(\"sawtooth\").lpf(1500)",
+    "seeAlso": [
+      "chord",
+      "arp"
+    ]
+  },
+  {
+    "name": "rootNotes",
+    "category": "tonal",
+    "signature": "rootNotes(octave)",
+    "short": "chord roots",
+    "description": "Replaces each chord symbol by its root note in the given octave, for a bass line.",
+    "example": "note(\"<C^7 A7 Dm7 G7>\".rootNotes(2)).s(\"sawtooth\")",
+    "seeAlso": [
+      "chord",
+      "scale"
+    ]
+  },
+  {
+    "name": "vowel",
+    "category": "effects",
+    "signature": "vowel(vowel)",
+    "short": "vowel filter",
+    "description": "A formant filter that makes sounds say a vowel: a, e, i, o, u, and a few more.",
+    "example": "note(\"c2 eb2\").s(\"sawtooth\").vowel(\"<a e i o u>\")",
+    "seeAlso": [
+      "lpf",
+      "bpf"
+    ]
+  },
+  {
+    "name": "coarse",
+    "category": "effects",
+    "signature": "coarse(factor)",
+    "short": "lower the sample rate",
+    "description": "Fakes a lower sample rate: 1 is unchanged, 2 half the rate, and so on, for a crunchy sound.",
+    "example": "s(\"bd sd, hh*8\").coarse(\"<1 4 8 16>\")",
+    "seeAlso": [
+      "crush",
+      "shape"
+    ]
+  },
+  {
+    "name": "distort",
+    "category": "effects",
+    "signature": "distort(amount)",
+    "short": "distortion",
+    "description": "Wave-shaping distortion; values between 0 and 10 are the most useful. It can get loud.",
+    "example": "s(\"bd sd, hh*8\").distort(\"<0 2 4>\")",
+    "seeAlso": [
+      "shape",
+      "crush"
+    ]
+  },
+  {
+    "name": "postgain",
+    "category": "effects",
+    "signature": "postgain(amount)",
+    "short": "gain after effects",
+    "description": "Volume applied after every effect, useful after distortion. Motif uses it for the volume automation of the master.",
+    "example": "s(\"bd sd, hh*8\").distort(3).postgain(0.5)",
+    "seeAlso": [
+      "gain",
+      "velocity"
+    ]
+  },
+  {
+    "name": "hpq",
+    "category": "effects",
+    "signature": "hpq(q)",
+    "short": "high-pass resonance",
+    "description": "The resonance of the high-pass filter, from 0 to 50.",
+    "example": "s(\"bd sd, hh*8\").hpf(2000).hpq(\"<0 10 20>\")",
+    "seeAlso": [
+      "hpf",
+      "lpq"
+    ]
+  },
+  {
+    "name": "bpf",
+    "category": "effects",
+    "signature": "bpf(frequency)",
+    "short": "band-pass filter",
+    "description": "A band-pass filter: keeps the frequencies around the given one, in hertz.",
+    "example": "s(\"bd sd, hh*6\").bpf(\"<1000 2000 4000>\")",
+    "seeAlso": [
+      "lpf",
+      "hpf"
+    ]
+  },
+  {
+    "name": "phaser",
+    "category": "effects",
+    "signature": "phaser(speed)",
+    "short": "phaser",
+    "description": "A sweeping phaser effect, like a guitar pedal; the value is the speed of the sweep.",
+    "example": "n(run(8)).scale(\"D:pentatonic\").s(\"sawtooth\").phaser(\"<1 2 4>\")",
+    "seeAlso": [
+      "vib",
+      "lpf"
+    ]
+  },
+  {
+    "name": "vib",
+    "category": "effects",
+    "signature": "vib(frequency)",
+    "short": "vibrato",
+    "description": "Wobbles the pitch of synths at the given speed, in hertz.",
+    "example": "note(\"a3 e3\").s(\"sawtooth\").vib(\"<0.5 2 8>\")",
+    "seeAlso": [
+      "phaser",
+      "note"
+    ]
+  },
+  {
+    "name": "orbit",
+    "category": "effects",
+    "signature": "orbit(number)",
+    "short": "effect bus",
+    "description": "Sends the pattern to a numbered bus: patterns on the same orbit share reverb and delay. Motif gives every track its own orbit.",
+    "example": "stack(s(\"hh*6\").delay(0.5).orbit(1), s(\"~ sd\").room(0.5).orbit(2))",
+    "seeAlso": [
+      "room",
+      "delay"
+    ]
+  },
+  {
+    "name": "decay",
+    "category": "envelope",
+    "signature": "decay(seconds)",
+    "short": "envelope decay",
+    "description": "How long the sound takes, after the attack, to fall to the sustain level.",
+    "example": "note(\"c3 e3 f3 g3\").s(\"sawtooth\").decay(\"<.1 .2 .4>\").sustain(0)",
+    "seeAlso": [
+      "attack",
+      "sustain",
+      "release"
+    ]
+  },
+  {
+    "name": "sustain",
+    "category": "envelope",
+    "signature": "sustain(level)",
+    "short": "envelope sustain",
+    "description": "The level, from 0 to 1, the sound holds after the decay until the note ends.",
+    "example": "note(\"c3 e3 f3 g3\").s(\"sawtooth\").decay(0.2).sustain(\"<0 .4 1>\")",
+    "seeAlso": [
+      "decay",
+      "release"
+    ]
+  },
+  {
+    "name": "clip",
+    "category": "envelope",
+    "signature": "clip(factor)",
+    "short": "note length",
+    "description": "Multiplies how long each note lasts, and cuts samples that would go beyond it.",
+    "example": "note(\"c3 a3 f3 e3\").s(\"sawtooth\").clip(\"<.5 1 2>\")",
+    "seeAlso": [
+      "release",
+      "cut"
+    ]
+  },
+  {
+    "name": "cut",
+    "category": "samples",
+    "signature": "cut(group)",
+    "short": "cut group",
+    "description": "Stops a playing sample when another sample of the same cut group starts, like an open hi-hat cut by a closed one.",
+    "example": "s(\"[oh hh]*4\").cut(1)",
+    "seeAlso": [
+      "clip",
+      "chop"
+    ]
+  },
+  {
+    "name": "splice",
+    "category": "samples",
+    "signature": "splice(slices, pattern)",
+    "short": "slices at tempo",
+    "description": "Like slice, but each slice is sped up or slowed down to fill its step exactly.",
+    "example": "s(\"wind\").splice(4, \"0 1 2 3\")",
+    "seeAlso": [
+      "slice",
+      "loopAt"
+    ]
+  },
+  {
+    "name": "fit",
+    "category": "samples",
+    "signature": "fit()",
+    "short": "fit to the step",
+    "description": "Changes the playback speed so each sample lasts exactly as long as its event. Good for loops.",
+    "example": "s(\"wind\").fit()",
+    "seeAlso": [
+      "loopAt",
+      "splice"
+    ]
+  },
+  {
+    "name": "echo",
+    "category": "stereo",
+    "signature": "echo(times, time, feedback)",
+    "short": "echoes",
+    "description": "Layers copies of the pattern, each later by the given time and quieter by the feedback factor.",
+    "example": "s(\"bd sd\").echo(3, 1/6, 0.8)",
+    "seeAlso": [
+      "off",
+      "echoWith",
+      "delay"
+    ]
+  },
+  {
+    "name": "echoWith",
+    "category": "stereo",
+    "signature": "echoWith(times, time, function)",
+    "short": "transformed echoes",
+    "description": "Layers copies of the pattern, each later by the given time and changed by the function, which gets the copy number.",
+    "example": "n(\"<0 [2 4]>\".echoWith(4, 1/8, (p, i) => p.add(i * 2))).scale(\"C:minor\").s(\"triangle\")",
+    "seeAlso": [
+      "echo",
+      "off"
+    ]
+  },
+  {
+    "name": "layer",
+    "category": "stereo",
+    "signature": "layer(...functions)",
+    "short": "layer transformed copies",
+    "description": "Plays the result of each function on top of the others, without the original pattern.",
+    "example": "n(\"0 2 4 6\".layer(x => x.add(\"0,2\"))).scale(\"C:minor\").s(\"triangle\")",
+    "seeAlso": [
+      "superimpose",
+      "stack"
+    ]
   }
 ]
