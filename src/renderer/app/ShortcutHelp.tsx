@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { uiStore, useUi } from '../store/ui-store'
-import { SHORTCUTS } from './shortcuts'
+import { SHORTCUT_GROUPS } from './shortcuts'
 
 /** The "?" overlay listing every shortcut. */
 export function ShortcutHelp() {
@@ -19,19 +19,26 @@ export function ShortcutHelp() {
       ref={ref}
       aria-labelledby="help-title"
       onClose={() => uiStore.getState().setHelpOpen(false)}
-      className="m-auto w-[440px] rounded-panel border border-line-strong bg-panel p-6 text-text backdrop:bg-bg-deep/70"
+      className="m-auto max-h-[calc(100vh-48px)] w-[820px] max-w-[calc(100vw-48px)] overflow-y-auto rounded-panel border border-line-strong bg-panel p-6 text-text backdrop:bg-bg-deep/70"
     >
       <h2 id="help-title" className="mb-4 text-screen-title font-medium">
         Keyboard shortcuts
       </h2>
-      <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2 text-body">
-        {SHORTCUTS.map((s) => (
-          <div key={s.keys} className="contents">
-            <dt className="font-mono text-knob-value text-accent">{s.keys}</dt>
-            <dd className="text-text-2">{s.action}</dd>
-          </div>
+      <div className="columns-2 gap-10">
+        {SHORTCUT_GROUPS.map((group) => (
+          <section key={group.title} aria-label={group.title} className="mb-5 break-inside-avoid">
+            <h3 className="mb-2 text-section font-medium uppercase tracking-[0.14em] text-label">{group.title}</h3>
+            <dl className="grid grid-cols-[auto_1fr] gap-x-5 gap-y-1.5 text-body">
+              {group.shortcuts.map((s) => (
+                <div key={s.keys} className="contents">
+                  <dt className="font-mono text-knob-value text-accent">{s.keys}</dt>
+                  <dd className="text-text-2">{s.action}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
         ))}
-      </dl>
+      </div>
       <button
         type="button"
         onClick={() => uiStore.getState().setHelpOpen(false)}
