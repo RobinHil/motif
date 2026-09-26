@@ -17,6 +17,7 @@ export const IPC = {
   samplesMoveFolder: 'samples:move-folder',
   samplesShowFolder: 'samples:show-folder',
   projectPendingOpen: 'project:pending-open',
+  projectCreateStarter: 'project:create-starter',
   projectOpenedExternally: 'project:opened-externally',
   appShowAbout: 'app:show-about',
   exportSave: 'export:save',
@@ -67,6 +68,11 @@ export interface MotifApi {
     reset(): Promise<void>
     recent(): Promise<RecentProject[]>
     openRecent(id: string): Promise<OpenResult>
+    /**
+     * First launch: saves the starter project "demo" in Motif's own folder (never elsewhere), adds
+     * it to the recent projects and opens it. An existing "demo" is opened as it is.
+     */
+    createStarter(text: string): Promise<OpenResult>
     /** A project the system asked Motif to open at launch (double-click on a .motif), once. */
     pendingOpen(): Promise<OpenResult | null>
     /** Projects the system asks to open while Motif runs. Returns the unsubscribe function. */
@@ -145,6 +151,8 @@ export interface Settings {
   zoom: (typeof ZOOMS)[number]
   /** English only in v1. */
   language: 'en'
+  /** The welcome banner (tutorial invitation) was closed for good. */
+  welcomeDismissed: boolean
 }
 
 export interface ExportFile {

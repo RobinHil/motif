@@ -194,6 +194,25 @@ export async function registerProjectIpc(library: SampleLibrary): Promise<Projec
 
   ipcMain.handle(IPC.recoveryClear, () => recovery.clear())
 
+  // First launch: the starter project lives in Motif's own folder, like a project the user saved.
+  ipcMain.handle(IPC.projectCreateStarter, async (event, text: unknown): Promise<OpenResult> => {
+    try {
+      assertProjectText(text)
+      const dir = join(userData, 'projects', `demo${PROJECT_EXTENSION}`)
+      const exists = await readProjectFolder(dir).then(
+        () => true,
+        () => false,
+      )
+      if (!exists) {
+        await writeProjectFolder(dir, text)
+        await trusted.trust(dir)
+      }
+      return await openDir(windowOf(event), dir)
+    } catch (error) {
+      return { status: 'error', message: message(error) }
+    }
+  })
+
   // A project asked for before the window could take it waits here; the renderer asks once ready.
   let pending: Promise<OpenResult> | null = null
   ipcMain.handle(IPC.projectPendingOpen, async (): Promise<OpenResult | null> => {
