@@ -11,7 +11,10 @@ export function CodePanel() {
   const direct = mode === 'direct'
 
   return (
-    <section aria-labelledby="code-title" className="flex min-h-0 min-w-0 flex-col overflow-hidden border-t border-line bg-bg-code">
+    <section
+      aria-labelledby="code-title"
+      className="flex min-h-0 min-w-0 flex-col overflow-hidden border-t border-line bg-bg-code"
+    >
       <header className="flex items-center gap-3 border-b border-line px-5 py-2.5">
         <h2 id="code-title" className="text-track-name font-medium">
           Strudel code
