@@ -6,7 +6,13 @@ import { startLiveScenes } from './app/live-scenes'
 import { startMidiBridge } from './app/midi-bridge'
 import { loadSettings } from './app/settings-session'
 import { startLiveHighlight } from './app/live-highlight'
-import { restoreRecovery, startAutosave, startExternalOpen, startSampleLibrary } from './app/project-session'
+import {
+  openFirstLaunch,
+  restoreRecovery,
+  startAutosave,
+  startExternalOpen,
+  startSampleLibrary,
+} from './app/project-session'
 import { startShortcuts } from './app/shortcuts'
 import { projectStore } from './store/project-store'
 import { uiStore } from './store/ui-store'
@@ -17,7 +23,7 @@ const FIRST_LAUNCH_KEY = 'motif.launched'
 const root = document.getElementById('root')
 if (!root) throw new Error('Missing #root element')
 
-// First launch opens the demo in the Studio (SPEC 10); later launches start on the home screen.
+// First launch opens the starter project "demo" in the Studio; later launches start on the home screen.
 const restored = await restoreRecovery()
 let launchedBefore = false
 try {
@@ -27,6 +33,7 @@ try {
   // Storage unavailable: behave like a first launch.
 }
 uiStore.getState().setHome(launchedBefore && !restored)
+if (!launchedBefore && !restored) await openFirstLaunch()
 uiStore.getState().selectTrack(projectStore.getState().project.tracks[0]?.id ?? null)
 
 // The engine starts with the first evaluation: read the settings (latency, output) first.

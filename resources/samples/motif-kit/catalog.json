@@ -54,6 +54,14 @@
       "category": "Drums"
     },
     {
+      "name": "tek",
+      "category": "Drums"
+    },
+    {
+      "name": "metal",
+      "category": "Drums"
+    },
+    {
       "name": "epiano",
       "category": "Instruments"
     },
@@ -83,6 +91,18 @@
     },
     {
       "name": "drone",
+      "category": "Textures"
+    },
+    {
+      "name": "riser",
+      "category": "Textures"
+    },
+    {
+      "name": "impact",
+      "category": "Textures"
+    },
+    {
+      "name": "static",
       "category": "Textures"
     }
   ]

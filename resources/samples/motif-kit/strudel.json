@@ -38,6 +38,12 @@
   "sh": ["sh/0.wav"],
   "MotifKit_sh": ["sh/0.wav"],
   "MotifTape_sh": ["tape/sh/0.wav"],
+  "tek": ["tek/0.wav", "tek/1.wav", "tek/2.wav"],
+  "MotifKit_tek": ["tek/0.wav", "tek/1.wav", "tek/2.wav"],
+  "MotifTape_tek": ["tape/tek/0.wav", "tape/tek/1.wav", "tape/tek/2.wav"],
+  "metal": ["metal/0.wav", "metal/1.wav", "metal/2.wav"],
+  "MotifKit_metal": ["metal/0.wav", "metal/1.wav", "metal/2.wav"],
+  "MotifTape_metal": ["tape/metal/0.wav", "tape/metal/1.wav", "tape/metal/2.wav"],
   "epiano": {
     "c2": ["epiano/c2.wav"],
     "c3": ["epiano/c3.wav"],
@@ -65,5 +71,8 @@
   "wind": ["wind/0.wav"],
   "rain": ["rain/0.wav"],
   "vinyl": ["vinyl/0.wav"],
-  "drone": ["drone/0.wav"]
+  "drone": ["drone/0.wav"],
+  "riser": ["riser/0.wav"],
+  "impact": ["impact/0.wav"],
+  "static": ["static/0.wav"]
 }

@@ -3,11 +3,13 @@ import lockup from '../../../resources/brand/lockup-tagline.svg'
 import type { RecentProject } from '@shared/ipc'
 import { uiStore } from '../store/ui-store'
 import { newProject, openDemo, openProject, openRecentProject } from './project-session'
+import { startTutorial } from './tutorial-session'
 
 const ACTIONS = [
   { label: 'New project', hint: 'Ctrl+N', run: newProject },
   { label: 'Open', hint: 'Ctrl+O', run: openProject },
   { label: 'Demo', hint: 'Drums, Bass, Lead, Texture', run: openDemo },
+  { label: 'Tutorial', hint: 'Build a tek track step by step', run: startTutorial },
 ]
 
 /** Home screen (SPEC 10, onboarding): logo lockup, new, open, recent projects, demo. */

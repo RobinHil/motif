@@ -22,7 +22,10 @@ describe('settings', () => {
       latency: 'playback',
       midiDisabled: ['X'],
     })
-    expect(validSettings({ zoom: 7, latency: 'fast', audioOutput: 3 })).toEqual(DEFAULT_SETTINGS)
+    expect(validSettings({ zoom: 7, latency: 'fast', audioOutput: 3, welcomeDismissed: 'yes' })).toEqual(
+      DEFAULT_SETTINGS,
+    )
+    expect(validSettings({ welcomeDismissed: true }).welcomeDismissed).toBe(true)
     expect(validSettings('nonsense')).toEqual(DEFAULT_SETTINGS)
   })
 

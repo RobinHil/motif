@@ -54,6 +54,8 @@ export function TempoControl() {
           autoFocus
           aria-label="Tempo in BPM"
           defaultValue={formatNumber(bpm)}
+          // Typing replaces the tempo instead of adding to it.
+          onFocus={(event) => event.currentTarget.select()}
           onBlur={(event) => {
             const value = Number(event.target.value.replace(',', '.'))
             if (Number.isFinite(value) && value > 0) update(setBpm(value))

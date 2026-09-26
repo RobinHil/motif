@@ -9,6 +9,7 @@ export const DEFAULT_SETTINGS: Settings = {
   midiDisabled: [],
   zoom: 1,
   language: 'en',
+  welcomeDismissed: false,
 }
 
 /** Keeps the valid fields of `value`: anything else, from an old file or the renderer, is ignored. */
@@ -28,6 +29,7 @@ export function validSettings(value: unknown, base: Settings = DEFAULT_SETTINGS)
     next.midiDisabled = [...new Set(disabled as string[])]
   const zoom = input['zoom']
   if ((ZOOMS as readonly unknown[]).includes(zoom)) next.zoom = zoom as Settings['zoom']
+  if (typeof input['welcomeDismissed'] === 'boolean') next.welcomeDismissed = input['welcomeDismissed']
   return next
 }
 

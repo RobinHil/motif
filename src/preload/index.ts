@@ -22,6 +22,7 @@ const api: MotifApi = {
     recent: () => ipcRenderer.invoke(IPC.projectRecent) as Promise<RecentProject[]>,
     openRecent: (id) => ipcRenderer.invoke(IPC.projectOpenRecent, id) as Promise<OpenResult>,
     pendingOpen: () => ipcRenderer.invoke(IPC.projectPendingOpen) as Promise<OpenResult | null>,
+    createStarter: (text) => ipcRenderer.invoke(IPC.projectCreateStarter, text) as Promise<OpenResult>,
     onOpenedExternally: (listener) => {
       const handler = (_event: unknown, result: OpenResult) => listener(result)
       ipcRenderer.on(IPC.projectOpenedExternally, handler)
