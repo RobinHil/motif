@@ -108,7 +108,7 @@ export function SceneCard({ scene }: { scene: Scene }) {
         <span className="text-small text-accent group-data-[state=playing]:inline hidden">playing</span>
         <span className="text-small text-track-3 group-data-[state=next]:inline hidden">next</span>
       </div>
-      <div role="group" aria-label={`Tracks in ${scene.name}`} className="relative flex flex-wrap gap-1.5 self-start">
+      <div role="group" aria-label={`Tracks in ${scene.name}`} className="relative flex flex-wrap gap-1 self-start">
         {tracks.map((track) => {
           const active = scene.activeTrackIds.includes(track.id)
           return (
@@ -122,7 +122,7 @@ export function SceneCard({ scene }: { scene: Scene }) {
                 event.stopPropagation()
                 update(toggleSceneTrack(scene.id, track.id))
               }}
-              className={`h-2.5 w-7 rounded-xs ${active ? SWATCH[track.color] : 'bg-active hover:bg-line-strong'}`}
+              className={`h-2.5 rounded-xs ${tracks.length > 8 ? 'w-3.5' : 'w-7'} ${active ? SWATCH[track.color] : 'bg-active hover:bg-line-strong'}`}
             />
           )
         })}

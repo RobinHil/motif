@@ -7,3 +7,5 @@ coverage/
 THIRD_PARTY_LICENSES
 test-results/
 playwright-report/
+packaging/aur/*/
+packaging/aur/*.pkg.tar.*

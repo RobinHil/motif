@@ -5,6 +5,7 @@ import { migrateProject, ProjectLoadError, serializeProject } from '../model/mig
 import { projectSampleLibrary } from '../model/samples'
 import { createStarterDemo } from '../tutorial/tracks'
 import { projectStore, selectIsDirty } from '../store/project-store'
+import { transportStore } from '../store/transport-store'
 import { uiStore } from '../store/ui-store'
 import { loadLibrary, syncProjectSamples, userSounds } from './sample-library'
 
@@ -20,6 +21,15 @@ function parseProject(text: string) {
   }
 }
 
+/**
+ * A project with a song opens in song mode, so Play plays the song and not every track at once;
+ * others open in live mode (every track).
+ */
+function playbackModeFor(project: { arrangement: readonly unknown[] }) {
+  transportStore.getState().setArrangeMode(project.arrangement.length > 0 ? 'song' : 'live')
+  transportStore.getState().setLiveScene(null)
+}
+
 function notify(message: string | null) {
   uiStore.getState().setNotice(message)
 }
@@ -27,6 +37,7 @@ function notify(message: string | null) {
 export async function newProject(): Promise<void> {
   await window.motif.project.reset()
   projectStore.getState().load(createProject(), { saved: true })
+  playbackModeFor({ arrangement: [] })
   uiStore.getState().setFileName(null)
   notify(null)
 }
@@ -34,6 +45,8 @@ export async function newProject(): Promise<void> {
 export async function openDemo(): Promise<void> {
   await window.motif.project.reset()
   projectStore.getState().load(createDemoProject(), { saved: true })
+  // The mockups' demo is a loop to play with: every track at once.
+  playbackModeFor({ arrangement: [] })
   uiStore.getState().setFileName(null)
   notify(null)
 }
@@ -57,7 +70,9 @@ function applyOpenResult(result: Awaited<ReturnType<typeof window.motif.project.
     return
   }
   try {
-    projectStore.getState().load(parseProject(result.text), { saved: true })
+    const project = parseProject(result.text)
+    projectStore.getState().load(project, { saved: true })
+    playbackModeFor(project)
     uiStore.getState().setFileName(result.name)
     uiStore.getState().setScreen('studio')
     notify(null)

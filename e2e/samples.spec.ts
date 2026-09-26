@@ -134,6 +134,10 @@ test('a project moved to another machine still plays its imported samples', asyn
   await expect(other.getByRole('button', { name: 'Play', exact: true })).toBeVisible()
   await other.keyboard.press('Control+o')
   await expect(other.getByRole('gridcell', { name: 'glass_hits step 1', exact: true })).toBeVisible()
+  // The demo has a song, so it opens in song mode; play every track instead.
+  await other.getByRole('navigation', { name: 'Screens' }).getByRole('button', { name: 'Arrangement' }).click()
+  await other.getByRole('button', { name: 'Live mode' }).click()
+  await other.getByRole('navigation', { name: 'Screens' }).getByRole('button', { name: 'Studio' }).click()
   await other.getByRole('button', { name: 'My samples', exact: true }).click()
   await expect(other.getByRole('complementary', { name: 'Sound browser' }).getByText('glass_hits')).toBeVisible()
   expect(await playAndListen(other, 'glass_hits')).toEqual({ loaded: true, problems: [] })
