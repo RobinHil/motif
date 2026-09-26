@@ -58,7 +58,7 @@ export function HomeScreen() {
                     className="flex w-full items-center justify-between rounded-control px-3 py-2 text-left text-body-lg text-text hover:bg-raised"
                   >
                     {project.name}
-                    <span className="font-mono text-knob-value text-text-3">.motif</span>
+                    <span className="font-mono text-knob-value text-text-2">.motif</span>
                   </button>
                 </li>
               ))}

@@ -86,11 +86,16 @@ export function ModulationScreen() {
                 key={s.id}
                 type="button"
                 aria-pressed={shape === s.id}
+                title={
+                  s.id === 'sequence'
+                    ? `.${key}("<...>"): one value per cycle`
+                    : `.${key}(${s.code}.range(low, high).slow(cycles))`
+                }
                 onClick={() => set(withShape(mod ?? defaultModulation(param), s.id, param))}
                 className={`flex flex-col items-center gap-1 rounded-panel border px-2 py-3 ${shape === s.id ? 'border-mod bg-mod-bg text-text' : 'border-line text-text hover:bg-raised'}`}
               >
                 <span className="text-body-lg">{s.label}</span>
-                <span className={`font-mono text-small ${shape === s.id ? 'text-mod' : 'text-text-3'}`}>{s.code}</span>
+                <span className={`font-mono text-small ${shape === s.id ? 'text-mod' : 'text-text-2'}`}>{s.code}</span>
               </button>
             ))}
           </div>
@@ -124,6 +129,7 @@ export function ModulationScreen() {
                         key={cycles}
                         type="button"
                         aria-pressed={mod.cycles === cycles}
+                        title={cycles === 1 ? 'One cycle: .slow() is left out' : `.slow(${String(cycles)})`}
                         onClick={() => set({ ...mod, cycles })}
                         className={`h-9 rounded-input border px-3 text-body whitespace-nowrap ${mod.cycles === cycles ? 'border-mod bg-mod-bg text-text' : 'border-line text-text hover:bg-raised'}`}
                       >

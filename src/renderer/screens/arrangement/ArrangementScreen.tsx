@@ -31,6 +31,11 @@ export function ArrangementScreen() {
               key={m.mode}
               type="button"
               aria-pressed={mode === m.mode}
+              title={
+                m.mode === 'song'
+                  ? 'Plays $: arrange([cycles, scene], ...), shown below'
+                  : 'Plays the Studio blocks; a scene mutes the others with _$:'
+              }
               onClick={() => setArrangeMode(m.mode)}
               className={`rounded-xs px-3.5 py-1.5 ${mode === m.mode ? 'bg-active text-accent' : 'text-text-2 hover:text-text'}`}
             >
@@ -55,14 +60,16 @@ export function ArrangementScreen() {
             <SceneCard scene={scene} />
           </div>
         ))}
-        <button
-          type="button"
-          onClick={() => projectStore.getState().update(captureScene().recipe)}
-          title="A new scene with the tracks you hear now"
-          className="grid h-[132px] min-w-[170px] flex-1 place-items-center rounded-panel border border-dashed border-line-strong text-body-lg text-text-2 hover:text-text"
-        >
-          + Capture current state
-        </button>
+        <div role="listitem" className="flex min-w-[170px] flex-1">
+          <button
+            type="button"
+            onClick={() => projectStore.getState().update(captureScene().recipe)}
+            title="A new scene with the tracks you hear now"
+            className="grid h-[132px] min-w-[170px] flex-1 place-items-center rounded-panel border border-dashed border-line-strong text-body-lg text-text-2 hover:text-text"
+          >
+            + Capture current state
+          </button>
+        </div>
       </div>
       <Timeline />
       <SongCode />

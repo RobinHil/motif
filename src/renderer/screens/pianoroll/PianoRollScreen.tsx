@@ -82,6 +82,7 @@ export function PianoRollScreen() {
 
   return (
     <main className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_330px] bg-bg-app">
+      <h1 className="sr-only">Piano roll</h1>
       <section aria-label={`Piano roll of ${track.name}`} className="flex min-h-0 flex-col">
         <div
           role="toolbar"
@@ -106,7 +107,7 @@ export function PianoRollScreen() {
               ))}
             </select>
           ) : (
-            <h1 className="text-track-name font-medium">{track.name}</h1>
+            <h2 className="text-track-name font-medium">{track.name}</h2>
           )}
           <div role="group" aria-label="Mode" className="flex rounded-control bg-raised p-0.5 text-body">
             {(
@@ -130,6 +131,7 @@ export function PianoRollScreen() {
             Scale
             <select
               value={content.scale ?? ''}
+              title={content.scale ? `.scale("${content.scale}")` : 'No scale: notes are written by name'}
               onChange={(event) => update(setScale(track.id, event.target.value))}
               className="h-8 w-48 rounded-input border border-line-strong bg-bg-code px-2 text-body text-text outline-none"
             >
@@ -207,6 +209,11 @@ export function PianoRollScreen() {
               key={c}
               type="button"
               aria-pressed={cycle === c}
+              title={
+                c === 'all'
+                  ? 'Edit every cycle at once'
+                  : `Edit what plays on cycle ${String(c)}: a note that differs between cycles is written <a b>`
+              }
               onClick={() => set({ editCycle: c })}
               className={`h-8 rounded-pill border px-3.5 text-body ${cycle === c ? 'border-text-2 text-text' : 'border-line text-text-2 hover:text-text'}`}
             >

@@ -184,6 +184,7 @@ export function NotePanel({ track, content }: { track: Track; content: NoteConte
           type="button"
           disabled={selected.length === 0}
           onClick={() => update(humanize(track.id, selection, Date.now() % 100000))}
+          title="Varies the velocities slightly, written with .velocity()"
           className="rounded-input border border-line px-3 py-2.5 text-left text-body-lg hover:bg-raised disabled:opacity-40"
         >
           Humanize velocity
@@ -195,6 +196,7 @@ export function NotePanel({ track, content }: { track: Track; content: NoteConte
               type="button"
               disabled={selected.length === 0}
               onClick={() => update(moveNotes(track.id, selection, 0, direction, cycle))}
+              title={content.mode === 'degree' ? 'Changes the degrees in n("...")' : 'Changes the notes in note("...")'}
               className="flex-1 rounded-input border border-line px-3 py-2.5 text-left text-body-lg hover:bg-raised disabled:opacity-40"
             >
               Transpose {direction > 0 ? 'up' : 'down'} one {content.mode === 'degree' ? 'degree' : 'semitone'}
@@ -216,7 +218,7 @@ export function NotePanel({ track, content }: { track: Track; content: NoteConte
           Generated code
         </h2>
         <CodeExcerpt track={track} content={content} selection={selection} />
-        <span className="text-small text-text-3">Velocities other than 1 are written with .velocity().</span>
+        <span className="text-small text-text-2">Velocities other than 1 are written with .velocity().</span>
       </section>
     </aside>
   )

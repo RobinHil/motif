@@ -173,7 +173,7 @@ export function StepGrid({ trackId, color }: { trackId: ID; color: TrackColor })
               style={{ height: STEP_HEIGHT }}
             >
               {row.sound}
-              {row.variant !== undefined && <span className="text-text-3">:{row.variant}</span>}
+              {row.variant !== undefined && <span className="text-text-2">:{row.variant}</span>}
             </button>
           ))}
         </div>
@@ -205,7 +205,12 @@ export function StepGrid({ trackId, color }: { trackId: ID; color: TrackColor })
                       data-cell={`${String(r)}-${String(i)}`}
                       tabIndex={focus.row === r && focus.step === i ? 0 : -1}
                       aria-label={`${row.sound} step ${String(i + 1)}`}
-                      aria-pressed={step !== null}
+                      aria-selected={step !== null}
+                      title={
+                        step
+                          ? `${row.sound} on step ${String(i + 1)}: writes ${row.sound}${step.probability < 1 ? `?${formatNumber(1 - step.probability)}` : ''}. Right-click for velocity and chance.`
+                          : `Step ${String(i + 1)}: a rest, written ~`
+                      }
                       onPointerDown={(event) => onPointerDown(event, row, i)}
                       onPointerEnter={() => onPointerEnter(row, i)}
                       onClick={(event) => {

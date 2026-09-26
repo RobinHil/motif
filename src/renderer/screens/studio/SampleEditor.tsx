@@ -210,7 +210,7 @@ export function SampleEditor({ trackId, onClose }: { trackId: ID; onClose: () =>
                 onClick={() => update(setSlicing(track.id, m, parts))}
                 className={segment(mode === m)}
               >
-                {MODE_TEXT[m].label} <span className="font-mono text-small text-text-3">{m}</span>
+                {MODE_TEXT[m].label} <span className="font-mono text-small text-text-2">{m}</span>
               </button>
             ))}
           </div>
@@ -255,7 +255,7 @@ export function SampleEditor({ trackId, onClose }: { trackId: ID; onClose: () =>
             }
             className={segment(loopCycles !== null)}
           >
-            Fit to tempo <span className="font-mono text-small text-text-3">loopAt</span>
+            Fit to tempo <span className="font-mono text-small text-text-2">loopAt</span>
           </button>
           {loopCycles !== null && (
             <div role="group" aria-label="Cycles" className="flex gap-1.5">

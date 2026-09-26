@@ -204,7 +204,7 @@ export function SoundBrowser() {
           {folders
             ? folders.map((folder) => (
                 <li key={folder} className="flex flex-col">
-                  <span className="px-2 pt-2 pb-1 text-small text-text-3">{folder || 'Imported'}</span>
+                  <span className="px-2 pt-2 pb-1 text-small text-text-2">{folder || 'Imported'}</span>
                   <ul className="flex flex-col">
                     {sounds
                       .filter((s) => (s.folder ?? '') === folder)
@@ -216,7 +216,7 @@ export function SoundBrowser() {
               ))
             : sounds.map((sound) => <SoundRow key={`${sound.category}-${sound.name}`} sound={sound} />)}
           {sounds.length === 0 && (
-            <li className="px-2 py-1.5 text-body text-text-3">
+            <li className="px-2 py-1.5 text-body text-text-2">
               {category === 'My samples'
                 ? 'Your imported samples will appear here. Drop files or a folder, or use Import.'
                 : 'No sound matches this search.'}

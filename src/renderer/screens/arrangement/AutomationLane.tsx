@@ -89,7 +89,7 @@ export function AutomationLane(props: { automation: Automation; tracks: readonly
         <button
           type="button"
           onClick={() => update(removeAutomation(automation.id))}
-          className="self-start text-small text-text-3 hover:text-text"
+          className="self-start text-small text-text-2 hover:text-text"
         >
           Remove
         </button>

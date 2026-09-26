@@ -118,6 +118,7 @@ export function MasterStrip() {
           onGestureEnd={endGesture}
           meter={<StereoMeter levels={masterLevels} label="Master" />}
           midi={{ trackId: 'master', param: 'gain' }}
+          title={`Master bus gain ${formatNumber(master.gain)}, applied after Strudel`}
         />
       </div>
       <div className="flex items-center gap-2">

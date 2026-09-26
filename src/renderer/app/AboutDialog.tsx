@@ -42,7 +42,7 @@ export function AboutDialog() {
           JavaScript port of <span className="text-text">TidalCycles</span> (tidalcycles.org). Thanks to their authors
           and communities: Motif is only possible because of them.
         </p>
-        <p className="text-small text-text-3">
+        <p className="text-small text-text-2">
           The {APP_NAME} name and logo are not covered by the AGPL. Bundled samples are synthesized by {APP_NAME} and
           released under CC0.
         </p>
@@ -50,6 +50,8 @@ export function AboutDialog() {
       <h3 className="mt-5 mb-2 text-section font-medium uppercase tracking-[0.14em] text-label">Licenses</h3>
       <pre
         aria-label="Licenses"
+        // Scrollable text must take the focus to scroll from the keyboard.
+        tabIndex={0}
         className="h-56 overflow-auto rounded-input bg-bg-code px-4 py-3 font-mono text-knob-value whitespace-pre-wrap text-text-2"
       >
         {licenses ?? 'Loading...'}

@@ -84,7 +84,7 @@ export function ModulationSidebar({ track, target }: { track: Track; target: Par
           Already animated in this project
         </h3>
         {animated.length === 0 ? (
-          <p className="text-small text-text-3">Nothing yet.</p>
+          <p className="text-small text-text-2">Nothing yet.</p>
         ) : (
           <ul className="flex flex-col gap-1.5">
             {animated.map((a) => (
