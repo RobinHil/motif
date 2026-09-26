@@ -87,12 +87,13 @@ function TransformList({ trackId, color }: { trackId: ID; color: string }) {
               type="button"
               aria-pressed={on}
               onClick={toggle}
+              title={`${on ? 'Remove' : 'Add'} ${TRANSFORMS[type].code(args)}`}
               className="flex flex-1 items-center justify-between gap-3 py-1.5 text-left text-body"
             >
               <span className={on ? 'text-text' : 'text-text-2'}>{TRANSFORMS[type].label(args)}</span>
               <span
                 className="font-mono text-knob-value"
-                style={{ color: on ? `var(--color-${color})` : 'var(--color-text-3)' }}
+                style={{ color: on ? `var(--color-${color})` : 'var(--color-label)' }}
               >
                 {TRANSFORMS[type].code(args)}
               </span>

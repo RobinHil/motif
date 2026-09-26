@@ -30,7 +30,7 @@ test('create a track, enable 4 steps, check the generated code', async () => {
   for (const step of [1, 5, 9, 13]) {
     await track.getByRole('gridcell', { name: `bd step ${String(step)}`, exact: true }).click()
   }
-  await expect(track.getByRole('gridcell', { name: 'bd step 5', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await expect(track.getByRole('gridcell', { name: 'bd step 5', exact: true })).toHaveAttribute('aria-selected', 'true')
 
   const expected = [
     '$: s(`bd ~  ~  ~  bd ~  ~  ~  bd ~  ~  ~  bd ~  ~  ~ ,',
@@ -48,7 +48,7 @@ test('edits with the keyboard only: steps, mute and undo', async () => {
   await page.keyboard.press('ArrowRight')
   await expect(drums.getByRole('gridcell', { name: 'bd step 2', exact: true })).toBeFocused()
   await page.keyboard.press('Enter')
-  await expect(drums.getByRole('gridcell', { name: 'bd step 2', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await expect(drums.getByRole('gridcell', { name: 'bd step 2', exact: true })).toHaveAttribute('aria-selected', 'true')
 
   await page.keyboard.press('m')
   await expect(drums.getByRole('button', { name: 'Mute' })).toHaveAttribute('aria-pressed', 'true')
@@ -56,7 +56,10 @@ test('edits with the keyboard only: steps, mute and undo', async () => {
 
   await page.keyboard.press('Control+z')
   await page.keyboard.press('Control+z')
-  await expect(drums.getByRole('gridcell', { name: 'bd step 2', exact: true })).toHaveAttribute('aria-pressed', 'false')
+  await expect(drums.getByRole('gridcell', { name: 'bd step 2', exact: true })).toHaveAttribute(
+    'aria-selected',
+    'false',
+  )
 })
 
 test('makes zero outbound requests', async () => {

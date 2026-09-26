@@ -30,7 +30,7 @@ function Row(props: { label: string; hint?: string; children: ReactNode }) {
     <div className="grid grid-cols-[220px_1fr] items-start gap-6">
       <div className="flex flex-col gap-1 pt-1.5">
         <span className="text-body-lg">{props.label}</span>
-        {props.hint && <span className="text-small text-text-3">{props.hint}</span>}
+        {props.hint && <span className="text-small text-text-2">{props.hint}</span>}
       </div>
       <div className="flex flex-wrap items-center gap-3">{props.children}</div>
     </div>
@@ -165,7 +165,7 @@ function MidiSettings({ settings }: { settings: Settings }) {
                   type="button"
                   aria-label={`Remove the mapping of CC ${String(m.cc)}`}
                   onClick={() => projectStore.getState().update(removeMapping(m.target))}
-                  className="text-small text-text-3 hover:text-text"
+                  className="text-small text-text-2 hover:text-text"
                 >
                   Remove
                 </button>
@@ -231,7 +231,7 @@ function SampleLibrarySettings() {
                         await loadLibrary()
                       })
                     }
-                    className="text-small text-text-3 hover:text-text"
+                    className="text-small text-text-2 hover:text-text"
                   >
                     Remove
                   </button>

@@ -19,6 +19,8 @@ export interface FaderProps {
   meter?: ReactNode
   /** What a MIDI controller drives through this fader. */
   midi?: MidiTarget
+  /** Tooltip: the code the fader writes. */
+  title?: string
 }
 
 /** Vertical fader (DESIGN.md "Fader"): 6 px rail, 36 x 22 px thumb, meter on the left. */
@@ -119,6 +121,7 @@ export function Fader(props: FaderProps) {
         aria-valuemax={range.max}
         aria-valuenow={value}
         aria-valuetext={formatNumber(value)}
+        title={props.title}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}

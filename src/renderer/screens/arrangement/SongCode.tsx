@@ -34,7 +34,7 @@ export function SongCode() {
           </span>
         ))}
       </pre>
-      <p className="text-small text-text-3">
+      <p className="text-small text-text-2">
         Each track is a constant named after it (const drums = the Drums block of the Studio, and so on).
       </p>
     </section>

@@ -22,7 +22,7 @@ export function SequenceEditor(props: {
                 type="button"
                 aria-label={`Remove cycle ${String(index + 1)}`}
                 onClick={() => props.onChange(values.filter((_, i) => i !== index))}
-                className="text-text-3 hover:text-text"
+                className="text-text-2 hover:text-text"
               >
                 ×
               </button>

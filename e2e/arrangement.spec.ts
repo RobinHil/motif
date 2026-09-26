@@ -14,8 +14,16 @@ test.afterEach(async () => {
 const openArrangement = (page: Page) =>
   page.getByRole('navigation', { name: 'Screens' }).getByRole('button', { name: 'Arrangement' }).click()
 const songCode = (page: Page) => page.getByLabel('Song code')
+/** A scene card: a container with its main button (name, length, state) and its track dots. */
 const card = (page: Page, name: string) =>
-  page.getByRole('list', { name: 'Scenes' }).getByRole('button', { name: new RegExp(`^${name},`) })
+  page
+    .getByRole('list', { name: 'Scenes' })
+    .locator('[data-scene-card]')
+    .filter({ has: page.getByRole('button', { name: new RegExp(`^${name},`) }) })
+const startCard = (page: Page, name: string) =>
+  card(page, name)
+    .getByRole('button', { name: new RegExp(`^${name},`) })
+    .click()
 /** The cycle shown in the transport bar. */
 const shownCycle = async (page: Page) =>
   Number((await page.getByText(/^cycle \d/).textContent())?.replace('cycle', '').trim())
@@ -23,7 +31,8 @@ const shownCycle = async (page: Page) =>
 test('the demo song is arranged like the mockup and plays in song mode', async () => {
   const { page } = running
   await openArrangement(page)
-  await expect(page.getByRole('list', { name: 'Scenes' }).getByRole('listitem')).toHaveCount(5)
+  // Five scenes, then the capture card.
+  await expect(page.getByRole('list', { name: 'Scenes' }).getByRole('listitem')).toHaveCount(6)
   await expect(songCode(page)).toContainText('$: arrange([8, intro], [16, verse], [8, chorus], [16, drop], [8, outro])')
   await expect(songCode(page)).toContainText('const drop   = stack(drums, bass, lead)')
 
@@ -40,7 +49,7 @@ test('in live mode a scene starts on the next cycle boundary', async () => {
   await page.getByRole('button', { name: 'Play', exact: true }).click()
   await expect.poll(() => shownCycle(page)).toBeGreaterThan(0.2)
 
-  await card(page, 'Chorus').click()
+  await startCard(page, 'Chorus')
   await expect(card(page, 'Chorus')).toHaveAttribute('data-state', 'next')
   const clickedAt = await shownCycle(page)
   await expect(card(page, 'Chorus')).toHaveAttribute('data-state', 'playing', { timeout: 8000 })

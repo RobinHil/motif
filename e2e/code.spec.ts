@@ -36,7 +36,7 @@ test('hand-editing a track in the canonical format updates the grid', async () =
 
   await page.getByRole('navigation', { name: 'Screens' }).getByRole('button', { name: 'Studio' }).click()
   const drums = page.getByRole('listitem', { name: 'Drums, Rhythm, orbit 1' })
-  await expect(drums.getByRole('gridcell', { name: 'bd step 2', exact: true })).toHaveAttribute('aria-pressed', 'true')
+  await expect(drums.getByRole('gridcell', { name: 'bd step 2', exact: true })).toHaveAttribute('aria-selected', 'true')
   await expect(page.getByRole('dialog')).toHaveCount(0)
 })
 

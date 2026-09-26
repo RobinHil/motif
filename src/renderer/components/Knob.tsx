@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react'
 import { formatNumber } from '../codegen/format'
+import { paramValueCode } from '../codegen/params'
 import { getCycle, isPlaying } from '../engine/engine'
 import { modulationAt } from '../engine/modulation-curve'
 import { removeMapping, type MidiTarget } from '../midi/targets'
@@ -56,6 +57,14 @@ function valueText(props: KnobProps): string {
   if (value === undefined) return `${code} ${props.absentLabel ?? formatNumber(props.defaultValue)}`
   if (typeof value === 'number') return `${code} ${formatNumber(value)}`
   return value.kind === 'signal' ? `${code} ${value.shape}` : `${code} <...>`
+}
+
+/** The Strudel call the knob writes, shown on hover: `.lpf(800)`, `.lpf(sine.range(300, 1200).slow(4))`. */
+export function knobTooltip(props: Pick<KnobProps, 'code' | 'value' | 'defaultValue' | 'absentLabel'>): string {
+  const { code, value } = props
+  if (value === undefined)
+    return `.${code}() is not written: Strudel plays ${props.absentLabel ?? formatNumber(props.defaultValue)}`
+  return `.${code}(${paramValueCode(value)})`
 }
 
 /** Knob (DESIGN.md "Knob", SPEC 6.1 "Knob behavior"). */
@@ -245,6 +254,7 @@ export function Knob(props: KnobProps) {
         }}
         className="cursor-ns-resize rounded-pill touch-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-2"
       >
+        <title>{knobTooltip(props)}</title>
         <path
           d={arcPath(center, center, r, 0, 1)}
           fill="none"

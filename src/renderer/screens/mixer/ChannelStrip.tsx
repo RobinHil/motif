@@ -1,3 +1,4 @@
+import { formatNumber } from '../../codegen/format'
 import { useCallback } from 'react'
 import { useMidiBinding } from '../../components/useMidiBinding'
 import { MidiBadge } from '../../components/MidiBadge'
@@ -111,6 +112,7 @@ export function ChannelStrip({ trackId }: { trackId: ID }) {
           onGestureEnd={endGesture}
           meter={<StereoMeter levels={levels} label={track.name} />}
           midi={{ trackId, param: 'gain' }}
+          title={`.gain(${formatNumber(gain)})`}
         />
       </div>
       <div className="flex items-center justify-between">

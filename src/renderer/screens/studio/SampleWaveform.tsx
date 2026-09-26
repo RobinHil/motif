@@ -123,7 +123,7 @@ export function SampleWaveform(props: WaveformProps) {
       >
         <canvas ref={canvasRef} aria-hidden="true" className="absolute inset-0 h-full w-full" />
         {!peaks && (
-          <span className="absolute inset-0 grid place-items-center text-body text-text-3">Reading the sample...</span>
+          <span className="absolute inset-0 grid place-items-center text-body text-text-2">Reading the sample...</span>
         )}
         {handle('begin')}
         {handle('end')}

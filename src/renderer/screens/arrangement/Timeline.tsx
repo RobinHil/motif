@@ -113,7 +113,7 @@ export function Timeline() {
               />
             ))}
             {sections.length === 0 && (
-              <span className="absolute inset-0 flex items-center px-3 text-body text-text-3">
+              <span className="absolute inset-0 flex items-center px-3 text-body text-text-2">
                 Drag a scene here, or right-click a scene and choose "Add to the end of the song".
               </span>
             )}
@@ -123,7 +123,7 @@ export function Timeline() {
           const heard = !track.mute && (!anySolo || track.solo)
           return (
             <div key={track.id} className="grid grid-cols-[200px_1fr] border-b border-line">
-              <span className={`flex items-center gap-2.5 px-4 py-3 text-body-lg ${heard ? '' : 'text-text-3'}`}>
+              <span className={`flex items-center gap-2.5 px-4 py-3 text-body-lg ${heard ? '' : 'text-text-2'}`}>
                 <span className={`size-3 rounded-xs ${SWATCH[track.color]}`} />
                 {track.name}
                 {!heard && <span className="text-small">muted</span>}
@@ -169,7 +169,7 @@ export function Timeline() {
         >
           + Add automation
         </button>
-        <span className="text-small text-text-3">Automations play in song mode.</span>
+        <span className="text-small text-text-2">Automations play in song mode.</span>
       </div>
     </section>
   )

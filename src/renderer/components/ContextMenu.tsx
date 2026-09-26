@@ -87,10 +87,10 @@ export function ContextMenu(props: { position: MenuPosition; items: MenuItem[]; 
             {item.swatch && <span className={`size-3 rounded-xs ${item.swatch}`} />}
             {item.label}
           </span>
-          {item.code && <span className="font-mono text-knob-value text-text-3">{item.code}</span>}
+          {item.code && <span className="font-mono text-knob-value text-text-2">{item.code}</span>}
         </button>
       ))}
-      {enabled.length === 0 && <span className="px-3 py-1.5 text-text-3">No action available</span>}
+      {enabled.length === 0 && <span className="px-3 py-1.5 text-text-2">No action available</span>}
     </div>,
     document.body,
   )

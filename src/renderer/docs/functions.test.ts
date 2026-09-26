@@ -1,6 +1,7 @@
 import { evalScope, Pattern } from '@strudel/core'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { initStrudelScope, playedEvents } from '../codegen/strudel-harness'
+import catalog from '../../../resources/samples/motif-kit/catalog.json'
 import { FUNCTIONS, functionDoc } from './functions'
 
 /** Injected by the Strudel repl at runtime, so absent from a plain scope. */
@@ -12,9 +13,9 @@ beforeAll(async () => {
 })
 
 describe('in-app function reference', () => {
-  it('documents 60 functions with unique names and valid links', () => {
-    expect(FUNCTIONS).toHaveLength(60)
-    expect(new Set(FUNCTIONS.map((f) => f.name)).size).toBe(60)
+  it('documents 123 functions with unique names and valid links', () => {
+    expect(FUNCTIONS).toHaveLength(123)
+    expect(new Set(FUNCTIONS.map((f) => f.name)).size).toBe(123)
     for (const doc of FUNCTIONS) {
       expect(doc.signature.startsWith(doc.name), doc.name).toBe(true)
       expect(doc.description.length, doc.name).toBeGreaterThan(20)
@@ -38,7 +39,7 @@ describe('in-app function reference', () => {
   })
 
   it('uses only sounds bundled with the app in examples', () => {
-    const bundled = new Set(['bd', 'sd', 'hh', 'cp', 'rim', 'wind', 'sawtooth', 'square', 'triangle', 'sine'])
+    const bundled = new Set([...catalog.sounds.map((s) => s.name), 'sawtooth', 'square', 'triangle', 'sine'])
     for (const doc of FUNCTIONS) {
       for (const [, names] of doc.example.matchAll(/\bs\("([^"]+)"\)/g)) {
         for (const word of (names ?? '').split(/[\s*<>[\],~]+/).filter((w) => /^[a-z]/.test(w))) {

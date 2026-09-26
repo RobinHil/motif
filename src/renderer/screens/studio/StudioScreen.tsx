@@ -7,6 +7,7 @@ import { TracksPanel } from './TracksPanel'
 export function StudioScreen() {
   return (
     <main className="grid min-h-0 flex-1 grid-cols-[250px_minmax(0,1fr)_320px] bg-bg-app">
+      <h1 className="sr-only">Studio</h1>
       <SoundBrowser />
       <div className="grid min-h-0 grid-rows-[minmax(0,1fr)_minmax(200px,34%)]">
         <TracksPanel />

@@ -9,6 +9,7 @@ export function MixerScreen() {
   const ids = trackIds === '' ? [] : trackIds.split('\n')
   return (
     <main className="flex min-h-0 flex-1 gap-3 overflow-hidden bg-bg-app p-4">
+      <h1 className="sr-only">Mixer</h1>
       <div className="flex min-w-0 flex-1 gap-3 overflow-x-auto pb-1">
         {ids.map((id) => (
           <ChannelStrip key={id} trackId={id} />

@@ -298,7 +298,7 @@ export function RollGrid({ trackId, content, color }: { trackId: ID; content: No
             return (
               <div
                 key={row}
-                className={`absolute right-0 left-0 flex items-center justify-end border-b border-bg-app pr-2 font-mono text-knob-value ${black ? 'bg-bg-code text-text-3' : 'bg-raised-2 text-text-2'}`}
+                className={`absolute right-0 left-0 flex items-center justify-end border-b border-bg-app pr-2 font-mono text-knob-value ${black ? 'bg-bg-code text-text-2' : 'bg-raised-2 text-text-2'}`}
                 style={{ top: row * ROW_HEIGHT, height: ROW_HEIGHT }}
               >
                 {displayNoteName(midiToNoteName(midi))}

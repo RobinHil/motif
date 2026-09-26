@@ -51,7 +51,7 @@ export function OutputPanel() {
           One file per orbit (stems)
         </label>
         <label
-          className="flex items-center gap-2.5 text-body text-text-3"
+          className="flex items-center gap-2.5 text-body text-text-2"
           title="Offline render comes in a later version"
         >
           <input type="checkbox" disabled className="size-4" /> Offline render
@@ -65,7 +65,7 @@ export function OutputPanel() {
           <span className={`size-2 bg-danger ${recording ? 'rounded-xs' : 'rounded-pill'}`} />
           {recording ? 'Stop and save' : 'Record output'}
         </button>
-        <p className="text-small text-text-3">
+        <p className="text-small text-text-2">
           Records what you hear until you stop. For an exact number of cycles, use Export.
         </p>
       </fieldset>

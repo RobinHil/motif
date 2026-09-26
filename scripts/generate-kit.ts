@@ -281,9 +281,10 @@ function normalize(samples: Float32Array): Float32Array {
 }
 
 const drums: Record<string, Float32Array[]> = {
-  // Variant 0 of bd, sd, hh, cp and rim is the original starter kit, unchanged so projects sound the same.
+  // Variant 0 of bd, hh, cp and rim is the original starter kit, unchanged so projects sound the same.
   bd: [kick(), ...[kick(52, 150, 10, 0.4, 0.25), kick(38, 80, 4, 1), kick(60, 60, 14, 0.3)].map(normalize)],
-  sd: [snare(), ...[snare(8, 220, 22, 0.22), snare(9, 160, 10, 0.45)].map(normalize)],
+  // The original snare clipped at full scale: it is normalized like the others (phase 11).
+  sd: [snare(), snare(8, 220, 22, 0.22), snare(9, 160, 10, 0.45)].map(normalize),
   hh: [hihat(), ...[hihat(12, 0.05, 90, 0.4), hihat(13, 0.12, 40, 0.5)].map(normalize)],
   oh: [hihat(14, 0.5, 8, 0.4), hihat(15, 0.35, 12, 0.42)].map(normalize),
   cp: [clap(), normalize(clap(16))],

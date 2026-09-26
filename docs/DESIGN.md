@@ -59,7 +59,7 @@ Extend to 8 hues with the same lightness and saturation (e.g. steel blue, olive,
 | Functions | `#BDB6E8` |
 | Strings | `#D9BE8E` |
 | Numbers | `#8FCBC1` |
-| Comments | `#5F5F68` |
+| Comments | `#787882` |
 | Playing element | 2 px outline in the track color |
 
 ### Contrast
@@ -103,7 +103,7 @@ Weights stay light: 600 at most, reserved for exceptional cases.
 
 **Primary button**: `accent` background, `bg-app` text. Secondary button: transparent, `line-strong` border. Destructive button: transparent with a `danger` dot, never a solid red fill.
 
-**Transform toggle**: 34 px row, label on the left, code in mono on the right (`text-3` when off, track color when on).
+**Transform toggle**: 34 px row, label on the left, code in mono on the right (`label` when off, track color when on).
 
 **Visualizations**: monochrome (white at 30 to 70% opacity), accent only on peaks and low frequencies.
 

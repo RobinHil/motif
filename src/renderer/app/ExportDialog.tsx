@@ -174,6 +174,7 @@ export function ExportDialog({ onClose }: { onClose: () => void }) {
         ) : (
           <pre
             aria-label="Exported code"
+            tabIndex={0}
             className="max-h-56 overflow-auto rounded-input bg-bg-code px-4 py-3 font-mono text-knob-value whitespace-pre text-text-2"
           >
             {exportedCode(song && total > 0, catalog)}

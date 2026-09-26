@@ -40,42 +40,51 @@ export function SceneCard({ scene }: { scene: Scene }) {
   }, [renaming])
 
   const openMenu = (x: number, y: number) => setMenu({ x, y })
-  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.target !== event.currentTarget) return
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault()
-      if (mode === 'live') startScene(scene.id)
-    } else if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+  const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
       event.preventDefault()
       const rect = event.currentTarget.getBoundingClientRect()
       openMenu(rect.left, rect.bottom + 4)
-    } else if (event.key === 'F2') setRenaming(true)
+    } else if (event.key === 'F2') {
+      event.preventDefault()
+      setRenaming(true)
+    }
   }
 
   return (
+    // The card is a container: its main button covers it, and the track dots sit above as their
+    // own buttons, so no control is nested in another (accessibility).
     <div
-      role="button"
-      tabIndex={0}
       draggable={!renaming}
-      aria-label={`${scene.name}, ${String(scene.lengthCycles)} cycles${live ? `, ${live}` : ''}`}
       data-scene-card={scene.id}
       data-state={live ?? undefined}
       onDragStart={(event) => {
         event.dataTransfer.setData(SCENE_DRAG_TYPE, scene.id)
         event.dataTransfer.effectAllowed = 'copy'
       }}
-      onClick={() => {
-        if (mode === 'live') startScene(scene.id)
-      }}
-      onDoubleClick={() => setRenaming(true)}
       onContextMenu={(event) => {
         event.preventDefault()
         openMenu(event.clientX, event.clientY)
       }}
-      onKeyDown={onKeyDown}
-      className="group relative flex h-[132px] w-full cursor-pointer flex-col gap-3 rounded-panel border border-line bg-panel px-4 py-3.5 text-left outline-none hover:border-line-strong focus-visible:border-text-2 data-[state=next]:border-track-3 data-[state=playing]:border-accent data-[state=playing]:bg-raised"
+      className="group relative flex h-[132px] w-full flex-col gap-3 rounded-panel border border-line bg-panel px-4 py-3.5 text-left hover:border-line-strong has-[button[data-main]:focus-visible]:border-text-2 data-[state=next]:border-track-3 data-[state=playing]:border-accent data-[state=playing]:bg-raised"
     >
-      <div className="flex items-start justify-between gap-2">
+      <button
+        type="button"
+        data-main=""
+        aria-label={`${scene.name}, ${String(scene.lengthCycles)} cycles${live ? `, ${live}` : ''}`}
+        title={
+          mode === 'live'
+            ? 'Start on the next cycle. Right-click for more.'
+            : 'Right-click for more. Drag onto the timeline.'
+        }
+        onClick={() => {
+          if (mode === 'live') startScene(scene.id)
+        }}
+        onDoubleClick={() => setRenaming(true)}
+        onKeyDown={onKeyDown}
+        className="absolute inset-0 cursor-pointer rounded-panel outline-none"
+      />
+      <div className="pointer-events-none relative flex items-start justify-between gap-2">
         {renaming ? (
           <input
             ref={inputRef}
@@ -91,7 +100,7 @@ export function SceneCard({ scene }: { scene: Scene }) {
               update(renameScene(scene.id, event.target.value))
               setRenaming(false)
             }}
-            className="w-full rounded-xs bg-bg-code px-1 text-track-name outline-none"
+            className="pointer-events-auto w-full rounded-xs bg-bg-code px-1 text-track-name outline-none"
           />
         ) : (
           <span className="truncate text-track-name font-medium">{scene.name}</span>
@@ -99,7 +108,7 @@ export function SceneCard({ scene }: { scene: Scene }) {
         <span className="text-small text-accent group-data-[state=playing]:inline hidden">playing</span>
         <span className="text-small text-track-3 group-data-[state=next]:inline hidden">next</span>
       </div>
-      <div role="group" aria-label={`Tracks in ${scene.name}`} className="flex flex-wrap gap-1.5">
+      <div role="group" aria-label={`Tracks in ${scene.name}`} className="relative flex flex-wrap gap-1.5 self-start">
         {tracks.map((track) => {
           const active = scene.activeTrackIds.includes(track.id)
           return (
@@ -118,7 +127,9 @@ export function SceneCard({ scene }: { scene: Scene }) {
           )
         })}
       </div>
-      <span className="mt-auto font-mono text-small text-text-2">{scene.lengthCycles} cycles</span>
+      <span className="pointer-events-none relative mt-auto font-mono text-small text-text-2">
+        {scene.lengthCycles} cycles
+      </span>
       {menu && (
         <ContextMenu
           label={`${scene.name} menu`}
